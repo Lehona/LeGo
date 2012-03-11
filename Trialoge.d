@@ -106,12 +106,13 @@ var int TRIA_Self;                // Pointer auf self
 var string TRIA_Camera;           // Läuft eine Kamerafahrt?
 
 func void ZS_TRIA() {};
-func void ZS_TRIA_Loop() {};
+func int ZS_TRIA_Loop() { return LOOP_CONTINUE; };
 
 //========================================
 // Npcs aufeinander warten lassen
 //========================================
 func void TRIA_Wait() {
+    AI_WaitTillEnd(hero, self);
     AI_WaitTillEnd(self, hero);
     AI_WaitTillEnd(hero, self);
 };
@@ -155,10 +156,10 @@ func void _TRIA_Copy(var int n0, var int n1) {
     var int a1; a1 = Npc_GetArmor(np1);
     var _TRIA_fltWrapper fn0; fn0 = MEM_PtrToInst(n0+1968);
     var _TRIA_fltWrapper fn1; fn1 = MEM_PtrToInst(n1+1968);
-    MEM_SwapBytes(n0+60,   n1+60,   64); // trafo
+    MEM_SwapBytes(n0+60,   n1+60,   64);      // trafo
     MEM_SwapBytes(n0+292,  n1+292,  604-292); // name, voice..
-    MEM_SwapBytes(n0+1884, n1+1884, 20); // bitfield
-    MEM_SwapBytes(n0+1908, n1+1908, 76); // visuals
+    MEM_SwapBytes(n0+1884, n1+1884, 20);      // bitfield
+    MEM_SwapBytes(n0+1908, n1+1908, 76);      // visuals
     Mdl_SetModelScale(np0, fn0.f0, fn0.f1, fn0.f2);
     Mdl_SetModelScale(np1, fn1.f0, fn1.f1, fn1.f2);
     Mdl_SetModelFatness(np0, fn0.f3);
@@ -253,6 +254,11 @@ func void TRIA_Start() {
         i += 1;
         MEM_StackPos.position = p;
     };
+
+    Npc_ClearAIQueue(self);
+    Npc_ClearAIQueue(hero);
+    Ai_Output(hero,self,"");
+
     var c_npc selfCopy; selfCopy = Hlp_GetNpc(self);
     self = MEM_NullToInst();
     TRIA_Invite(selfCopy);

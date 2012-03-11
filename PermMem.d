@@ -20,12 +20,14 @@ const int STR_Sequences[33] = {
 };
 
 func string STR_Escape(var string s0) {
+    var int osb; osb = SB_Get();
+
     var zString z; z = _^(_@s(s0));
     const int sb = 0;
     if(!sb) {
         sb = SB_New();
     };
-	SB_Use(sb);
+    SB_Use(sb);
     SB_InitBuffer(z.len * 2);
     var int i; i = 0;
     var int l; l = z.len;
@@ -42,51 +44,58 @@ func string STR_Escape(var string s0) {
         else {
             SBc(c);
         };
-		i += 1;
+        i += 1;
     end;
     var string res; res = SB_ToString();
     SB_Clear();
+
+    SB_Use(osb);
     return res;
 };
 
 func string STR_Unescape(var string s0) {
-	var zString z; z = _^(_@s(s0));
-	const int sb = 0;
-	if(!sb) {
-		sb = SB_New();
-	};
-	SB_Use(sb);
-	SB_InitBuffer(z.len);
-	var int i; i = 0;
-	var int l; l = z.len;
-	while(i < l);
-		var int c; c = MEM_ReadByte(z.ptr + i);
-		if(c == 92) { // '\'
-			i += 1;
-			c = MEM_ReadByte(z.ptr + i);
-			if(c == 92) {
-				SBc(92);
-			}
-			else {
-				var int j; j = 0;
-				while(j < 33);
-					var int n; n = MEM_ReadStatArr(STR_Sequences, j);
-					if(c == n) {
-						SBc(j);
-						break;
-					};
-					j += 1;
-				end;
-			};
-		}
-		else {
-			SBc(c);
-		};
-		i += 1;
-	end;
-	var string res; res = SB_ToString();
-	SB_Clear();
-	return res;
+    var int osb; osb = SB_Get();
+
+    var zString z; z = _^(_@s(s0));
+    const int sb = 0;
+    if(!sb) {
+        sb = SB_New();
+    };
+    SB_Use(sb);
+    SB_InitBuffer(z.len);
+    var int i; i = 0;
+    var int l; l = z.len;
+    while(i < l);
+        var int c; c = MEM_ReadByte(z.ptr + i);
+        if(c == 92) { // '\'
+            i += 1;
+            c = MEM_ReadByte(z.ptr + i);
+            if(c == 92) {
+                SBc(92);
+            }
+            else {
+                var int j; j = 0;
+                while(j < 33);
+                    var int n; n = MEM_ReadStatArr(STR_Sequences, j);
+                    if(c == n) {
+                        SBc(j);
+                        break;
+                    };
+                    j += 1;
+                end;
+            };
+        }
+        else {
+            SBc(c);
+        };
+        i += 1;
+    end;
+    var string res; res = SB_ToString();
+    SB_Clear();
+
+    SB_Use(osb);
+
+    return res;
 };
 
 //========================================
@@ -180,7 +189,7 @@ func void clear(var int h) {
 // Handle freigeben
 //========================================
 func void release(var int h) {
-	if (!Hlp_IsValidHandle(h)) { return; };
+    if (!Hlp_IsValidHandle(h)) { return; };
     MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, 0);
     MEM_WriteIntArray(HandlesObj.array, ((h - 1) * 2)+1, 0);
 };
@@ -306,10 +315,10 @@ func int getPtr(var int h) {
 // Pointer eines Handles setzen (Debugzwecke)
 //========================================
 func void setPtr(var int h, var int ptr) {
-	if (!Hlp_IsValidHandle(h)){ return; };
-	MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, ptr);
+    if (!Hlp_IsValidHandle(h)){ return; };
+    MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, ptr);
 };
-	
+
 func void _PM_Reset() {
     MEM_Info("Reset ALL the handles!");
     if(Handles) {
@@ -515,12 +524,12 @@ func void _PM_Error(var string msg) {
 };
 
 func int _PM_NewObjectString(var string name, var string content) {
-	// if(_PM_Mode == 1) {
-		// content = STR_Escape(content);
-	// }
-	// else {
-		// content = STR_Unescape(content);
-	// };
+    // if(_PM_Mode == 1) {
+        // content = STR_Escape(content);
+    // }
+    // else {
+        // content = STR_Unescape(content);
+    // };
     var int ptr; ptr = _PM_Alloc(_PM_SaveObject_Str_size);
     var _PM_SaveObject_Str oStr; oStr = MEM_PtrToInst(ptr);
     oStr.name = name;
