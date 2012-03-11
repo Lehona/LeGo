@@ -78,7 +78,6 @@ func int FF_Active(var func function) {
     return 0;
 };
 
-
 //========================================
 // Funktion hinzufügen (vereinfacht)
 //========================================
@@ -86,6 +85,21 @@ func void FF_Apply(var func function) {
     FF_ApplyExt(function, 0, -1);
 };
 
+//========================================
+// Funktion einmalig hinzufügen
+//========================================
+func void FF_ApplyOnceExt(var func function, var int delay, var int cycles) {
+	if(!FF_Active(function)) {
+		FF_ApplyExt(function, delay, cycles);
+	};
+};
+
+//========================================
+// Funktion einmalig hinzufügen (vereinfacht)
+//========================================
+func void FF_ApplyOnce(var func function) {
+	FF_ApplyOnceExt(function, 0, -1);
+};
 
 //========================================
 // Funktion entfernen

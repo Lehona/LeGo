@@ -50,23 +50,23 @@ func void AI_Function_II(var c_npc slf, var func function, var int param1, var i
 };
 func void AI_Function_S(var c_npc slf, var func function, var string param) {
     var string s1;
-    s1 = ConcatStrings("S ", param);
+    s1 = ConcatStrings("S ", STR_Escape(param));
     s1 = ConcatStrings(s1, " ");
     s1 = ConcatStrings(s1, IntToString(MEM_GetFuncID(function)));
     _AI_Function(slf, s1);
 };
 func void AI_Function_SS(var c_npc slf, var func function, var string param1, var string param2) {
     var string s1;
-    s1 = ConcatStrings("SS ", param1);
+    s1 = ConcatStrings("SS ", STR_Escape(param1));
     s1 = ConcatStrings(s1, " ");
-    s1 = ConcatStrings(s1, param2);
+    s1 = ConcatStrings(s1, STR_Escape(param2));
     s1 = ConcatStrings(s1, " ");
     s1 = ConcatStrings(s1, IntToString(MEM_GetFuncID(function)));
     _AI_Function(slf, s1);
 };
 func void AI_Function_SI(var c_npc slf, var func function, var string param1, var int param2) {
     var string s1;
-    s1 = ConcatStrings("SI ", param1);
+    s1 = ConcatStrings("SI ", STR_Escape(param1));
     s1 = ConcatStrings(s1, " ");
     s1 = ConcatStrings(s1, IntToString(param2));
     s1 = ConcatStrings(s1, " ");
@@ -77,7 +77,7 @@ func void AI_Function_IS(var c_npc slf, var func function, var int param1, var s
     var string s1;
     s1 = ConcatStrings("IS ", IntToString(param1));
     s1 = ConcatStrings(s1, " ");
-    s1 = ConcatStrings(s1, param2);
+    s1 = ConcatStrings(s1, STR_Escape(param2));
     s1 = ConcatStrings(s1, " ");
     s1 = ConcatStrings(s1, IntToString(MEM_GetFuncID(function)));
     _AI_Function(slf, s1);
@@ -92,9 +92,11 @@ func void _AI_FUNCTION_EVENT() {
     var int ptr; ptr = EBP+88;
     MEMINT_StackPushVar(ptr);
     var string AniName; AniName = MEMINT_PopString();
+	
     if(!STR_StartsWith(AniName, "CALL ")) {
         return;
     };
+	
 	var string argc; argc = STR_Split(AniName, " ", 1);
 	if (Hlp_StrCmp(argc, "I")) {
 		i0 = STR_ToInt(STR_Split(AniName, " ", 2));
@@ -102,7 +104,7 @@ func void _AI_FUNCTION_EVENT() {
 		MEM_PushIntParam(i0);
 	}
 	else if (Hlp_StrCmp(argc, "S")) {
-		s0 = STR_Split(AniName, " ", 2);
+		s0 = STR_Unescape(STR_Split(AniName, " ", 2));
 		fnc = STR_ToInt(STR_Split(AniName, " ", 3));
 		MEM_PushStringParam(s0);
 	}
@@ -114,14 +116,14 @@ func void _AI_FUNCTION_EVENT() {
 		MEM_PushIntParam(i1);
 	}
 	else if (Hlp_StrCmp(argc, "SS")) {
-		s0 = STR_Split(AniName, " ", 2);
-		s1 = STR_Split(AniName, " ", 3);
+		s0 = STR_Unescape(STR_Split(AniName, " ", 2));
+		s1 = STR_Unescape(STR_Split(AniName, " ", 3));
 		fnc = STR_ToInt(STR_Split(AniName, " ", 4));
 		MEM_PushStringParam(s0);
 		MEM_PushStringParam(s1);
 	}
 	else if (Hlp_StrCmp(argc, "SI")) {
-		s0 = STR_Split(AniName, " ", 2);
+		s0 = STR_Unescape(STR_Split(AniName, " ", 2));
 		i1 = STR_ToInt(STR_Split(AniName, " ", 3));
 		fnc = STR_ToInt(STR_Split(AniName, " ", 4));
 		MEM_PushStringParam(s0);
@@ -129,7 +131,7 @@ func void _AI_FUNCTION_EVENT() {
 	}
 	else if (Hlp_StrCmp(argc, "IS")) {
 		i0 = STR_ToInt(STR_Split(AniName, " ", 2));
-		s1 = STR_Split(AniName, " ", 3);
+		s1 = STR_Unescape(STR_Split(AniName, " ", 3));
 		fnc = STR_ToInt(STR_Split(AniName, " ", 4));
 		MEM_PushIntParam(i0);
 		MEM_PushStringParam(s1);

@@ -12,11 +12,11 @@ func string MEM_ReadStringArray(var int arrayAddress, var int offset) {
 //========================================
 // STR_Escape / STR_Unescape
 //========================================
-const int STR_Sequences[32] = {
+const int STR_Sequences[33] = {
     48,  49,  50,  51,  52,  53,  54,  97,
     98,  116, 110, 118, 102, 114, 55,  56,
     57,  65,  66,  67,  68,  69,  70,  71,
-    72,  73,  74,  75,  76,  77,  78,  79
+    72,  73,  74,  75,  76,  77,  78,  79, 95
 };
 
 func string STR_Escape(var string s0) {
@@ -35,7 +35,7 @@ func string STR_Escape(var string s0) {
             SBc(92);
             SBc(92);
         }
-        else if(c < 32) {
+        else if(c < 33) {
             SBc(92);
             SBc(MEM_ReadStatArr(STR_Sequences, c));
         }
@@ -69,7 +69,7 @@ func string STR_Unescape(var string s0) {
 			}
 			else {
 				var int j; j = 0;
-				while(j < 32);
+				while(j < 33);
 					var int n; n = MEM_ReadStatArr(STR_Sequences, j);
 					if(c == n) {
 						SBc(j);
