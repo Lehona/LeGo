@@ -214,10 +214,15 @@ func void View_MoveToPxl(var int hndl, var int x, var int y) {
     View_MoveTo(hndl, x, y);
 };
 
+func void View_DeleteTextSub(var int listPtr) {
+	var zCList l; l = MEM_PtrToInst(listPtr);
+	MEM_Free(l.data);
+};
 func void View_DeleteText(var int hndl) {
 	var zCView v; v = get(hndl);
 	if (v.textLines_next) { 
-		Print_TextFieldDelete(v.textLines_next); //Noch wird leider nicht gefreet.
+		List_For(v.textLines_next, "View_DeleteTextSub");
+		List_Destroy(v.textLines_next);
 		v.textLines_next = 0;
 	};
 };
@@ -237,7 +242,6 @@ func void View_AddText(var int hndl, var int x, var int y, var string text, var 
 func void View_Top(var int hndl) {
     const int zCView_Top = 8021904; //007A6790
     Call__thiscall(getPtr(hndl), zCView_Top);
-	MEM_Info(IntToString(getPtr(hndl)));
 };
 
 
@@ -399,7 +403,7 @@ func void zCView_Unarchiver(var zCView this) {
     PM_LoadArrayToPtr("posOpenClose_1", _@(this.posOpenClose_1));
 	
 	
-	if (this.isOpen) {
+	if (this.intFlags) {
 		_View_Open(MEM_InstToPtr(this));
 	}; 
 	
