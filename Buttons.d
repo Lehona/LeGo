@@ -18,11 +18,10 @@ class _Button {
 
 	// intern
 	var int view; 	// zCView@
-	var int text;   // zCList_zCViewText@
 	var int state; 	
 
 };
-const string _BUTTON_STRUCT = "auto|11";
+const string _BUTTON_STRUCT = "auto|10";
 func void _Button_Delete(var _Button btn) {
 	View_Delete(btn.view);
 };
@@ -58,8 +57,7 @@ func int Button_Create(var int posx, var int posy, var int width, var int height
 	btn.state = 0; //off
 	
 	View_SetTexture(btn.view, tex);
-	
-	btn.text = 0; //Initial gibt es keinen Text.		
+			
 				
 	MEM_WriteStatArr(_Buttons, _Buttons_NextSlot, button);
 	_Buttons_NextSlot += 1;
@@ -121,9 +119,9 @@ func void Button_SetTexture(var int hndl, var string tex) {
 
 func void Button_SetCaption(var int hndl, var string caption, var string font) { 
 	var _Button btn; btn = get(hndl);
-	if (btn.text) {
-		Print_TextFieldDelete(btn.text);
-	};
+	
+	View_DeleteText(btn.view);
+	
 	var int len; len = Print_GetStringWidth(STR_Split(caption, Print_LineSeperator, 0), font);
 	var int hi; hi = Print_GetFontHeight(font);
 	
@@ -131,10 +129,7 @@ func void Button_SetCaption(var int hndl, var string caption, var string font) {
 	var int xPos; xPos = (1<<13>>1)-(Print_ToVirtual(len, Print_ToPixel(btn.posx2-btn.posx, PS_X))/2);
 	var int yPos; yPos = (1<<13>>1)-(Print_ToVirtual((hi*lines)/2, Print_ToPixel(btn.posy2-btn.posy, PS_Y))/2);
 		
-	var int ptr; ptr = Print_TextField(xPos, yPos, caption, font, Print_ToVirtual(hi, Print_ToPixel(btn.posy2-btn.posy, PS_Y)));
-	btn.text = ptr;
-	var zCView view; view = View_Get(btn.view);
-	view.textLines_next = ptr;	
+	View_AddText(btn.view, xPos, yPos, caption, font);
 };
 
 
@@ -178,7 +173,7 @@ func void Button_CreateMouseover(var string text, var string font) {
 	view.fxclose = 0;
 	
 	if (view.textLines_next) {
-		Print_TextFieldDelete(view.textLines_next);
+		View_DeleteText(_BUTTON_MO);
 	};
 	view.textLines_next = txt; 
 };	
@@ -231,12 +226,10 @@ func zCView Button_GetView(var int hndl) {
 
 func int Button_GetCaptionPtr(var int hndl) {
 	var _Button btn; btn = get(hndl);
-	return btn.text;
+	var zCView v; v = get(btn.view);
+	return v.textLines_next;
 };
 
-func zCViewText Button_GetCaption(var int hndl) {
-	Button_GetCaptionPtr(hndl);
-};
 	
 func void Buttons_Do() {
 	var _Button btn;
