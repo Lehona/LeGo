@@ -117,9 +117,10 @@ const int LeGo_View           = 1<<11; // View.d
 const int LeGo_Interface      = 1<<12; // Interface.d
 const int LeGo_Bars           = 1<<13; // Bars.d
 const int LeGo_Quickslots     = 1<<14; // Quickslots.d
-const int LeGo_Buttons        = 1<<15;
+const int LeGo_Buttons        = 1<<15; // Buttons.d
+const int LeGo_Timer          = 1<<16; // Timer.d
 
-const int LeGo_All            = (1<<16)-1; // Sämtliche Bibliotheken
+const int LeGo_All            = (1<<17)-1; // Sämtliche Bibliotheken
 
 //========================================
 // [intern] Variablen
@@ -136,7 +137,7 @@ func void LeGo_InitFlags(var int f) {
     if(f & LeGo_Bloodsplats)    { f = f | LeGo_FrameFunctions | LeGo_HookEngine | LeGo_Random; };
     if(f & LeGo_PrintS)         { f = f | LeGo_AI_Function | LeGo_Anim8 | LeGo_Interface; };
     if(f & LeGo_Anim8)          { f = f | LeGo_PermMem | LeGo_FrameFunctions; };
-    if(f & LeGo_FrameFunctions) { f = f | LeGo_PermMem | LeGo_HookEngine; };
+    if(f & LeGo_FrameFunctions) { f = f | LeGo_PermMem | LeGo_HookEngine | LeGo_Timer; };
     if(f & LeGo_Cursor)         { f = f | LeGo_Interface; };
     if(f & LeGo_Buttons)        { f = f | LeGo_PermMem | LeGo_View; };
     if(f & LeGo_Bars)           { f = f | LeGo_PermMem | LeGo_View; };
@@ -156,7 +157,7 @@ func void LeGo_InitAlways(var int f) {
             HandlesObj = MEM_PtrToInst(Handles);
         };
         if((Handles)&&(!_LeGo_Loaded)) {
-            // Passiert bei Neues Spiel -> Neues Spiel
+            // Passiert bei 'Neues Spiel' -> 'Neues Spiel'
             _PM_Reset();
         };
     };
@@ -182,6 +183,10 @@ func void LeGo_InitAlways(var int f) {
             FF_Apply(_Anim8_Loop);
         };
     };
+	
+	if(f & LeGo_Timer) {
+		_Timer_Init();
+	};
 
     if(f & LeGo_Quickslots) {
         _QS_Init();
@@ -193,7 +198,6 @@ func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Cursor) {
         HookEngine(5062907, 5, "_CURSOR_GETVAL");
     };
-
 
     if(f & LeGo_Shields) {
         HookEngine(oCNpc__EV_DrawWeapon,    6, "_EVT_SHIELD_DRAW");
@@ -227,11 +231,12 @@ func void LeGo_InitGamestart(var int f) {
 };
 
 func void LeGo_Init(var int flags) {
-    MEM_InitAll();
-
     if(!MEM_CheckVersion(1,2,0)) {
         MEM_Error("LeGo benötigt mindestens Ikarus 1.2!");
+		return;
     };
+
+    MEM_InitAll();
 
     LeGo_InitFlags(flags);
 

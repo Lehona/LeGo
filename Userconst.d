@@ -74,51 +74,22 @@ const string Cursor_Font   = "CURSOR.TGA"; // Genutzte Schriftart [Cursor.tga wi
 const int    Cursor_Alpha  = 255;                     // Alpha (0..255; 0 = unsichtbar)
 
 //========================================
-// Dialoggestures
-//========================================
-/* ==== 1-Satz Gesten ==== */
-const int DIAG_GREET_COOL = 0;    // Begrüßung
-const int DIAG_GREET_GRD = 1;     // Begrüßung
-const int DIAG_GREET_NOV = 2;     // Begrüßung
-const int DIAG_NO = 3;            // Abwehrende Geste (Sehr deutlich)
-const int DIAG_YES = 4;           // Nicken
-const int DIAG_BECAREFUL = 5;     // Vorsichtiges Umsehen (-> Borka)
-const int DIAG_GETLOST = 6;       // "Hau ab!" Geste. (Mehr lächerlich als überzeugend, wirkt wie "Kusch! Ab!")
-
-/* ==== Komplette Sets ==== */
-const int DIAG_ANGRY = 7;         // Wütende Gesten
-const int DIAG_NOTSURE = 8;       // Unwissend/Unsicher/Nachdenklich
-const int DIAG_NERVOUS = 9;       // Nervöse Bewegungen (Ein ertappter Dieb zB.)
-
-const int DIAG_MAX = 10;
-const int DIAG_NORMAL = DIAG_MAX; // Gesten wieder zurücksetzen
-
-/* ==== Sammlung der Overlays ==== */
-const string DIAG_Overlays[DIAG_MAX] = {
-    "HUM_DIA_GREET_COOL.MDS",
-    "HUM_DIA_GREET_GRD.MDS",
-    "HUM_DIA_GREET_MAG.MDS",
-    "HUM_DIA_NO.MDS",
-    "HUM_DIA_YES.MDS",
-    "HUM_DIA_BECAREFUL.MDS",
-    "HUM_DIA_GETLOST.MDS",
-    "HUM_DIA_ANGRY.MDS",
-    "HUM_DIA_NOTSURE.MDS",
-    "HUM_DIA_NERVOUS.MDS"
-};
-
-//========================================
 // Interface
 //========================================
 const string Print_LineSeperator = "~";
 
 /* ==== PrintS ==== */
-const int    PF_PrintX     = 200;                     // X-Koordinate auf dem Screen (0..8192)
-const int    PF_PrintY     = 4900;                    // Minimale Y-Position (0..8192)
-const int    PF_FadeTime   = 255;                     // Zeit zum einblenden/ausblenden der Textzeilen (in ms)
-const int    PF_MoveYTime  = 400;                     // Zeit in der Y bewegt wird. (Oder so.)
-const int    PF_WaitTime   = 2000;                    // Zeit die gewartet wird, bis wieder ausgeblendet wird (in ms)
-const int    PF_TextHeight = 170;                     // Abstand zwischen einzelnen Zeilen
+// <<Virtuelle Positionen>>
+const int    PF_PrintX      = 200;     // Startposition X
+const int    PF_PrintY      = 5000;    // Startposition Y
+const int    PF_TextHeight  = 170;     // Abstand zwischen einzelnen Zeilen
+
+// <<Milisekunden>>
+const int    PF_FadeInTime  = 300;     // Zeit zum einblenden der Textzeilen 
+const int    PF_FadeOutTime = 1000;    // Zeit zum ausblenden der Textzeilen
+const int    PF_MoveYTime   = 300;     // Zeit zum verschieben einer Zeile
+const int    PF_WaitTime    = 3000;    // Zeit die gewartet wird, bis wieder ausgeblendet wird
+
 const string PF_Font       = "FONT_OLD_10_WHITE.TGA"; //Verwendete Schriftart
 
 //========================================
@@ -127,28 +98,23 @@ const string PF_Font       = "FONT_OLD_10_WHITE.TGA"; //Verwendete Schriftart
 const int AIV_Name = 89; // Genutzte AI-Var
 
 //========================================
-// PermMem
-//========================================
-const int PM_ExtendedInfoToSavegame = 0; // Optional weitere Informationen wie Klassennamen ins Savegame (Für Analysezwecke)
-
-//========================================
 // Quickslots
 //========================================
 const int zCVob_bitfield4_posInQs = ((1 << 5) - 1) << 7;
 const int zCVob_bitfield4_amount = ((1 << 16) - 1) << 12;
 
-const int    QS_SlotSize       = 90;                      // Größe des Renders auf dem Bildschirm
-const int    QS_DigitMarginX   = 2;                       // Abstand der Nummerierungen vom Rand des Slots
-const int    QS_DigitMarginY   = 12;                      // Abstand der Nummerierungen vom Boden des Slots
-const int    QS_DigitCol0      = COL_White;               // Schriftfarbe
-const int    QS_DigitCol1      = COL_White;               // Schriftfarbe
-const string QS_DigitFont      = "FONT_CALIBRI_17.TGA";   // Schriftart der Nummerierung
-const string QS_SlotBackTex    = "QUICKSLOTS.TGA";        // Hintergrundtextur
-const int    QS_SlotBackX      = 512;                     // Breite der Hintergrundtextur
-const int    QS_SlotBackY      = 128;                     // Höhe der Hintergrundtextur
-const int    QS_SlotBackMargin = 45;                      // Abstand der Mitte des Balkens zum unteren Bildschirmrand
-const int    QS_SlotDist       = 50;                      // Abstand der einzelnen Slots horizontal zueinander
-const int    QS_SlotDistSep    = 10;                      // Zusatzabstand zwischen Standardwaffen und Zusatzslots
+const int    QS_SlotSize       = 90;                        // Größe des Renders auf dem Bildschirm
+const int    QS_DigitMarginX   = 2;                         // Abstand der Nummerierungen vom Rand des Slots
+const int    QS_DigitMarginY   = 12;                        // Abstand der Nummerierungen vom Boden des Slots
+const int    QS_DigitCol0      = COL_White;                 // Schriftfarbe
+const int    QS_DigitCol1      = COL_White;                 // Schriftfarbe
+const string QS_DigitFont      = "FONT_OLD_10_WHITE.TGA";   // Schriftart der Nummerierung
+const string QS_SlotBackTex    = "QUICKSLOTS.TGA";          // Hintergrundtextur
+const int    QS_SlotBackX      = 512;                       // Breite der Hintergrundtextur
+const int    QS_SlotBackY      = 128;                       // Höhe der Hintergrundtextur
+const int    QS_SlotBackMargin = 45;                        // Abstand der Mitte des Balkens zum unteren Bildschirmrand
+const int    QS_SlotDist       = 50;                        // Abstand der einzelnen Slots horizontal zueinander
+const int    QS_SlotDistSep    = 10;                        // Zusatzabstand zwischen Standardwaffen und Zusatzslots
 
 //========================================
 // Shields

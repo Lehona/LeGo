@@ -72,16 +72,17 @@ func int Print_GetTextPtr(var int hndl) {
 // Text löschen
 //========================================
 func void Print_DeleteText(var int hndl) {
-	if (!Hlp_IsValidHandle(hndl)) { return; };
+    if (!Hlp_IsValidHandle(hndl)) { return; };
     var zCView v; v = MEM_PtrToInst(MEM_Game.array_view[0]);
-	var int lPtr; lPtr = List_Contains(v.textLines_next, getPtr(hndl));
-	var zCList l; l = MEM_PtrToInst(lPtr);
-	var int length; length = List_Length(v.textLines_next);
-	length -= List_Length(lPtr);
-	var zCList prev; prev = MEM_PtrToInst(List_Node(v.textLines_next, length));
-	prev.next = l.next;
-	delete(hndl);
-	MEM_Free(lPtr);
+    var int list; list = _@(v.textLines_data);
+    var int offs; offs = List_Contains(list, getPtr(hndl));
+    if(offs > 1) {
+        List_Delete(list, offs);
+    }
+    else {
+        MEM_Error(ConcatStrings(IntToString(offs), ". Print not found?!"));
+    };
+    delete(hndl);
 };
 
 //========================================
@@ -219,28 +220,28 @@ func int Print_ExtPxl(var int x, var int y, var string text, var string font, va
 //========================================
 
 func string Print_LongestLine(var string text, var string font) {
-	var int cnt; cnt = STR_SplitCount(text, Print_LineSeperator);
+    var int cnt; cnt = STR_SplitCount(text, Print_LineSeperator);
     var int i; i = 0;
-	var int max; max = 0;
-	var int tmp; tmp = 0;
-	
-	var int pos; pos = MEM_StackPos.position;
-		if (i >= cnt) {
-			return STR_Split(text, Print_LineSeperator, i-1);
-		};
-		tmp = Print_GetStringWidth(STR_Split(text, Print_LineSeperator, i), font);
-		if (tmp > max) {
-			max = tmp;
-		};
-	i+=1;
-	MEM_StackPos.position = pos;
+    var int max; max = 0;
+    var int tmp; tmp = 0;
+
+    var int pos; pos = MEM_StackPos.position;
+        if (i >= cnt) {
+            return STR_Split(text, Print_LineSeperator, i-1);
+        };
+        tmp = Print_GetStringWidth(STR_Split(text, Print_LineSeperator, i), font);
+        if (tmp > max) {
+            max = tmp;
+        };
+    i+=1;
+    MEM_StackPos.position = pos;
 };
 
 func int Print_LongestLineLength(var string text, var string font) {
-	return Print_GetStringWidth(Print_LongestLine(text, font), font);
-};	
-		
-		
+    return Print_GetStringWidth(Print_LongestLine(text, font), font);
+};
+
+
 func int Print_TextField(var int x, var int y, var string text, var string font, var int height) {
     var int cnt; cnt = STR_SplitCount(text, Print_LineSeperator);
     var int i; i = 1;
@@ -275,63 +276,70 @@ func int Print_TextFieldPxl(var int x, var int y, var string text, var string fo
 // Klasse für PermMem
 //========================================
 class gCPrintS {
-    var int alpha;
-    var int y;
-    var int hndl; // zCViewText@
-    var int opos;
-    var int gpos;
+    var int a8_Alpha;    // Anim8(h)
+    var int a8_Movement; // Anim8(h)
+    var int tv_Text;     // Print(h)
+	var int vr_Pos;
+	var int vr_Offs;
 };
-
-func void gCPrintS_Delete(var gCPrintS g) {
-    if(Hlp_IsValidHandle(g.hndl)) {
-        Print_DeleteText(g.hndl);
-    };
-    if(Hlp_IsValidHandle(g.alpha)) {
-        Anim8_Delete(g.alpha);
-    };
-    if(Hlp_IsValidHandle(g.y)) {
-        Anim8_Delete(g.y);
-    };
-};
-
 instance gCPrintS@(gCPrintS);
 
-var int PF_List; // zCList<gCPrintS(h)>(h)
-const int PF_ListPtr = 0;
-var int PF_CPos;
-var int PF_Loop;
+var int gCPrintS_Act;
+var int gCPrintS_COff;
+
+func void gCPrintS_Delete(var gCPrintS this) {
+    Anim8_Delete(this.a8_Movement);
+    Print_DeleteText(this.tv_Text);
+};
+
+func void gCPrintS_Alpha(var int h, var int data) {
+    var gCPrintS p; p = get(h);
+    var zCViewText t; t = get(p.tv_Text);
+    t.color = ChangeAlpha(t.color, data);
+	if(gCPrintS_COff > p.vr_Offs) {
+		p.vr_Pos -= (gCPrintS_COff - p.vr_Offs) * PF_TextHeight;
+		Anim8(p.a8_Movement, p.vr_Pos, PF_MoveYTime, A8_SlowEnd);
+		p.vr_Offs = gCPrintS_COff;
+	};
+    if(!data) {
+		gCPrintS_Act -= 1;
+        delete(h);
+    };
+};
+
+func void gCPrintS_Position(var int h, var int data) {
+    var gCPrintS p; p = get(h);
+    var zCViewText t; t = get(p.tv_Text);
+    t.posY = data;
+};
 
 //========================================
 // Softprint
 //========================================
 func void PrintS_Ext(var string txt, var int color) {
-    // Die geballte Macht von PermMem und Anim8!
-    if(!PF_List) {
-        PF_List = new(zCList@);
-        PF_ListPtr = getPtr(PF_List);
-    };
-
-    var int alpha; alpha = Anim8_New(1, false);
-    Anim8 (alpha, 255, PF_FadeTime,   A8_Constant);
-    Anim8q(alpha, 0,   PF_WaitTime,   A8_Wait);
-    Anim8q(alpha, 0,   PF_FadeTime*3, A8_SlowStart);
-
-    var int y; y = Anim8_New(PF_PrintY + PF_TextHeight, false);
-    Anim8(y, PF_PrintY, PF_MoveYTime, A8_SlowEnd);
-
     var int h; h = new(gCPrintS@);
     var gCPrintS p; p = get(h);
-    p.alpha = alpha;
-    p.y = y;
-    p.opos = PF_CPos;
-    p.gpos = PF_CPos;
-    p.hndl = Print_Ext(PF_PrintX, PF_PrintY + PF_TextHeight, txt, PF_Font, color, -1);
-    List_Add(PF_ListPtr, h);
-    PF_CPos += 1;
-    if(!PF_Loop) {
-        PF_Loop = 1;
-        FF_Apply(_PrintS_Loop);
-    };
+    var int v;
+
+    v = Anim8_NewExt(1, gCPrintS_Alpha, h, false);
+    Anim8_RemoveIfEmpty(v, true);
+    Anim8 (v, 255, PF_FadeInTime,  A8_Constant);
+    Anim8q(v, 0,   PF_WaitTime,    A8_Wait);
+    Anim8q(v, 0,   PF_FadeOutTime, A8_SlowStart);
+    p.a8_Alpha = v;
+
+    v = Anim8_NewExt(PF_PrintY, gCPrintS_Position, h, false);
+    Anim8 (v, PF_PrintY - PF_TextHeight, PF_MoveYTime, A8_SlowEnd);
+    p.a8_Movement = v;
+
+    p.tv_Text = Print_Ext(PF_PrintX, PF_PrintY, txt, PF_Font, color, -1);
+	p.vr_Pos = PF_PrintY - PF_TextHeight;
+	gCPrintS_COff += 1;
+	if(!gCPrintS_Act) {
+		gCPrintS_COff = 0;
+	};
+	gCPrintS_Act += 1;
+	p.vr_Offs = gCPrintS_COff;
 };
 func void AI_PrintS_Ext(var c_npc slf, var string txt, var int color) {
     AI_Function_SI(slf, PrintS_Ext, txt, color);
@@ -347,45 +355,7 @@ func void AI_PrintS(var c_npc slf, var string txt) {
     AI_Function_S(slf, PrintS, txt);
 };
 
-//========================================
-// [intern] Softprint-Loop
-//========================================
-func void _PrintS_Loop() {
-    PF_ListPtr = getPtr(PF_List);
-    var int i; i = 2;
-    var int l; l = PF_ListPtr;
-    var int p; p = MEM_StackPos.position;
-    l = MEM_ReadInt(l+4); // l = (zCList*)l->next
-    var int p0; p0 = MEM_StackPos.position;
-    if(l) {
-        var int c; c = MEM_ReadInt(l);
-        if(c) {
-            if(!Hlp_IsValidHandle(c)) {
-                List_Delete(l, i);
-            }
-            else {
-                var gCPrintS g; g = get(c);
-                var zCViewText t; t = Print_GetText(g.hndl);
-                t.color = ChangeAlpha(t.color, Anim8_Get(g.alpha));
-                if(PF_CPos > g.opos) {
-                    g.opos = PF_Cpos;
-                    Anim8(g.y, PF_PrintY - PF_TextHeight * (PF_Cpos - g.gpos), PF_MoveYTime, A8_SlowEnd);
-                };
-                t.posY = Anim8_Get(g.y);
-                if(Anim8_Empty(g.alpha)) {
-                    delete(c);
-                    l = MEM_ReadInt(l+4);
-                    List_Delete(PF_ListPtr, i);
-                    MEM_StackPos.position = p0;
-                };
-            };
-        };
-        i += 1;
-        MEM_StackPos.position = p;
-    };
-    if(List_Length(PF_ListPtr) <= 1) {
-        PF_Loop = 0;
-        PF_CPos = 0;
-        FF_Remove(_PrintS_Loop);
-    };
-};
+
+
+
+

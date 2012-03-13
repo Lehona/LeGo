@@ -106,6 +106,7 @@ var zCArray HandlesObj;
 var int _PM_ArrayElements;
 var int _PM_Inst;
 var int _PM_Stack;
+const int PM_CurrHandle = 0;
 
 //========================================
 // Anzahl Handles
@@ -241,7 +242,9 @@ func int create(var int inst) {
 
     //Speicher gemäß der Größe eines Objekts der Klasse holen
     var int ptr; ptr = MEM_Alloc(symbCls.offset);
+	Locals_Push(create);
     var int i; i = zCParser_CreateInstance(inst, ptr);
+	Locals_Pop(create);
     return ptr;
 };
 
@@ -274,7 +277,10 @@ func int new(var int inst) {
         //end
     };
 
-    ptr = create(inst);
+	Locals_Push(new);
+    create(inst);
+	Locals_Pop(new);
+	ptr = MEMINT_StackPopInt();
 
     if (h < HandlesObj.numInArray / 2) {
         //alte Werte überschreiben
@@ -287,7 +293,7 @@ func int new(var int inst) {
         MEM_ArrayInsert(Handles, inst);
     };
 
-    return h + 1; //das erste ValidHandle heißt 1
+    return h+1; //das erste ValidHandle heißt 1
 };
 
 //========================================
@@ -502,7 +508,6 @@ func void _PM_SaveStruct_Delete(var _PM_SaveStruct this) {
 
 const int _PM_HeadPtr = 0; // _PM_SaveStruct*
 var _PM_SaveStruct _PM_Head;
-const int PM_CurrHandle = 0;
 const string _PM_SearchObjCache = "";
 
 const int _PM_DataPoolNum = 0;
