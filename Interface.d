@@ -2,11 +2,7 @@
               INTERFACE
 \***********************************/
 
-
-
 var int Print_List; //zCList_zCViewText@
-
-
 
 //========================================
 // Vergangene Zeit seit Systemstart
@@ -76,7 +72,16 @@ func int Print_GetTextPtr(var int hndl) {
 // Text löschen
 //========================================
 func void Print_DeleteText(var int hndl) {
-    delete(hndl);
+	if (!Hlp_IsValidHandle(hndl)) { return; };
+    var zCView v; v = MEM_PtrToInst(MEM_Game.array_view[0]);
+	var int lPtr; lPtr = List_Contains(v.textLines_next, getPtr(hndl));
+	var zCList l; l = MEM_PtrToInst(lPtr);
+	var int length; length = List_Length(v.textLines_next);
+	length -= List_Length(lPtr);
+	var zCList prev; prev = MEM_PtrToInst(List_Node(v.textLines_next, length));
+	prev.next = l.next;
+	delete(hndl);
+	MEM_Free(lPtr);
 };
 
 //========================================
@@ -262,11 +267,6 @@ func int Print_TextField(var int x, var int y, var string text, var string font,
 
 func int Print_TextFieldPxl(var int x, var int y, var string text, var string font) {
     return Print_TextField(Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y), text, font, Print_ToVirtual(Print_GetFontHeight(font), PS_Y));
-};
-
-func void Print_TextFieldDelete(var int txtfield) { // Geht noch nicht.
-    var zCList__zCViewText v; v = _^(txtfield);
-	//zCList__zCViewText_Delete(v);
 };
 
 
