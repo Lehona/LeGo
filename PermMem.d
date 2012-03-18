@@ -18,6 +18,7 @@ var int _PM_ArrayElements;
 var int _PM_Inst;
 var int _PM_Stack;
 const int PM_CurrHandle = 0;
+const int _PM_foreachTable = 0;
 
 //========================================
 // Anzahl Handles
@@ -106,6 +107,72 @@ func void release(var int h) {
     MEM_WriteIntArray(HandlesObj.array, ((h - 1) * 2)+1, 0);
 };
 
+//========================================
+// Funktion für alle Handles aufrufen
+//========================================
+func void _PM_AddToForeachTable(var int h) {
+	if(!_PM_foreachTable) {
+		MEM_Call(_PM_CreateForeachTable);
+		return;
+	};
+	h -= 1;
+	var int p; p = MEM_ReadIntArray(HandlesObj.array, h<<1);
+	if(p) {
+		var int i; i = MEM_ReadIntArray(HandlesObj.array, (h<<1)+1);
+		var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
+		if(!c) {
+			c = MEM_ArrayCreate();
+			MEM_WriteIntArray(_PM_foreachTable, i, c);
+		};
+		MEM_ArrayInsert(c, h);
+	};
+};
+
+func void _PM_RemoveFromForeachTable(var int h) {
+	h -= 1;
+	var int p; p = MEM_ReadIntArray(HandlesObj.array, h<<1);
+	if(p) {
+		var int i; i = MEM_ReadIntArray(HandlesObj.array, (h<<1)+1);
+		var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
+		if(!c) {
+			return;
+		};
+		MEM_ArrayRemoveValue(c, h);
+		if(!MEM_ArraySize(c)) {
+			MEM_ArrayFree(c);
+			MEM_WriteIntArray(_PM_foreachTable, i, 0);
+		};
+	};
+};
+
+func void _PM_CreateForeachTable() {
+	if(_PM_foreachTable) {
+		MEM_Free(_PM_foreachTable);
+	};
+	_PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
+	if(Handles) {
+		var int i; i = 0;
+		var int m; m = HandlesObj.numInArray / 2;
+		repeat(i, m);
+			_PM_AddToForeachTable(i+1);
+		end;
+	};
+};
+
+func void foreachHndl(var int inst, var func fnc) {
+	var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
+	if(!c) {
+		return;
+	};
+	var zCArray a; a = _^(c);
+	var int i; i = 0;
+	var int l; l = a.numInArray;
+	var int o; o = MEM_GetFuncOffset(fnc);
+	repeat(i, l);
+		MEM_ReadIntArray(a.array, i);
+		MEM_CallByOffset(o);
+	end;
+};
 
 //========================================
 // Handle mit Destruktor löschen
@@ -113,6 +180,7 @@ func void release(var int h) {
 func void delete(var int h) {
 	locals();
     if (!Hlp_IsValidHandle(h)) { return; };
+	_PM_RemoveFromForeachTable(h);
     var int inst; inst = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2 + 1);
     var zCPar_Symbol symbCls; symbCls = _PM_ToClass(inst);
     var int fnc; fnc = MEM_FindParserSymbol(ConcatStrings(symbCls.name, "_DELETE"));
@@ -200,6 +268,7 @@ func int new(var int inst) {
         MEM_ArrayInsert(Handles, inst);
     };
 
+	_PM_AddToForeachTable(h+1);
     return h+1; //das erste ValidHandle heißt 1
 };
 
@@ -232,6 +301,10 @@ func void setPtr(var int h, var int ptr) {
     MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, ptr);
 };
 
+//========================================
+// Betrachten der folgenden
+// Scripte auf eigene Gefahr :0
+//========================================
 func void _PM_Reset() {
     MEM_Info("Reset ALL the handles!");
     if(Handles) {
@@ -1267,6 +1340,8 @@ func void _PM_Unarchive() {
     PM_CurrHandle = 0;
     free(_PM_HeadPtr, _PM_SaveStruct@);
     _PM_HeadPtr = 0;
+	
+	_PM_CreateForeachTable();
 
     MEM_Info(ConcatStrings("buffer used:     ", IntToString(_PM_DataPoolSize)));
     MEM_Info(ConcatStrings("buffer cleaned:  ", IntToString(_PM_FreedSize)));
