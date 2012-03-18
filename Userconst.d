@@ -73,16 +73,12 @@ const int BLOODSPLAT_DAM = 7;  // Schadensmultiplikator bzgl. der Texturgröße ( 
 //========================================
 // Cursor
 //========================================
-const string Cursor_Symbol = "A";                     // Genutzter Buchstabe
-
-const string Cursor_Font   = "CURSOR.TGA"; // Genutzte Schriftart [Cursor.tga wird von LeGo bereitgestellt und enthält nur den Buchstaben 'A']
-
-const int    Cursor_Alpha  = 255;                     // Alpha (0..255; 0 = unsichtbar)
+const string Cursor_Texture   = "CURSOR.TGA"; // Genutzte Textur, LeGo stellt eine "CURSOR.TGA" bereit
 
 //========================================
 // Interface
 //========================================
-const string Print_LineSeperator = "~";
+const string Print_LineSeperator = "~"; // Sollte man lieber nicht ändern
 
 /* ==== PrintS ==== */
 // <<Virtuelle Positionen>>

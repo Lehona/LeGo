@@ -28,16 +28,15 @@ var int Cursor_fY;
 var int Cursor_Hndl;
 func void Cursor_Hide() {
     if(!Hlp_IsValidHandle(Cursor_Hndl)) { return; };
-
+	
     View_Close(Cursor_Hndl);
-    Cursor_Hndl = 0;
 };
 
 //========================================
 // Cursor anzeigen
 //========================================
 func void Cursor_Show() {
-    if(Hlp_IsValidHandle(Cursor_Hndl)) { return; };
+    if(Hlp_IsValidHandle(Cursor_Hndl)) { View_Open(Cursor_Hndl); return; };
     Print_GetScreenSize();
     Cursor_X = Print_Screen[PS_X] / 2;
     Cursor_Y = Print_Screen[PS_Y] / 2;
