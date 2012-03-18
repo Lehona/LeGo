@@ -10,95 +10,6 @@ func string MEM_ReadStringArray(var int arrayAddress, var int offset) {
 };
 
 //========================================
-// STR_Escape / STR_Unescape
-//========================================
-const int STR_Sequences[33] = {
-    48,  49,  50,  51,  52,  53,  54,  97,
-    98,  116, 110, 118, 102, 114, 55,  56,
-    57,  65,  66,  67,  68,  69,  70,  71,
-    72,  73,  74,  75,  76,  77,  78,  79, 95
-};
-
-func string STR_Escape(var string s0) {
-    var int osb; osb = SB_Get();
-
-    var zString z; z = _^(_@s(s0));
-    const int sb = 0;
-    if(!sb) {
-        sb = SB_New();
-    };
-    SB_Use(sb);
-    SB_InitBuffer(z.len * 2);
-    var int i; i = 0;
-    var int l; l = z.len;
-    while(i < l);
-        var int c; c = MEM_ReadByte(z.ptr + i);
-        if(c == 92) { // '\'
-            SBc(92);
-            SBc(92);
-        }
-        else if(c < 33) {
-            SBc(92);
-            SBc(MEM_ReadStatArr(STR_Sequences, c));
-        }
-        else {
-            SBc(c);
-        };
-        i += 1;
-    end;
-    var string res; res = SB_ToString();
-    SB_Clear();
-
-    SB_Use(osb);
-    return res;
-};
-
-func string STR_Unescape(var string s0) {
-    var int osb; osb = SB_Get();
-
-    var zString z; z = _^(_@s(s0));
-    const int sb = 0;
-    if(!sb) {
-        sb = SB_New();
-    };
-    SB_Use(sb);
-    SB_InitBuffer(z.len);
-    var int i; i = 0;
-    var int l; l = z.len;
-    while(i < l);
-        var int c; c = MEM_ReadByte(z.ptr + i);
-        if(c == 92) { // '\'
-            i += 1;
-            c = MEM_ReadByte(z.ptr + i);
-            if(c == 92) {
-                SBc(92);
-            }
-            else {
-                var int j; j = 0;
-                while(j < 33);
-                    var int n; n = MEM_ReadStatArr(STR_Sequences, j);
-                    if(c == n) {
-                        SBc(j);
-                        break;
-                    };
-                    j += 1;
-                end;
-            };
-        }
-        else {
-            SBc(c);
-        };
-        i += 1;
-    end;
-    var string res; res = SB_ToString();
-    SB_Clear();
-
-    SB_Use(osb);
-
-    return res;
-};
-
-//========================================
 // [intern] Variablen
 //========================================
 const int Handles = 0;
@@ -200,6 +111,7 @@ func void release(var int h) {
 // Handle mit Destruktor löschen
 //========================================
 func void delete(var int h) {
+	locals();
     if (!Hlp_IsValidHandle(h)) { return; };
     var int inst; inst = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2 + 1);
     var zCPar_Symbol symbCls; symbCls = _PM_ToClass(inst);
@@ -207,10 +119,8 @@ func void delete(var int h) {
     if(fnc != -1) {
         var int ptr; ptr = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2);
         symbCls = MEM_PtrToInst(ptr);
-        Locals_Push(delete);
         MEMINT_StackPushInst(symbCls);
         MEM_CallByID(fnc);
-        Locals_Pop(delete);
     };
     clear(h);
 };
@@ -236,15 +146,14 @@ func void free(var int h, var int inst) {
 // Speicher reservieren.
 //========================================
 func int create(var int inst) {
+	locals();
     var zCPar_Symbol symbCls;
     //Symbol der Klasse holen
     symbCls = _PM_ToClass(inst);
 
     //Speicher gemäß der Größe eines Objekts der Klasse holen
     var int ptr; ptr = MEM_Alloc(symbCls.offset);
-	Locals_Push(create);
     var int i; i = zCParser_CreateInstance(inst, ptr);
-	Locals_Pop(create);
     return ptr;
 };
 
@@ -252,6 +161,7 @@ func int create(var int inst) {
 // Neues Handle anlegen
 //========================================
 func int new(var int inst) {
+	locals();
     var int h; var int ptr;
 
     if (!Handles) {
@@ -277,10 +187,7 @@ func int new(var int inst) {
         //end
     };
 
-	Locals_Push(new);
-    create(inst);
-	Locals_Pop(new);
-	ptr = MEMINT_StackPopInt();
+    ptr = create(inst);
 
     if (h < HandlesObj.numInArray / 2) {
         //alte Werte überschreiben
@@ -435,6 +342,7 @@ instance _PM_SaveStruct@(_PM_SaveStruct);
 const int _PM_FreedNum = 0;
 const int _PM_FreedSize = 0;
 func void _PM_SaveStruct_DeleteArr(var int arr) {
+	locals();
     if(!arr) { return; };
     var zCArray a; a = MEM_PtrToInst(arr);
     var int i; i = 0;
@@ -466,17 +374,13 @@ func void _PM_SaveStruct_DeleteArr(var int arr) {
                 oc.class = "";
                 _PM_FreedSize += _PM_SaveObject_Cls_size;
                 if(oc.content) {
-                    Locals_Push(_PM_SaveStruct_DeleteArr);
                     _PM_SaveStruct_DeleteArr(oc.content);
-                    Locals_Pop(_PM_SaveStruct_DeleteArr);
                 };
             }
             else {
                 _PM_FreedSize += _PM_SaveObject_Arr_size;
                 if(!_PM_Mode&&oc.content) {
-                    Locals_Push(_PM_SaveStruct_DeleteArr);
                     _PM_SaveStruct_DeleteArr(oc.content);
-                    Locals_Pop(_PM_SaveStruct_DeleteArr);
                 };
             };
             oc.name = "";
@@ -670,6 +574,7 @@ func void _PM_AutoPackSymbol(var int symbID) {
 };
 
 func void _PM_DataToSaveStruct_Struct(var int classID, var int struct) {
+	locals();
     var zCPar_Symbol zstruct; zstruct = MEM_PtrToInst(MEM_ReadIntArray(currSymbolTableAddress, struct));
     var zCPar_Symbol zclass;  zclass  = MEM_PtrToInst(MEM_ReadIntArray(currSymbolTableAddress, classID));
 
@@ -759,11 +664,7 @@ func void _PM_DataToSaveStruct_Struct(var int classID, var int struct) {
             MEM_ArrayPush(_PM_Head.contentStack, _PM_Head.content);
             _PM_Head.content = nArr;
 
-            Locals_Push(_PM_DataToSaveStruct_Struct);
-
             _PM_DataToSaveObject0("", curr);
-
-            Locals_Pop(_PM_DataToSaveStruct_Struct);
 
             _PM_Head.currOffs = MEM_ArrayPop(_PM_Head.offsStack);
             _PM_Head.content = MEM_ArrayPop(_PM_Head.contentStack);
@@ -778,11 +679,9 @@ func void _PM_DataToSaveStruct_Struct(var int classID, var int struct) {
 };
 
 func int _PM_DataToSaveStruct_Archiver(var int offs, var int archiver) {
-    Locals_PushID(archiver);
     var zCPar_Symbol s; s = MEM_PtrToInst(_PM_Head.currOffs+offs);
     MEMINT_StackPushInst(s);
     MEM_CallByID(archiver);
-    Locals_PopID(archiver);
 };
 
 func void _PM_DataToSaveStruct_Auto(var int currID) {
@@ -930,6 +829,7 @@ func void _PM_WriteArray(var int obj) {
 };
 
 func void _PM_WriteClass(var int obj) {
+	locals();
     var _PM_SaveObject_Cls oCls; oCls = MEM_PtrToInst(obj);
     if(!oCls.content) { return; };
 
@@ -959,11 +859,7 @@ func void _PM_WriteClass(var int obj) {
             }
             else {
                 // Unterklassen
-                Locals_Push(_PM_WriteClass);
-
                 _PM_WriteClass(currObj);
-
-                Locals_Pop(_PM_WriteClass);
             };
 
         };
@@ -1186,15 +1082,14 @@ func void _PM_ClassToInst0(var string s0) {
 };
 
 func void _PM_ClassToInst_ClassToPtr(var int obj, var int ptr) {
+	locals();
     var _PM_SaveObject_Cls oc; oc = MEM_PtrToInst(obj);
     MEM_ArrayPush(_PM_Head.offsStack, _PM_Head.currOffs);
     MEM_ArrayPush(_PM_Head.contentStack, _PM_Head.content);
     _PM_Head.currOffs = ptr;
     _PM_Head.content = oc.content;
 
-    Locals_Push(_PM_ClassToInst_ClassToPtr);
     _PM_ClassToInst0(oc.class);
-    Locals_Pop(_PM_ClassToInst_ClassToPtr);
 
     _PM_Head.currOffs = MEM_ArrayPop(_PM_Head.offsStack);
     _PM_Head.content = MEM_ArrayPop(_PM_Head.contentStack);
@@ -1222,6 +1117,7 @@ func void _PM_ClassToInst_ArrToPtr(var int obj, var int offs) {
 };
 
 func void _PM_ClassToInst_Auto(var string className) {
+	locals();
     var _PM_SaveObject_Int oi;
     var _PM_SaveObject_Str os;
     var zCArray arr; arr = MEM_PtrToInst(_PM_Head.content);
@@ -1247,9 +1143,7 @@ func void _PM_ClassToInst_Auto(var string className) {
             MEM_WriteInt(offs, oi.content);
         }
         else if(type == _PM_Class) {
-            Locals_Push(_PM_ClassToInst_Auto);
             _PM_ClassToInst_ClassToPtr(obj, offs);
-            Locals_Pop(_PM_ClassToInst_Auto);
         }
         else if(type == _PM_ClassPtr) {
             var _PM_SaveObject_Cls oc; oc = MEM_PtrToInst(obj);
@@ -1261,9 +1155,7 @@ func void _PM_ClassToInst_Auto(var string className) {
                 };
                 var int ptr; ptr = MEM_Alloc(MEM_ReadInt(classPtr + zCParSymbol_offset_offset));
                 MEM_WriteInt(offs, ptr);
-                Locals_Push(_PM_ClassToInst_Auto);
                 _PM_ClassToInst_ClassToPtr(obj, ptr);
-                Locals_Pop(_PM_ClassToInst_Auto);
             };
         }
         else if(type >= _PM_IntArr) {
@@ -1275,11 +1167,9 @@ func void _PM_ClassToInst_Auto(var string className) {
 };
 
 func void _PM_ClassToInst_Unarchiver(var int unarchiver) {
-    Locals_PushID(unarchiver);
     var zCPar_Symbol s; s = MEM_PtrToInst(_PM_Head.currOffs);
     MEMINT_StackPushInst(s);
     MEM_CallByID(unarchiver);
-    Locals_PopID(unarchiver);
 };
 
 func void _PM_ClassToInst(var string className) {
@@ -1501,6 +1391,7 @@ func int PM_Exists(var string name) {
 };
 
 func int _PM_Load(var string objName, var int type, var int ptr) {
+	locals();
     var int obj; obj = _PM_SearchObj(objName);
     if(!obj) { return 0; };
     if(type == -1) { type = _PM_ObjectType(obj); };
@@ -1529,9 +1420,7 @@ func int _PM_Load(var string objName, var int type, var int ptr) {
         if(!ptr) {
             ptr = MEM_Alloc(MEM_ReadInt(MEM_GetParserSymbol(oc.class) + zCParSymbol_offset_offset));
         };
-        Locals_Push(_PM_Load);
         _PM_ClassToInst_ClassToPtr(obj, ptr);
-        Locals_Pop(_PM_Load);
         return ptr;
     }
     else if(type >= _PM_IntArr) {

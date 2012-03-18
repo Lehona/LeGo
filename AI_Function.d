@@ -3,27 +3,10 @@
 \***********************************/
 
 //========================================
-// Hilfsfunktion STR_StartsWith
-//========================================
-func int STR_StartsWith(var string str, var string start) {
-    var zString z0; z0 = _^(_@s(str));
-    var zString z1; z1 = _^(_@s(start));
-    if(z1.len > z0.len) { return 0; };
-    MEM_CompareBytes(z0.ptr, z1.ptr, z1.len);
-};
-
-
-//========================================
 // [intern] Alias zu AI_Function
 //========================================
 func void _AI_Function(var c_npc slf, var string fnc) {
-    if(!_LeGo_Init&LeGo_AI_Function) {
-        MEM_Error("LeGo: AI_Function wurde nicht initialisiert!");
-        return;
-    };
-
-    var string s1; s1 = ConcatStrings("CALL ", fnc);
-    AI_PlayAni(slf, s1);
+    AI_PlayAni(slf, ConcatStrings("CALL ", fnc));
 };
 
 //========================================

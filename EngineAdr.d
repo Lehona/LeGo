@@ -41,9 +41,9 @@ const int zCAICamera__StartDialogCam                = 4923632; //0x4B20F0
 const int zCFont__GetFontName                       = 7902368; //0x7894A0
 const int zCFont__GetFontX                          = 7902448; //0x7894F0
 const int zCFont__GetFontY                          = 7902432; //0x7894E0
-const int zCFontMan__Load							= 7897808; //0x7882D0
-const int zCFontMan__GetFont						= 7898288; //0x7884B0
-const int zFontMan									=11221460; //0xAB39D4
+const int zCFontMan__Load                            = 7897808; //0x7882D0
+const int zCFontMan__GetFont                        = 7898288; //0x7884B0
+const int zFontMan                                    =11221460; //0xAB39D4
 const int zCInput_Win32__GetMouseButtonPressedLeft  = 5068688; //0x4D5790
 const int zCInput_Win32__GetMouseButtonPressedMid   = 5068704; //0x4D57A0
 const int zCInput_Win32__GetMouseButtonPressedRight = 5068720; //0x4D57B0
@@ -75,63 +75,52 @@ const int _LeGo_Flags = 0;
 // Wrapper für Engine-Funktionen
 
 
-// Interface 
+// Interface
 
 func string zCTexture_GetName(var int ptr) { // Eigentlich gar kein Engine-Call
-	var zCObject obj; obj = MEM_PtrToInst(ptr);
-	return obj.objectName;
+    if(!ptr) { return ""; };
+    var zCObject obj; obj = MEM_PtrToInst(ptr);
+    return obj.objectName;
 };
 
 func int zCTexture_Load(var string texture) {
-	CALL_IntParam(1);
-	CALL_zStringPtrParam(texture);
-	CALL__cdecl(zCTexture__Load);
-	return CALL_RetValAsInt();
+    CALL_IntParam(1);
+    CALL_zStringPtrParam(texture);
+    CALL__cdecl(zCTexture__Load);
+    return CALL_RetValAsInt();
 };
-	
-	
+
+
 
 func int zCFontMan_Load(var string font) {
-	CALL_zStringPtrParam(font);
-	CALL__Thiscall(MEM_ReadInt(zFontMan), zCFontMan__Load);
-	return CALL_RetValAsInt();
+    CALL_zStringPtrParam(font);
+    CALL__Thiscall(MEM_ReadInt(zFontMan), zCFontMan__Load);
+    return CALL_RetValAsInt();
 };
-	
+
 func int Print_GetFontPtr(var string font) {
     var int i; i = zCFontMan_Load(font);
-	CALL_IntParam(i);
-	CALL__Thiscall(MEM_ReadInt(zFontMan), zCFontMan__GetFont);
-	return CALL_RetValAsInt();
+    CALL_IntParam(i);
+    CALL__Thiscall(MEM_ReadInt(zFontMan), zCFontMan__GetFont);
+    return CALL_RetValAsInt();
 };
 
 func string Print_GetFontName(var int fontPtr) {
-	CALL_RetValIszString();
-	CALL__Thiscall(fontPtr, zCFont__GetFontName);
-	return CALL_RetValAszString();
+    CALL_RetValIszString();
+    CALL__Thiscall(fontPtr, zCFont__GetFontName);
+    return CALL_RetValAszString();
 };
 
 func int Print_GetStringWidth(var string s, var string font) {
-	var int adr; adr = Print_GetFontPtr(font);
-	CALL_zStringPtrParam(s);
-	CALL__Thiscall(adr, zCFont__GetFontX);
-	return CALL_RetValAsInt();
+    var int adr; adr = Print_GetFontPtr(font);
+    CALL_zStringPtrParam(s);
+    CALL__Thiscall(adr, zCFont__GetFontX);
+    return CALL_RetValAsInt();
 };
 
 func int Print_GetFontHeight(var string font) {
-	var int adr; adr = Print_GetFontPtr(font);
-	CALL__thiscall(adr, zCFont__GetFontY);
-	return CALL_RetValAsInt();
+    var int adr; adr = Print_GetFontPtr(font);
+    CALL__thiscall(adr, zCFont__GetFontY);
+    return CALL_RetValAsInt();
 };
-
-
-
-
-
-
-// Globale Konstante für den Spielstatus
-var int Gamestate;
-
-const int Game_NewGame     = 0;
-const int Game_Loaded      = 1;
-const int Game_WorldChange = 2;
 

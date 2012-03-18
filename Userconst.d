@@ -44,6 +44,12 @@ const int PS_Y = 1;
 
 const int PS_VMax = 8192;
 
+//========================================
+// Gamestate
+//========================================
+const int Gamestate_NewGame     = 0;
+const int Gamestate_Loaded      = 1;
+const int Gamestate_WorldChange = 2;
 
 
 
@@ -85,12 +91,12 @@ const int    PF_PrintY      = 5000;    // Startposition Y
 const int    PF_TextHeight  = 170;     // Abstand zwischen einzelnen Zeilen
 
 // <<Milisekunden>>
-const int    PF_FadeInTime  = 300;     // Zeit zum einblenden der Textzeilen 
+const int    PF_FadeInTime  = 300;     // Zeit zum einblenden der Textzeilen
 const int    PF_FadeOutTime = 1000;    // Zeit zum ausblenden der Textzeilen
 const int    PF_MoveYTime   = 300;     // Zeit zum verschieben einer Zeile
 const int    PF_WaitTime    = 3000;    // Zeit die gewartet wird, bis wieder ausgeblendet wird
 
-const string PF_Font       = "FONT_OLD_10_WHITE.TGA"; //Verwendete Schriftart
+const string PF_Font        = "FONT_OLD_10_WHITE.TGA"; //Verwendete Schriftart
 
 //========================================
 // Names
