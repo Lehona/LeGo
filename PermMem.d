@@ -111,76 +111,88 @@ func void release(var int h) {
 // Funktion für alle Handles aufrufen
 //========================================
 func void _PM_AddToForeachTable(var int h) {
-	if(!_PM_foreachTable) {
-		MEM_Call(_PM_CreateForeachTable);
-		return;
-	};
-	h -= 1;
-	var int p; p = MEM_ReadIntArray(HandlesObj.array, h<<1);
-	if(p) {
-		var int i; i = MEM_ReadIntArray(HandlesObj.array, (h<<1)+1);
-		var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
-		if(!c) {
-			c = MEM_ArrayCreate();
-			MEM_WriteIntArray(_PM_foreachTable, i, c);
-		};
-		MEM_ArrayInsert(c, h);
-	};
+    if(!_PM_foreachTable) {
+        MEM_Call(_PM_CreateForeachTable);
+        return;
+    };
+    h -= 1;
+    var int p; p = MEM_ReadIntArray(HandlesObj.array, h<<1);
+    if(p) {
+        var int i; i = MEM_ReadIntArray(HandlesObj.array, (h<<1)+1);
+        var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
+        if(!c) {
+            c = MEM_ArrayCreate();
+            MEM_WriteIntArray(_PM_foreachTable, i, c);
+        };
+        MEM_ArrayInsert(c, h);
+    };
 };
 
 func void _PM_RemoveFromForeachTable(var int h) {
-	h -= 1;
-	var int p; p = MEM_ReadIntArray(HandlesObj.array, h<<1);
-	if(p) {
-		var int i; i = MEM_ReadIntArray(HandlesObj.array, (h<<1)+1);
-		var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
-		if(!c) {
-			return;
-		};
-		MEM_ArrayRemoveValue(c, h);
-		if(!MEM_ArraySize(c)) {
-			MEM_ArrayFree(c);
-			MEM_WriteIntArray(_PM_foreachTable, i, 0);
-		};
-	};
+    h -= 1;
+    var int p; p = MEM_ReadIntArray(HandlesObj.array, h<<1);
+    if(p) {
+        var int i; i = MEM_ReadIntArray(HandlesObj.array, (h<<1)+1);
+        var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
+        if(!c) {
+            return;
+        };
+        MEM_ArrayRemoveValue(c, h);
+        if(!MEM_ArraySize(c)) {
+            MEM_ArrayFree(c);
+            MEM_WriteIntArray(_PM_foreachTable, i, 0);
+        };
+    };
 };
 
 func void _PM_CreateForeachTable() {
-	if(_PM_foreachTable) {
-		MEM_Free(_PM_foreachTable);
-	};
-	_PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
-	if(Handles) {
-		var int i; i = 0;
-		var int m; m = HandlesObj.numInArray / 2;
-		repeat(i, m);
-			_PM_AddToForeachTable(i+1);
-		end;
-	};
+    if(_PM_foreachTable) {
+        MEM_Free(_PM_foreachTable);
+    };
+    _PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
+    if(Handles) {
+        var int i; i = 0;
+        var int m; m = HandlesObj.numInArray / 2;
+        repeat(i, m);
+            _PM_AddToForeachTable(i+1);
+        end;
+    };
 };
 
 func void foreachHndl(var int inst, var func fnc) {
-	var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
-	if(!c) {
-		return;
-	};
-	var zCArray a; a = _^(c);
-	var int i; i = 0;
-	var int l; l = a.numInArray;
-	var int o; o = MEM_GetFuncOffset(fnc);
-	repeat(i, l);
-		MEM_ReadIntArray(a.array, i);
-		MEM_CallByOffset(o);
-	end;
+    // locals();
+    var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
+    if(!c) {
+        return;
+    };
+    var zCArray z; z = _^(c);
+    var int l; l = z.numInArray;
+    var int a; a = MEM_Alloc(l<<2);
+    MEM_Copy(z.array, a, l);
+    var int i; i = 0;
+    var int o; o = MEM_GetFuncOffset(fnc);
+	MEM_Info(inttostring(l));
+	
+    repeat(i, l);
+        var int h; h = MEM_ReadInt(a+(i<<2));
+		// h = h;
+		MEM_Info(inttostring(i));
+        MEM_Info(concatstrings("push ", inttostring(h)));
+        if(MEM_ReadInt(HandlesObj.array+((h-1)<<3))) {
+            h;
+            MEM_CallByOffset(o);
+        };
+    end;
+    MEM_Free(a);
 };
 
 //========================================
 // Handle mit Destruktor löschen
 //========================================
 func void delete(var int h) {
-	locals();
+    locals();
     if (!Hlp_IsValidHandle(h)) { return; };
-	_PM_RemoveFromForeachTable(h);
+    _PM_RemoveFromForeachTable(h);
     var int inst; inst = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2 + 1);
     var zCPar_Symbol symbCls; symbCls = _PM_ToClass(inst);
     var int fnc; fnc = MEM_FindParserSymbol(ConcatStrings(symbCls.name, "_DELETE"));
@@ -214,7 +226,7 @@ func void free(var int h, var int inst) {
 // Speicher reservieren.
 //========================================
 func int create(var int inst) {
-	locals();
+    locals();
     var zCPar_Symbol symbCls;
     //Symbol der Klasse holen
     symbCls = _PM_ToClass(inst);
@@ -229,7 +241,7 @@ func int create(var int inst) {
 // Neues Handle anlegen
 //========================================
 func int new(var int inst) {
-	locals();
+    locals();
     var int h; var int ptr;
 
     if (!Handles) {
@@ -268,7 +280,7 @@ func int new(var int inst) {
         MEM_ArrayInsert(Handles, inst);
     };
 
-	_PM_AddToForeachTable(h+1);
+    _PM_AddToForeachTable(h+1);
     return h+1; //das erste ValidHandle heißt 1
 };
 
@@ -415,7 +427,7 @@ instance _PM_SaveStruct@(_PM_SaveStruct);
 const int _PM_FreedNum = 0;
 const int _PM_FreedSize = 0;
 func void _PM_SaveStruct_DeleteArr(var int arr) {
-	locals();
+    locals();
     if(!arr) { return; };
     var zCArray a; a = MEM_PtrToInst(arr);
     var int i; i = 0;
@@ -647,7 +659,7 @@ func void _PM_AutoPackSymbol(var int symbID) {
 };
 
 func void _PM_DataToSaveStruct_Struct(var int classID, var int struct) {
-	locals();
+    locals();
     var zCPar_Symbol zstruct; zstruct = MEM_PtrToInst(MEM_ReadIntArray(currSymbolTableAddress, struct));
     var zCPar_Symbol zclass;  zclass  = MEM_PtrToInst(MEM_ReadIntArray(currSymbolTableAddress, classID));
 
@@ -902,7 +914,7 @@ func void _PM_WriteArray(var int obj) {
 };
 
 func void _PM_WriteClass(var int obj) {
-	locals();
+    locals();
     var _PM_SaveObject_Cls oCls; oCls = MEM_PtrToInst(obj);
     if(!oCls.content) { return; };
 
@@ -1155,7 +1167,7 @@ func void _PM_ClassToInst0(var string s0) {
 };
 
 func void _PM_ClassToInst_ClassToPtr(var int obj, var int ptr) {
-	locals();
+    locals();
     var _PM_SaveObject_Cls oc; oc = MEM_PtrToInst(obj);
     MEM_ArrayPush(_PM_Head.offsStack, _PM_Head.currOffs);
     MEM_ArrayPush(_PM_Head.contentStack, _PM_Head.content);
@@ -1190,7 +1202,7 @@ func void _PM_ClassToInst_ArrToPtr(var int obj, var int offs) {
 };
 
 func void _PM_ClassToInst_Auto(var string className) {
-	locals();
+    locals();
     var _PM_SaveObject_Int oi;
     var _PM_SaveObject_Str os;
     var zCArray arr; arr = MEM_PtrToInst(_PM_Head.content);
@@ -1340,8 +1352,8 @@ func void _PM_Unarchive() {
     PM_CurrHandle = 0;
     free(_PM_HeadPtr, _PM_SaveStruct@);
     _PM_HeadPtr = 0;
-	
-	_PM_CreateForeachTable();
+
+    _PM_CreateForeachTable();
 
     MEM_Info(ConcatStrings("buffer used:     ", IntToString(_PM_DataPoolSize)));
     MEM_Info(ConcatStrings("buffer cleaned:  ", IntToString(_PM_FreedSize)));
@@ -1466,7 +1478,7 @@ func int PM_Exists(var string name) {
 };
 
 func int _PM_Load(var string objName, var int type, var int ptr) {
-	locals();
+    locals();
     var int obj; obj = _PM_SearchObj(objName);
     if(!obj) { return 0; };
     if(type == -1) { type = _PM_ObjectType(obj); };
