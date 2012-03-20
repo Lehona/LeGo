@@ -43,7 +43,7 @@ func void Cursor_Show() {
     Cursor_fX = mkf(Cursor_X);
     Cursor_fY = mkf(Cursor_Y);
     Cursor_Hndl = View_CreatePxl(Cursor_X, Cursor_Y, Cursor_X+64, Cursor_Y+64);
-    View_SetTexture(Cursor_Hndl, Cursor_Font);
+    View_SetTexture(Cursor_Hndl, Cursor_Texture);
     View_Open(Cursor_Hndl);
 };
 
