@@ -5,7 +5,6 @@
 //========================================
 // [intern] Variablen und Klassen
 //========================================
-var int A8_Arr; //zCArray(h)<A8Head(h)>
 
 class A8Head {
     var int value;
@@ -13,6 +12,7 @@ class A8Head {
     var int flt;
     var int data;
     var int dif;
+	var int ddif;
     var int queue; //zCList<A8Command(h)>*
 };
 
@@ -20,19 +20,21 @@ class A8Head {
 
 func void A8Head_Archiver(var A8Head this) {
     PM_SaveInt("value", this.value);
-    if(this.fnc) { PM_SaveFuncID("loop",  this.fnc);  };
-    if(this.flt) { PM_SaveFloat ("float", this.flt);  };
-    if(this.data){ PM_SaveInt   ("data",  this.data); };
-    if(this.dif) { PM_SaveInt   ("dif",   this.dif);  };
+    if(this.fnc) { PM_SaveFuncPtr("loop",  this.fnc);  };
+    if(this.flt) { PM_SaveFloat  ("float", this.flt);  };
+    if(this.data){ PM_SaveInt    ("data",  this.data); };
+    if(this.dif) { PM_SaveInt    ("dif",   this.dif);  };
+    if(this.ddif){ PM_SaveInt    ("ddif",  this.ddif); };
     PM_SaveClassPtr("queue", this.queue, "zCList");
 };
 
 func void A8Head_UnArchiver(var A8Head this) {
     this.value = PM_Load("value");
-    if(PM_Exists("loop"))  { this.fnc  = PM_LoadFuncID("loop"); };
-    if(PM_Exists("float")) { this.flt  = PM_LoadFloat("float"); };
-    if(PM_Exists("data"))  { this.data = PM_LoadInt("data");    };
-    if(PM_Exists("dif"))   { this.dif  = PM_LoadInt("dif");     };
+    if(PM_Exists("loop"))  { this.fnc  = PM_LoadFuncPtr("loop"); };
+    if(PM_Exists("float")) { this.flt  = PM_LoadFloat("float");  };
+    if(PM_Exists("data"))  { this.data = PM_LoadInt("data");     };
+    if(PM_Exists("dif"))   { this.dif  = PM_LoadInt("dif");      };
+    if(PM_Exists("ddif"))  { this.ddif = PM_LoadInt("ddif");     };
     this.queue = PM_Load("queue");
 };
 
@@ -66,9 +68,6 @@ instance A8Command@(A8Command);
 // Neues Objekt erstellen
 //========================================
 func int Anim8_New(var int value, var int IsFloat) {
-    if(!A8_Arr) {
-        A8_Arr = new(zCArray@);
-    };
     var int hndl; hndl = new(A8Head@);
     var A8Head h; h = get(hndl);
     if(!IsFloat) {
@@ -78,8 +77,6 @@ func int Anim8_New(var int value, var int IsFloat) {
         h.value = value;
     };
     h.flt = !!IsFloat;
-    var int i; i = MEM_ArrayOverwriteFirst(getPtr(A8_Arr), 0, hndl);
-
     return hndl;
 };
 
@@ -89,7 +86,7 @@ func int Anim8_New(var int value, var int IsFloat) {
 func int Anim8_NewExt(var int value, var func handler, var int data, var int IsFloat) {
     var int hndl; hndl = Anim8_New(value, IsFloat);
     var A8Head h; h = get(hndl);
-    h.fnc = MEM_GetFuncID(handler);
+    h.fnc = MEM_GetFuncPtr(handler);
     h.data = data;
     return hndl;
 };
@@ -101,10 +98,6 @@ func void Anim8_Delete(var int hndl) {
     if(!Hlp_IsValidHandle(hndl)) {
         MEM_Warn("A8_Delete: Invalid handle");
         return;
-    };
-    var int p; p = MEM_ArrayOverwrite(getPtr(A8_Arr), hndl, 0);
-    if(p == -1) {
-        MEM_Warn("A8_Delete: Handle not found");
     };
     delete(hndl);
 };
@@ -155,92 +148,90 @@ func void _Anim8_Ext(var int hndl, var int targetVal, var int timeSpan, var int 
 //========================================
 // [intern] FF-Loop
 //========================================
-func void _Anim8_Loop() {
-    if(!A8_Arr) { return; };
-    var zCArray arr; arr = get(A8_Arr);
-    var int i; i = -1;
-    var int p; p = MEM_StackPos.position;
-    while(i < arr.numInArray);
-        i += 1;
-        var int chndl; chndl = MEM_ReadInt(arr.array + i*4);
-        if(!Hlp_IsValidHandle(chndl)) {
-            continue;
-        };
-        var A8Head h; h = get(chndl);
-        if(!h.queue) {
-            continue;
-        };
-        if(!List_HasLength(h.queue, 2)) {
-            continue;
-        };
-		
-        var int ldata; ldata = List_Get(h.queue, 2);
-		if(!ldata) {
-			List_Delete(h.queue, 2);
-			continue;
+func void _Anim8_FFLoop() {
+	MEM_PushIntParam(A8Head@);
+	MEM_GetFuncID(_Anim8_Loop);
+	MEM_StackPos.position = foreachHndl_ptr;
+};
+func int _Anim8_Loop(var int hndl) {
+	var A8Head h; h = get(hndl);
+	if(!h.queue) {
+		return rContinue;
+	};
+	if(!List_HasLength(h.queue, 2)) {
+		return rContinue;
+	};
+	
+	var int ldata; ldata = List_Get(h.queue, 2);
+	if(!ldata) {
+		List_Delete(h.queue, 2);
+		return rContinue;
+	};
+	
+	var A8Command c; c = get(ldata);
+
+	// Eigentliche Interpolierung
+	var int t; t = mkf(MEM_Timer.totalTime - c.startTime);
+
+	if(c.interpol&&c.interpol < A8_Wait) {
+		if(c.interpol == A8_Constant) {
+			// s = v*t;
+			h.value = mulf(c.velo, t);
+		}
+		else if(c.interpol == A8_SlowEnd) {
+			// s = a/2*t^2 + v0*t
+			h.value = addf(mulf(mulf(c.velo, floatHalb), mulf(t, t)), mulf(c.startV, t));
+		}
+		else if(c.interpol == A8_SlowStart) {
+			// s = a/2*t^2
+			h.value = mulf(mulf(c.velo, floatHalb), mulf(t, t));
 		};
-		
-        var A8Command c; c = get(ldata);
+		h.value = addf(c.startVal, h.value);
+	};
 
-        // Eigentliche Interpolierung
+	if(gef(t, c.timeSpan)) {
+		if(c.interpol != A8_Wait) {
+			h.value = c.target;
+		};
+	};
 
-        var int t; t = mkf(MEM_Timer.totalTime - c.startTime);
+	if(h.fnc) {
+		if(h.data) {
+			h.data;
+		};
+		if(h.flt) {
+			h.value;
+		}
+		else {
+			roundf(h.value);
+		};
+		MEM_CallByPtr(h.fnc);
+	};
 
-        if(c.interpol&&c.interpol < A8_Wait) {
-            if(c.interpol == A8_Constant) {
-                // s = v*t;
-                h.value = mulf(c.velo, t);
-            }
-            else if(c.interpol == A8_SlowEnd) {
-                // s = a/2*t^2 + v0*t
-                h.value = addf(mulf(mulf(c.velo, floatHalb), mulf(t, t)), mulf(c.startV, t));
-            }
-            else if(c.interpol == A8_SlowStart) {
-                // s = a/2*t^2
-                h.value = mulf(mulf(c.velo, floatHalb), mulf(t, t));
-            };
-            h.value = addf(c.startVal, h.value);
-        };
-
-        if(gef(t, c.timeSpan)) {
-            if(c.interpol != A8_Wait) {
-                h.value = c.target;
-            };
-        };
-
-        if(h.fnc) {
-            if(h.data) {
-                h.data;
-            };
-            if(h.flt) {
-                h.value;
-            }
-            else {
-                roundf(h.value);
-            };
-            MEM_CallById(h.fnc);
-        };
-
-        if(gef(t, c.timeSpan)) {
-            delete(ldata);
-            List_Delete(h.queue, 2);
-            // ggf. Liste aktualisieren
-            if(List_HasLength(h.queue, 2)) {
-				ldata = List_Get(h.queue, 2);
-				if(!ldata) {
-					List_Delete(h.queue, 2);
-					continue;
+	if(gef(t, c.timeSpan)) {
+		delete(ldata);
+		List_Delete(h.queue, 2);
+		// ggf. Liste aktualisieren
+		if(List_HasLength(h.queue, 2)) {
+			ldata = List_Get(h.queue, 2);
+			if(!ldata) {
+				List_Delete(h.queue, 2);
+				return rContinue;
+			};
+			c = get(ldata);
+			c.startVal = h.value;
+			c.startTime = MEM_Timer.totalTime;
+			_Anim8_SetVelo(h, c);
+		}
+		else if(h.dif) {
+			if(h.ddif) {
+				if(h.data) {
+					delete(h.data);
 				};
-                c = get(ldata);
-                c.startVal = h.value;
-                c.startTime = MEM_Timer.totalTime;
-                _Anim8_SetVelo(h, c);
-            }
-            else if(h.dif) {
-                Anim8_Delete(chndl);
-            };
-        };
-    end;
+			};
+			delete(hndl);
+		};
+	};
 };
 
 //========================================
@@ -277,6 +268,17 @@ func void Anim8_RemoveIfEmpty(var int hndl, var int on) {
     };
     var A8Head h; h = get(hndl);
     h.dif = !!on;
+};
+
+//========================================
+// Objektdata zerstören wenn es leer ist?
+//========================================
+func void Anim8_RemoveDataIfEmpty(var int hndl, var int on) {
+    if(!Hlp_IsValidHandle(hndl)) {
+        return;
+    };
+    var A8Head h; h = get(hndl);
+    h.ddif = !!on;
 };
 
 

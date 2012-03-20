@@ -104,7 +104,7 @@ func void LeGo_InitAlways(var int f) {
         };
 
         if(f & LeGo_Anim8) {
-            FF_Apply(_Anim8_Loop);
+            FF_Apply(_Anim8_FFLoop);
         };
     };
 
@@ -118,17 +118,17 @@ func void LeGo_InitAlways(var int f) {
 //========================================
 func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Cursor) {
-        HookEngine(5062907, 5, "_CURSOR_GETVAL");
+        HookEngineF(5062907, 5, _CURSOR_GETVAL);
     };
 
     if(f & LeGo_Shields) {
-        HookEngine(oCNpc__EV_DrawWeapon,    6, "_EVT_SHIELD_DRAW");
-        HookEngine(oCNpc__EV_DrawWeapon1,   5, "_EVT_SHIELD_DRAW");
-        HookEngine(oCNpc__EV_RemoveWeapon,  7, "_EVT_SHIELD_REMOVE");
-        HookEngine(oCNpc__EV_RemoveWeapon1, 7, "_EVT_SHIELD_REMOVE");
-        HookEngine(oCNpc__EquipItem,        7, "_EVT_SHIELD_EQUIP");
-        HookEngine(oCNpc__UnequipItem,      6, "_EVT_SHIELD_UNEQUIP");
-        HookEngine(oCNpc__DropUnconscious,  7, "_EVT_SHIELD_DROP");
+        HookEngineF(oCNpc__EV_DrawWeapon,    6, _EVT_SHIELD_DRAW);
+        HookEngineF(oCNpc__EV_DrawWeapon1,   5, _EVT_SHIELD_DRAW);
+        HookEngineF(oCNpc__EV_RemoveWeapon,  7, _EVT_SHIELD_REMOVE);
+        HookEngineF(oCNpc__EV_RemoveWeapon1, 7, _EVT_SHIELD_REMOVE);
+        HookEngineF(oCNpc__EquipItem,        7, _EVT_SHIELD_EQUIP);
+        HookEngineF(oCNpc__UnequipItem,      6, _EVT_SHIELD_UNEQUIP);
+        HookEngineF(oCNpc__DropUnconscious,  7, _EVT_SHIELD_DROP);
     };
 
     if(f & LeGo_Random) {
@@ -136,19 +136,19 @@ func void LeGo_InitGamestart(var int f) {
     };
 
     if(f & LeGo_Focusnames) {
-        HookEngine(oCGame__UpdateStatus, 8, "_FOCUSNAMES");
+        HookEngineF(oCGame__UpdateStatus, 8, _Focusnames);
     };
 
     if(f & LeGo_AI_Function) {
-        HookEngine(oCNPC__EV_PlayAni, 5, "_AI_FUNCTION_EVENT");
+        HookEngineF(oCNPC__EV_PlayAni, 5, _AI_FUNCTION_EVENT);
     };
 
     if(f & LeGo_FrameFunctions) {
-        HookEngine(oCGame__Render, 7, "_FF_LOOP");
+        HookEngineF(oCGame__Render, 7, _FF_HOOK);
     };
 
     if(f & LeGo_Saves) {
-        HookEngine(oCSavegameManager__SetAndWriteSavegame, 5, "_BW_SAVEGAME");
+        HookEngineF(oCSavegameManager__SetAndWriteSavegame, 5, _BW_SAVEGAME);
     };
 
     if(f & LeGo_Timer) {

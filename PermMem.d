@@ -110,6 +110,10 @@ func void release(var int h) {
 //========================================
 // Funktion für alle Handles aufrufen
 //========================================
+const int rBreak = break;
+const int rContinue = continue;
+const int foreachHndl_ptr = 0;
+
 func void _PM_AddToForeachTable(var int h) {
     if(!_PM_foreachTable) {
         MEM_Call(_PM_CreateForeachTable);
@@ -124,7 +128,9 @@ func void _PM_AddToForeachTable(var int h) {
             c = MEM_ArrayCreate();
             MEM_WriteIntArray(_PM_foreachTable, i, c);
         };
-        MEM_ArrayInsert(c, h);
+		mem_info(concatstrings("add handle ", inttostring(h+1)));
+		mem_info(concatstrings("inst is ", inttostring(i)));
+        MEM_ArrayInsert(c, h+1);
     };
 };
 
@@ -149,6 +155,7 @@ func void _PM_CreateForeachTable() {
     if(_PM_foreachTable) {
         MEM_Free(_PM_foreachTable);
     };
+	foreachHndl_ptr = MEM_GetFuncPtr(foreachHndl);
     _PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
     if(Handles) {
         var int i; i = 0;
@@ -160,7 +167,7 @@ func void _PM_CreateForeachTable() {
 };
 
 func void foreachHndl(var int inst, var func fnc) {
-    // locals();
+    locals();
     var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
     if(!c) {
         return;
@@ -170,19 +177,23 @@ func void foreachHndl(var int inst, var func fnc) {
     var int a; a = MEM_Alloc(l<<2);
     MEM_Copy(z.array, a, l);
     var int i; i = 0;
-    var int o; o = MEM_GetFuncOffset(fnc);
-	MEM_Info(inttostring(l));
-	
-    repeat(i, l);
+    var int o; o = MEM_GetFuncPtr(fnc);
+	var int p; p = MEM_StackPos.position;
+	// if(i < l) {
+	while(i < l);
         var int h; h = MEM_ReadInt(a+(i<<2));
-		// h = h;
-		MEM_Info(inttostring(i));
-        MEM_Info(concatstrings("push ", inttostring(h)));
         if(MEM_ReadInt(HandlesObj.array+((h-1)<<3))) {
             h;
-            MEM_CallByOffset(o);
+            MEM_CallByPtr(o);
+			if(MEM_PopIntResult() == rBreak) {
+				break;
+				// i = l;
+			};
         };
-    end;
+		i += 1;
+		// MEM_StackPos.position = p;
+	// };
+	end;
     MEM_Free(a);
 };
 
@@ -1396,6 +1407,14 @@ func void PM_SaveFuncID(var string name, var int fnc) {
     PM_SaveString(name, sym.name);
 };
 
+func void PM_SaveFuncOffset(var string name, var int fnc) {
+	PM_SaveFuncID(name, MEM_GetFuncIDByOffset(fnc));
+};
+
+func void PM_SaveFuncPtr(var string name, var int fnc) {
+	PM_SaveFuncOffset(name, fnc - currParserStackAddress);
+};
+
 func void _PM_SaveClassPtr(var string name, var int ptr, var string className, var int p) {
     _PM_ArchiveError();
     // Das hier ist etwas komplizierter als alles andere.
@@ -1546,6 +1565,15 @@ func string PM_LoadString(var string name) {
 
 func int PM_LoadFuncID(var string name) {
     return MEM_FindParserSymbol(PM_LoadString(name));
+};
+
+func int PM_LoadFuncOffset(var string name) {
+	var zCPar_Symbol s; s = _^(MEM_ReadIntArray(currSymbolTableAddress, PM_LoadFuncID(name)));
+	return s.content;
+};
+
+func int PM_LoadFuncPtr(var string name) {
+	return PM_LoadFuncOffset(name) + currParserStackAddress;
 };
 
 func void PM_LoadClass(var string name, var int destPtr) {

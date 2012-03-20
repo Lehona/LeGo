@@ -99,7 +99,6 @@ func string View_GetTexture(var int hndl) {
 //========================================
 // View einfärben
 //========================================
-
 func void View_SetColor(var int hndl, var int zColor) {
     var zCView v; v = get(hndl);
     v.color = zColor;
@@ -109,7 +108,6 @@ func int View_GetColor(var int hndl) {
     var zCView v; v = get(hndl);
     return v.color;
 };
-
 
 //========================================
 // View anzeigen
