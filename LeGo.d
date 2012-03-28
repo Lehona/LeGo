@@ -52,7 +52,7 @@ var int _LeGo_Loaded;
 func void LeGo_InitFlags(var int f) {
     if(f & LeGo_Bloodsplats)    { f = f | LeGo_FrameFunctions | LeGo_HookEngine | LeGo_Random; };
     if(f & LeGo_Gamestate)      { f = f | LeGo_EventHandler | LeGo_Saves; };
-	if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
+    if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
     if(f & LeGo_PrintS)         { f = f | LeGo_AI_Function | LeGo_Anim8 | LeGo_Interface; };
     if(f & LeGo_Anim8)          { f = f | LeGo_PermMem | LeGo_FrameFunctions; };
     if(f & LeGo_FrameFunctions) { f = f | LeGo_PermMem | LeGo_HookEngine | LeGo_Timer; };
@@ -166,8 +166,8 @@ func void LeGo_Init(var int flags) {
     };
 
     MEM_InitAll();
-	
-	MEM_Info(ConcatStrings(LeGo_Version, " wird initialisiert."));
+
+    MEM_Info(ConcatStrings(LeGo_Version, " wird initialisiert."));
 
     LeGo_InitFlags(flags);
 

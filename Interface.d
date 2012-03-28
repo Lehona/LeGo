@@ -279,8 +279,8 @@ class gCPrintS {
     var int a8_Alpha;    // Anim8(h)
     var int a8_Movement; // Anim8(h)
     var int tv_Text;     // Print(h)
-	var int vr_Pos;
-	var int vr_Offs;
+    var int vr_Pos;
+    var int vr_Offs;
 };
 instance gCPrintS@(gCPrintS);
 
@@ -292,25 +292,21 @@ func void gCPrintS_Delete(var gCPrintS this) {
     Print_DeleteText(this.tv_Text);
 };
 
-func void gCPrintS_Alpha(var int h, var int data) {
+func void gCPrintS_Alpha(var int h, var int value) {
     var gCPrintS p; p = get(h);
     var zCViewText t; t = get(p.tv_Text);
-    t.color = ChangeAlpha(t.color, data);
-	if(gCPrintS_COff > p.vr_Offs) {
-		p.vr_Pos -= (gCPrintS_COff - p.vr_Offs) * PF_TextHeight;
-		Anim8(p.a8_Movement, p.vr_Pos, PF_MoveYTime, A8_SlowEnd);
-		p.vr_Offs = gCPrintS_COff;
-	};
-    if(!data) {
-		gCPrintS_Act -= 1;
-        delete(h);
+    t.color = ChangeAlpha(t.color, value);
+    if(gCPrintS_COff > p.vr_Offs) {
+        p.vr_Pos -= (gCPrintS_COff - p.vr_Offs) * PF_TextHeight;
+        Anim8(p.a8_Movement, p.vr_Pos, PF_MoveYTime, A8_SlowEnd);
+        p.vr_Offs = gCPrintS_COff;
     };
 };
 
-func void gCPrintS_Position(var int h, var int data) {
+func void gCPrintS_Position(var int h, var int value) {
     var gCPrintS p; p = get(h);
     var zCViewText t; t = get(p.tv_Text);
-    t.posY = data;
+    t.posY = value;
 };
 
 //========================================
@@ -323,6 +319,7 @@ func void PrintS_Ext(var string txt, var int color) {
 
     v = Anim8_NewExt(1, gCPrintS_Alpha, h, false);
     Anim8_RemoveIfEmpty(v, true);
+    Anim8_RemoveDataIfEmpty(v, true);
     Anim8 (v, 255, PF_FadeInTime,  A8_Constant);
     Anim8q(v, 0,   PF_WaitTime,    A8_Wait);
     Anim8q(v, 0,   PF_FadeOutTime, A8_SlowStart);
@@ -333,13 +330,13 @@ func void PrintS_Ext(var string txt, var int color) {
     p.a8_Movement = v;
 
     p.tv_Text = Print_Ext(PF_PrintX, PF_PrintY, txt, PF_Font, color, -1);
-	p.vr_Pos = PF_PrintY - PF_TextHeight;
-	gCPrintS_COff += 1;
-	if(!gCPrintS_Act) {
-		gCPrintS_COff = 0;
-	};
-	gCPrintS_Act += 1;
-	p.vr_Offs = gCPrintS_COff;
+    p.vr_Pos = PF_PrintY - PF_TextHeight;
+    gCPrintS_COff += 1;
+    if(!gCPrintS_Act) {
+        gCPrintS_COff = 0;
+    };
+    gCPrintS_Act += 1;
+    p.vr_Offs = gCPrintS_COff;
 };
 func void AI_PrintS_Ext(var c_npc slf, var string txt, var int color) {
     AI_Function_SI(slf, PrintS_Ext, txt, color);

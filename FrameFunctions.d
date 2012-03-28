@@ -52,7 +52,7 @@ func void FF_ApplyExt(var func function, var int delay, var int cycles) {
 // Funktion prüfen
 //========================================
 func int FF_Active(var func function) {
-	_FF_Symbol = MEM_GetFuncID(function);
+	_FF_Symbol = MEM_GetFuncPtr(function);
 	foreachHndl(FFItem@, _FF_Active);
 	return !_FF_Symbol;
 };
@@ -93,7 +93,7 @@ func void FF_ApplyOnce(var func function) {
 // Funktion entfernen
 //========================================
 func void FF_Remove(var func function) {
-	_FF_Symbol = MEM_GetFuncID(function);
+	_FF_Symbol = MEM_GetFuncPtr(function);
 	foreachHndl(FFItem@, _FF_RemoveL);
 };
 

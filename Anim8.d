@@ -42,15 +42,14 @@ func void A8Head_Delete(var A8Head h) {
     if(!h.queue) { return; };
     List_For(h.queue, "A8Head_DeleteSub");
     List_Destroy(h.queue);
+	h.queue = 0;
     };func void A8Head_DeleteSub(var int node) {
     if(Hlp_IsValidHandle(MEM_ReadInt(node))) {
         delete(MEM_ReadInt(node));
     };
 };
 
-instance A8Head@(A8Head) {
-    A8Head@.queue = List_Create(0);
-};
+instance A8Head@(A8Head);
 
 class A8Command {
     var int target;
@@ -126,10 +125,12 @@ func void _Anim8_SetVelo(var A8Head h, var A8Command c) {
 //========================================
 func void _Anim8_Ext(var int hndl, var int targetVal, var int timeSpan, var int interpol, var int UseQueue) {
     var A8Head h; h = get(hndl);
-    if(!UseQueue||!h.queue) {
+    if(!UseQueue) {
         A8Head_Delete(h);
-        h.queue = List_Create(0);
     };
+	if(!h.queue) {
+        h.queue = List_Create(0);
+	};
     var int cmd; cmd = new(A8Command@);
     var A8Command c; c = get(cmd);
     c.target = targetVal;
@@ -156,6 +157,23 @@ func void _Anim8_FFLoop() {
 func int _Anim8_Loop(var int hndl) {
 	var A8Head h; h = get(hndl);
 	if(!h.queue) {
+		return rContinue;
+	};
+	if(h.queue < 1048576) {
+		var int s; s = SB_New();
+		SB ("A8 sucks. Handle ");
+		SBi(hndl);
+		SB (" of instance ");
+		SB (_PM_InstName(getInst(hndl)));
+		SB (" messed up with a queue of ");
+		SBi(h.queue);
+		SB (". I will ignore it.");
+		SB (STR_Unescape("\n"));
+		SB ("The pointer was ");
+		SBi(getPtr(hndl));
+		SB ("...");
+		MEM_Warn(SB_ToString());
+		SB_Destroy();
 		return rContinue;
 	};
 	if(!List_HasLength(h.queue, 2)) {

@@ -128,8 +128,8 @@ func void _PM_AddToForeachTable(var int h) {
             c = MEM_ArrayCreate();
             MEM_WriteIntArray(_PM_foreachTable, i, c);
         };
-		mem_info(concatstrings("add handle ", inttostring(h+1)));
-		mem_info(concatstrings("inst is ", inttostring(i)));
+		// mem_info(concatstrings("add handle ", inttostring(h+1)));
+		// mem_info(concatstrings("inst is ", inttostring(i)));
         MEM_ArrayInsert(c, h+1);
     };
 };
@@ -143,7 +143,7 @@ func void _PM_RemoveFromForeachTable(var int h) {
         if(!c) {
             return;
         };
-        MEM_ArrayRemoveValue(c, h);
+        MEM_ArrayRemoveValue(c, h+1);
         if(!MEM_ArraySize(c)) {
             MEM_ArrayFree(c);
             MEM_WriteIntArray(_PM_foreachTable, i, 0);
@@ -168,6 +168,7 @@ func void _PM_CreateForeachTable() {
 
 func void foreachHndl(var int inst, var func fnc) {
     locals();
+	if(!_PM_foreachTable) { return; };
     var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
     if(!c) {
         return;
@@ -195,6 +196,13 @@ func void foreachHndl(var int inst, var func fnc) {
 	// };
 	end;
     MEM_Free(a);
+};
+
+func int hasHndl(var int inst) {
+	if(!_PM_foreachTable) { return false; };
+	var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
+	if(!c) { return false; };
+	return MEM_ArraySize(c) > 0;
 };
 
 //========================================
@@ -311,11 +319,24 @@ func MEMINT_HelperClass get(var int h) {
 // Handle als Pointer holen
 //========================================
 func int getPtr(var int h) {
-    if (Hlp_IsValidHandle(h)) {
-        return MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2);
-    };
-    return false;
+	h -= 1;
+	if(h > HandlesObj.numInArray) {
+		return false;
+	};
+	return MEM_ReadIntArray(HandlesObj.array, h * 2);
 };
+
+//========================================
+// Instanz eines Handles holen
+//========================================
+func int getInst(var int h) {
+	h -= 1;
+	if(h > HandlesObj.numInArray) {
+		return false;
+	};
+	return MEM_ReadIntArray(HandlesObj.array, (h * 2) + 1);
+};
+
 //========================================
 // Pointer eines Handles setzen (Debugzwecke)
 //========================================
