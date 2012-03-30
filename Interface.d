@@ -183,13 +183,15 @@ func int Print_Ext(var int x, var int y, var string text, var string font, var i
     };
 
     if(!color) { color = 1; };
-
-    txt.timed = 0;
+	
+	txt.timed = (time != -1);
+	if (time != -1) { txt.timer = mkf(time); };
+	
     txt.font = Print_GetFontPtr(font);
     txt.color = color;
     txt.text = text;
     txt.colored = 1;
-
+	
     txt.posx = x;
     if (x == -1) {
         txt.posx = ((1<<13)>>1)-(Print_GetStringWidth(text, font)/2);
@@ -354,5 +356,29 @@ func void AI_PrintS(var c_npc slf, var string txt) {
 
 
 
+//========================================
+// PrintScreen fixen
+//========================================
+func void PrintScreen_Ext(var string txt, var int x, var int y, var string font, var int timeSec) {
+	x = x * (1<<12) / 100;
+	y = y * (1<<12) / 100;
+	if (x<0) { // Muss am Anfang positiv gewesen sein (oder Überlauf)
+		x = (1<<12)-Print_GetStringWidth(txt, font)/2;
+	};
+	if (y<0) {
+		y = (1<<12)-Print_GetFontHeight(font)/2;
+	};
+	Print_Ext(x, y, txt, font, -1, timeSec*1000);
+};
 
+func void Print_FixPS() {	
+	var int test; test = MEM_GetFuncOffset(PrintScreen_Ext);
+	var zCPar_Symbol PS; PS = _^(MEM_ReadIntArray(contentSymbolTableAddress, MEM_GetFuncID(PrintScreen)));
+
+	Call_Begin(0);
+		Call_IntParam(_@(test));
+		Call__thiscall(_@(ContentParserAddress), 7936352);
+	
+	PS.content = Call_Close();
+};
 

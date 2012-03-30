@@ -154,6 +154,10 @@ func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Timer) {
         _Timer_Init();
     };
+	
+	if (f & LeGo_Interface) {	
+		Print_fixPS();
+	};
 };
 
 //========================================
@@ -179,6 +183,8 @@ func void LeGo_Init(var int flags) {
 
     _LeGo_Init = 1;
     _LeGo_Loaded = 1;
+	
+	
 };
 
 
