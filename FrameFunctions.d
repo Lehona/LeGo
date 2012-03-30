@@ -45,24 +45,24 @@ func void FF_ApplyExt(var func function, var int delay, var int cycles) {
     itm.fncID = MEM_GetFuncPtr(function);
     itm.cycles = cycles;
     itm.delay = delay;
-    itm.next = MEM_Timer.totalTime + itm.delay;
+    itm.next = Timer() + itm.delay;
 };
 
 //========================================
 // Funktion prüfen
 //========================================
 func int FF_Active(var func function) {
-	_FF_Symbol = MEM_GetFuncPtr(function);
-	foreachHndl(FFItem@, _FF_Active);
-	return !_FF_Symbol;
+    _FF_Symbol = MEM_GetFuncPtr(function);
+    foreachHndl(FFItem@, _FF_Active);
+    return !_FF_Symbol;
 };
 
 func int _FF_Active(var int hndl) {
-	if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol) {
-		return continue;
-	};
-	_FF_Symbol = 0;
-	return break;
+    if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol) {
+        return continue;
+    };
+    _FF_Symbol = 0;
+    return break;
 };
 
 //========================================
@@ -76,63 +76,65 @@ func void FF_Apply(var func function) {
 // Funktion einmalig hinzufügen
 //========================================
 func void FF_ApplyOnceExt(var func function, var int delay, var int cycles) {
-	if(FF_Active(function)) {
-		return;
-	};
-	FF_ApplyExt(function, delay, cycles);
+    if(FF_Active(function)) {
+        return;
+    };
+    FF_ApplyExt(function, delay, cycles);
 };
 
 //========================================
 // Funktion einmalig hinzufügen (vereinfacht)
 //========================================
 func void FF_ApplyOnce(var func function) {
-	FF_ApplyOnceExt(function, 0, -1);
+    FF_ApplyOnceExt(function, 0, -1);
 };
 
 //========================================
 // Funktion entfernen
 //========================================
 func void FF_Remove(var func function) {
-	_FF_Symbol = MEM_GetFuncPtr(function);
-	foreachHndl(FFItem@, _FF_RemoveL);
+    _FF_Symbol = MEM_GetFuncPtr(function);
+    foreachHndl(FFItem@, _FF_RemoveL);
 };
 
 func int _FF_RemoveL(var int hndl) {
-	if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol) {
-		return continue;
-	};
-	delete(hndl);
-	return break;
+    if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol) {
+        return continue;
+    };
+    delete(hndl);
+    return break;
 };
 
 //========================================
 // [intern] Enginehook
 //========================================
 func void _FF_Hook() {
-	MEM_PushIntParam(FFItem@);
-	MEM_GetFuncID(FrameFunctions);
-	MEM_StackPos.position = foreachHndl_ptr;
+    MEM_PushIntParam(FFItem@);
+    MEM_GetFuncID(FrameFunctions);
+    MEM_StackPos.position = foreachHndl_ptr;
 };
 func int FrameFunctions(var int hndl) {
     var FFItem itm; itm = get(hndl);
 
-	MEM_Label(0);
-    if(MEM_Timer.totalTime >= itm.next) {
+    var int t; t = Timer();
+
+    MEM_Label(0);
+    if(t >= itm.next) {
         MEM_CallByPtr(itm.fncID);
         if(itm.cycles != -1) {
             itm.cycles -= 1;
             if(itm.cycles <= 0) {
                 delete(hndl);
-				return rContinue;
+                return rContinue;
             };
         };
         if(itm.delay) {
             itm.next += itm.delay;
-			MEM_Goto(0);
+            MEM_Goto(0);
         };
     };
-	
-	return rContinue;
+
+    return rContinue;
 };
 
 

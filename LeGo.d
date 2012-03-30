@@ -13,7 +13,7 @@
 |*                              auf Ikarus                               *|
 |*                                                                       *|
 \*************************************************************************/
-const string LeGo_Version = "LeGo 2.x.x_b";
+const string LeGo_Version = "LeGo 2.x.x_c";
 
 const int LeGo_PrintS         = 1<<0;  // Interface.d
 const int LeGo_HookEngine     = 1<<1;  // HookEngine.d
@@ -26,19 +26,17 @@ const int LeGo_Focusnames     = 1<<4;  // Focusnames.d
 const int LeGo_Random         = 1<<5;  // Random.d
 const int LeGo_Bloodsplats    = 1<<6;  // Bloodsplats.d
 const int LeGo_Saves          = 1<<7;  // Saves.d
-const int LeGo_Shields        = 1<<8;  // Shields.d
-const int LeGo_PermMem        = 1<<9;  // PermMemory.d
-const int LeGo_Anim8          = 1<<10; // Anim8.d
-const int LeGo_View           = 1<<11; // View.d
-const int LeGo_Interface      = 1<<12; // Interface.d
-const int LeGo_Bars           = 1<<13; // Bars.d
-const int LeGo_Quickslots     = 1<<14; // Quickslots.d
-const int LeGo_Buttons        = 1<<15; // Buttons.d
-const int LeGo_Timer          = 1<<16; // Timer.d
-const int LeGo_EventHandler   = 1<<17; // EventHandler.d
-const int LeGo_Gamestate      = 1<<18; // Gamestate.d
+const int LeGo_PermMem        = 1<<8;  // PermMemory.d
+const int LeGo_Anim8          = 1<<9;  // Anim8.d
+const int LeGo_View           = 1<<10; // View.d
+const int LeGo_Interface      = 1<<11; // Interface.d
+const int LeGo_Bars           = 1<<12; // Bars.d
+const int LeGo_Buttons        = 1<<13; // Buttons.d
+const int LeGo_Timer          = 1<<14; // Timer.d
+const int LeGo_EventHandler   = 1<<15; // EventHandler.d
+const int LeGo_Gamestate      = 1<<16; // Gamestate.d
 
-const int LeGo_All            = (1<<19)-1; // Sämtliche Bibliotheken
+const int LeGo_All            = (1<<17)-1; // Sämtliche Bibliotheken
 
 //========================================
 // [intern] Variablen
@@ -52,14 +50,13 @@ var int _LeGo_Loaded;
 func void LeGo_InitFlags(var int f) {
     if(f & LeGo_Bloodsplats)    { f = f | LeGo_FrameFunctions | LeGo_HookEngine | LeGo_Random; };
     if(f & LeGo_Gamestate)      { f = f | LeGo_EventHandler | LeGo_Saves; };
-    if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
-    if(f & LeGo_PrintS)         { f = f | LeGo_AI_Function | LeGo_Anim8 | LeGo_Interface; };
-    if(f & LeGo_Anim8)          { f = f | LeGo_PermMem | LeGo_FrameFunctions; };
-    if(f & LeGo_FrameFunctions) { f = f | LeGo_PermMem | LeGo_HookEngine | LeGo_Timer; };
     if(f & LeGo_Cursor)         { f = f | LeGo_Interface | LeGo_View; };
+    if(f & LeGo_PrintS)         { f = f | LeGo_AI_Function | LeGo_Anim8 | LeGo_Interface; };
+    if(f & LeGo_Anim8)          { f = f | LeGo_PermMem | LeGo_FrameFunctions | LeGo_Timer; };
+    if(f & LeGo_FrameFunctions) { f = f | LeGo_PermMem | LeGo_HookEngine | LeGo_Timer; };
     if(f & LeGo_Buttons)        { f = f | LeGo_PermMem | LeGo_View; };
     if(f & LeGo_Bars)           { f = f | LeGo_PermMem | LeGo_View; };
-    if(f & LeGo_Quickslots)     { f = f | LeGo_PermMem | LeGo_Interface | LeGo_View | LeGo_HookEngine; };
+    if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
     if(f & LeGo_View)           { f = f | LeGo_PermMem; };
     if(f & LeGo_Interface)      { f = f | LeGo_PermMem; };
     if(f & LeGo_PermMem)        { f = f | LeGo_Saves; };
@@ -108,8 +105,8 @@ func void LeGo_InitAlways(var int f) {
         };
     };
 
-    if(f & LeGo_Quickslots) {
-        _QS_Init();
+    if(f & LeGo_Timer) {
+        _Timer_Init();
     };
 };
 
@@ -119,16 +116,6 @@ func void LeGo_InitAlways(var int f) {
 func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Cursor) {
         HookEngineF(5062907, 5, _CURSOR_GETVAL);
-    };
-
-    if(f & LeGo_Shields) {
-        HookEngineF(oCNpc__EV_DrawWeapon,    6, _EVT_SHIELD_DRAW);
-        HookEngineF(oCNpc__EV_DrawWeapon1,   5, _EVT_SHIELD_DRAW);
-        HookEngineF(oCNpc__EV_RemoveWeapon,  7, _EVT_SHIELD_REMOVE);
-        HookEngineF(oCNpc__EV_RemoveWeapon1, 7, _EVT_SHIELD_REMOVE);
-        HookEngineF(oCNpc__EquipItem,        7, _EVT_SHIELD_EQUIP);
-        HookEngineF(oCNpc__UnequipItem,      6, _EVT_SHIELD_UNEQUIP);
-        HookEngineF(oCNpc__DropUnconscious,  7, _EVT_SHIELD_DROP);
     };
 
     if(f & LeGo_Random) {
@@ -149,10 +136,6 @@ func void LeGo_InitGamestart(var int f) {
 
     if(f & LeGo_Saves) {
         HookEngineF(oCSavegameManager__SetAndWriteSavegame, 5, _BW_SAVEGAME);
-    };
-
-    if(f & LeGo_Timer) {
-        _Timer_Init();
     };
 	
 	if (f & LeGo_Interface) {	

@@ -177,3 +177,16 @@ func void _EVT_Shield_Drop() {
         Npc_RemoveInvItem(slf, Hlp_GetInstanceID(shield));
     };
 };
+
+//========================================
+// Script initialisieren
+//========================================
+func void Shields_Init() {
+	HookEngineF(oCNpc__EV_DrawWeapon,    6, _EVT_SHIELD_DRAW);
+	HookEngineF(oCNpc__EV_DrawWeapon1,   5, _EVT_SHIELD_DRAW);
+	HookEngineF(oCNpc__EV_RemoveWeapon,  7, _EVT_SHIELD_REMOVE);
+	HookEngineF(oCNpc__EV_RemoveWeapon1, 7, _EVT_SHIELD_REMOVE);
+	HookEngineF(oCNpc__EquipItem,        7, _EVT_SHIELD_EQUIP);
+	HookEngineF(oCNpc__UnequipItem,      6, _EVT_SHIELD_UNEQUIP);
+	HookEngineF(oCNpc__DropUnconscious,  7, _EVT_SHIELD_DROP);
+};

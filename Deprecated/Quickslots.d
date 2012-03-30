@@ -167,7 +167,7 @@ func void _QS_CheckSlots(var int node) {
     _QS_AvSlots = _QS_AvSlots | (1<<((itm._zCVob_bitfield[4] & zCVob_bitfield4_posInQs)>>7));
 };
 
-func void _QS_Init() {
+func void QS_Init() {
     _QS_XDist0 = (QS_SlotSize/2) + (QS_SlotDist/2) - QS_DigitMarginX;
     _QS_YDist0 = Print_ToVirtual((QS_SlotSize/2)+(QS_SlotDist/2)-QS_DigitMarginY, PS_Y);
     _QS_YDist1 = Print_ToVirtual(QS_SlotDist-(QS_DigitMarginY*2)+Print_GetFontHeight(QS_DigitFont), PS_Y);

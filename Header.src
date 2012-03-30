@@ -27,10 +27,8 @@ Names.d
 Bars.d
 Buttons.d
 Box.d
-Quickslots.d
 Dialoggestures.d
 Focusnames.d
-Shields.d
 Gamestate.d
 Saves.d
 Int64.d
