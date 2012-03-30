@@ -9,15 +9,6 @@ func string ReadStringArr(var string name, var int offset) {
 };
 
 //========================================
-// Userkonstanten
-//========================================
-
-// Die abgespielte Animation kann so beschrieben werden:
-//   DIAG_Prefix + AniName + DIAG_Suffix + ((rand() % (Max - (Min - 1))) + Min).ToString("00");
-const string DIAG_Prefix = "DG_";
-const string DIAG_Suffix = "_";
-
-//========================================
 // [intern]
 //========================================
 var int _DIAG_Max;

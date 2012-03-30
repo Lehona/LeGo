@@ -2,6 +2,9 @@
        ADRESSEN DER ENGINECALLS
 \***********************************/
 
+//========================================
+// Alle (?) genutzen Engineadressen
+//========================================
 const int CGameManager__ApplySomeSettings           = 4355760; //0x4276B0
 const int CGameManager__Read_Savegame               = 4366438; //0x42A066
 const int CloseHandle                               = 8079190; //0x7B4756
@@ -41,9 +44,9 @@ const int zCAICamera__StartDialogCam                = 4923632; //0x4B20F0
 const int zCFont__GetFontName                       = 7902368; //0x7894A0
 const int zCFont__GetFontX                          = 7902448; //0x7894F0
 const int zCFont__GetFontY                          = 7902432; //0x7894E0
-const int zCFontMan__Load                            = 7897808; //0x7882D0
+const int zCFontMan__Load                           = 7897808; //0x7882D0
 const int zCFontMan__GetFont                        = 7898288; //0x7884B0
-const int zFontMan                                    =11221460; //0xAB39D4
+const int zFontMan                                  =11221460; //0xAB39D4
 const int zCInput_Win32__GetMouseButtonPressedLeft  = 5068688; //0x4D5790
 const int zCInput_Win32__GetMouseButtonPressedMid   = 5068704; //0x4D57A0
 const int zCInput_Win32__GetMouseButtonPressedRight = 5068720; //0x4D57B0
@@ -65,24 +68,23 @@ const int zCWorld__zCWorld                          = 6421056; //0x61FA40
 const int zParser__CallFunc                         = 7940592; //0x7929F0
 const int zrenderer_adr                             = 9973512; //0x982F08
 
-
-// Globale Flagvariable (manche Pakete wollen wissen ob sie erwünscht sind...)
+//========================================
+// Globale Flagvariable
+//========================================
 const int _LeGo_Flags = 0;
 
-
-
-
-// Wrapper für Engine-Funktionen
-
-
-// Interface
-
+//========================================
+// Namen einer Textur holen
+//========================================
 func string zCTexture_GetName(var int ptr) { // Eigentlich gar kein Engine-Call
     if(!ptr) { return ""; };
     var zCObject obj; obj = MEM_PtrToInst(ptr);
     return obj.objectName;
 };
 
+//========================================
+// Pointer auf eine Textur holen
+//========================================
 func int zCTexture_Load(var string texture) {
     CALL_IntParam(1);
     CALL_zStringPtrParam(texture);
@@ -90,14 +92,18 @@ func int zCTexture_Load(var string texture) {
     return CALL_RetValAsInt();
 };
 
-
-
+//========================================
+// FontManager holen
+//========================================
 func int zCFontMan_Load(var string font) {
     CALL_zStringPtrParam(font);
     CALL__Thiscall(MEM_ReadInt(zFontMan), zCFontMan__Load);
     return CALL_RetValAsInt();
 };
 
+//========================================
+// Pointer auf eine Font holen
+//========================================
 func int Print_GetFontPtr(var string font) {
     var int i; i = zCFontMan_Load(font);
     CALL_IntParam(i);
@@ -105,12 +111,18 @@ func int Print_GetFontPtr(var string font) {
     return CALL_RetValAsInt();
 };
 
+//========================================
+// Namen einer Font holen
+//========================================
 func string Print_GetFontName(var int fontPtr) {
     CALL_RetValIszString();
     CALL__Thiscall(fontPtr, zCFont__GetFontName);
     return CALL_RetValAszString();
 };
 
+//========================================
+// Breite eines Strings holen
+//========================================
 func int Print_GetStringWidth(var string s, var string font) {
     var int adr; adr = Print_GetFontPtr(font);
     CALL_zStringPtrParam(s);
@@ -118,9 +130,112 @@ func int Print_GetStringWidth(var string s, var string font) {
     return CALL_RetValAsInt();
 };
 
+//========================================
+// Höhe einer Font holen
+//========================================
 func int Print_GetFontHeight(var string font) {
     var int adr; adr = Print_GetFontPtr(font);
     CALL__thiscall(adr, zCFont__GetFontY);
     return CALL_RetValAsInt();
 };
 
+//========================================
+// Beliebigen Waypoint holen
+//========================================
+func string MEM_GetAnyWP() {
+    var zCWaynet wayNet; wayNet = MEM_PtrToInst(MEM_World.wayNet);
+    var zCWaypoint wp;   wp = MEM_PtrToInst(MEM_ReadInt(wayNet.wplist_next+4));
+    return wp.name;
+};
+
+//========================================
+// Item an Koordinaten einfügen
+//========================================
+func void MEM_InsertItem(var c_item itm, var int fX, var int fY, var int fZ) {
+    var zCWaynet wayNet; wayNet = MEM_PtrToInst(MEM_World.wayNet);
+    var zCWaypoint wp; wp = MEM_PtrToInst(MEM_ReadInt(wayNet.wplist_next+4));
+    var int x; x = wp.pos[0];
+    var int y; y = wp.pos[1];
+    var int z; z = wp.pos[2];
+    wp.pos[0] = fX;
+    wp.pos[1] = fY;
+    wp.pos[2] = fZ;
+    Wld_InsertItem(Hlp_GetInstanceID(itm), wp.name);
+    wp.pos[0] = x;
+    wp.pos[1] = y;
+    wp.pos[2] = z;
+};
+
+//========================================
+// Vob an Npc hängen
+//========================================
+func int oCNpc_PutInSlot(var c_npc slf, var string SlotName, var int oCVobPtr, var int SlotID) {
+    CALL_IntParam(SlotID);
+    CALL_PtrParam(oCVobPtr);
+    CALL_zStringPtrParam(SlotName);
+    CALL__thiscall(MEM_InstToPtr(slf), oCNpc__PutInSlot);
+    return CALL_RetValAsInt();
+};
+
+//========================================
+// Vob von Npc entfernen
+//========================================
+func void oCNpc_RemoveFromSlot(var c_npc slf, var string SlotName, var int retVal, var int SlotID) {
+    CALL_IntParam(SlotID);
+    CALL_IntParam(retVal);
+    CALL_zStringPtrParam(SlotName);
+    CALL__thiscall(MEM_InstToPtr(slf), oCNpc__RemoveFromSlot);
+};
+
+//========================================
+// Item ablegen
+//========================================
+func void oCNpc_UnequipItem(var c_npc slf, var int oCItemPtr) {
+    CALL_PtrParam(oCItemPtr);
+    CALL__thiscall(MEM_InstToPtr(slf), oCNpc__UnequipItem);
+};
+
+//========================================
+// Ein Item auf einem View rendern
+//========================================
+func void oCItem_Render(var int itm, var int wld, var int view, var int rot) {
+    CALL_FloatParam(rot);
+    CALL_PtrParam(view);
+    CALL_PtrParam(wld);
+    CALL__thiscall(itm, oCItem__Render);
+};
+
+//========================================
+// <funktioniert nicht?>
+//========================================
+func void zCRenderer_DrawTile(var int this,
+                              var int tex,
+                              var int vec0x, var int vec0y,
+                              var int vec1x, var int vec1y,
+                              var int flt,
+                              var int vec2x, var int vec2y,
+                              var int vec3x, var int vec3y,
+                              var int color) {
+    const int vec = 0;
+    if(!vec) {
+        vec = MEM_Alloc(8);
+    };
+    CALL_IntParam(color);
+    CALL_PtrParam(vec);
+    CALL_PtrParam(vec);
+    CALL_FloatParam(flt);
+    CALL_PtrParam(vec);
+    MEM_WriteInt(vec+0, vec0x);
+    MEM_WriteInt(vec+4, vec0y);
+    CALL_PtrParam(vec);
+    CALL_PtrParam(tex);
+    CALL__thiscall(this, zCRenderer__DrawTile);
+};
+
+//========================================
+// Beliebiges Item anlegen
+//========================================
+func void oCNpc_Equip(var int npcPtr, var int itmPtr) {
+    CALL_PtrParam(itmPtr);
+    CALL__thiscall(npcPtr, oCNpc__Equip);
+};

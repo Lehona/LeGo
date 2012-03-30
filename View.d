@@ -26,9 +26,6 @@ func int View_Create(var int x1, var int y1, var int x2, var int y2) {
     var int hndl; hndl = new(zCView@);
     var zCView v; v = get(hndl);
     _View_Create(getPtr(hndl), x1, y1, x2, y2);
-
-    v.fxOpen = 0;
-    v.fxClose = 0;
     return hndl;
 };
 
@@ -140,7 +137,7 @@ func void zCView_Delete(var zCView this) {
 	CALL__thiscall(MEM_InstToPtr(this), zCView__@zCView);
 };
 
- func void View_Delete(var int hndl) {
+func void View_Delete(var int hndl) {
 	var zCView v; v = MEM_PtrToInst(getPtr(hndl));
 	zCView_Delete(v);
 	release(hndl);

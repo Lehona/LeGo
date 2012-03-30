@@ -100,32 +100,9 @@ const string PF_Font        = "FONT_OLD_10_WHITE.TGA"; //Verwendete Schriftart
 const int AIV_Name = 89; // Genutzte AI-Var
 
 //========================================
-// Quickslots
+// Dialoggestures
 //========================================
-const int zCVob_bitfield4_posInQs = ((1 << 5) - 1) << 7;
-const int zCVob_bitfield4_amount = ((1 << 16) - 1) << 12;
-
-const int    QS_SlotSize       = 90;                        // Größe des Renders auf dem Bildschirm
-const int    QS_DigitMarginX   = 2;                         // Abstand der Nummerierungen vom Rand des Slots
-const int    QS_DigitMarginY   = 12;                        // Abstand der Nummerierungen vom Boden des Slots
-const int    QS_DigitCol0      = COL_White;                 // Schriftfarbe
-const int    QS_DigitCol1      = COL_White;                 // Schriftfarbe
-const string QS_DigitFont      = "FONT_OLD_10_WHITE.TGA";   // Schriftart der Nummerierung
-const string QS_SlotBackTex    = "QUICKSLOTS.TGA";          // Hintergrundtextur
-const int    QS_SlotBackX      = 512;                       // Breite der Hintergrundtextur
-const int    QS_SlotBackY      = 128;                       // Höhe der Hintergrundtextur
-const int    QS_SlotBackMargin = 45;                        // Abstand der Mitte des Balkens zum unteren Bildschirmrand
-const int    QS_SlotDist       = 50;                        // Abstand der einzelnen Slots horizontal zueinander
-const int    QS_SlotDistSep    = 10;                        // Zusatzabstand zwischen Standardwaffen und Zusatzslots
-
-//========================================
-// Shields
-//========================================
-const int    Shield_AIVar0    = 97;             // Eine freie AI-Var
-const int    Shield_AIVar1    = 98;             // Eine weitere freie AI-Var
-const int    Shield_AIVar2    = 99;             // Und noch eine freie AI-Var  |  Bei Gelegenheit wird das durch ein weiteres Savegame ersetzt.
-const string Shield_WP        = "TOT";          // Irgendein Waypoint der in jeder Welt existiert (TOT zB.)
-
-const string Shield_SlotEquip = "ZS_LONGSWORD"; // Wohin wenn das Schild equipped wird?
-const string Shield_SlotDrawn = "ZS_LEFTHAND";  // Wohin wenn das Schild gezogen wird?
-const int    Shield_Slot      = 4;              // Genutzter Model-Slot
+// Die abgespielte Animation kann so beschrieben werden:
+//   DIAG_Prefix + AniName + DIAG_Suffix + ((rand() % (Max - (Min - 1))) + Min).ToString("00");
+const string DIAG_Prefix = "DG_";
+const string DIAG_Suffix = "_";

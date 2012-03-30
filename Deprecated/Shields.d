@@ -2,61 +2,14 @@
                SHIELDS
 \***********************************/
 
-//========================================
-// Beliebigen Waypoint holen
-//========================================
-func string MEM_GetAnyWP() {
-    var zCWaynet wayNet; wayNet = MEM_PtrToInst(MEM_World.wayNet);
-    var zCWaypoint wp;   wp = MEM_PtrToInst(MEM_ReadInt(wayNet.wplist_next+4));
-    return wp.name;
-};
+const int    Shield_AIVar0    = 97;             // Eine freie AI-Var
+const int    Shield_AIVar1    = 98;             // Eine weitere freie AI-Var
+const int    Shield_AIVar2    = 99;             // Und noch eine freie AI-Var  |  Bei Gelegenheit wird das durch ein weiteres Savegame ersetzt.
+const string Shield_WP        = "TOT";          // Irgendein Waypoint der in jeder Welt existiert (TOT zB.)
 
-//========================================
-// Item an Koordinaten einfügen
-//========================================
-func void MEM_InsertItem(var c_item itm, var int fX, var int fY, var int fZ) {
-    var zCWaynet wayNet; wayNet = MEM_PtrToInst(MEM_World.wayNet);
-    var zCWaypoint wp; wp = MEM_PtrToInst(MEM_ReadInt(wayNet.wplist_next+4));
-    var int x; x = wp.pos[0];
-    var int y; y = wp.pos[1];
-    var int z; z = wp.pos[2];
-    wp.pos[0] = fX;
-    wp.pos[1] = fY;
-    wp.pos[2] = fZ;
-    Wld_InsertItem(Hlp_GetInstanceID(itm), wp.name);
-    wp.pos[0] = x;
-    wp.pos[1] = y;
-    wp.pos[2] = z;
-};
-
-//========================================
-// Vob an Npc hängen
-//========================================
-func int oCNpc_PutInSlot(var c_npc slf, var string SlotName, var int oCVobPtr, var int SlotID) {
-    CALL_IntParam(SlotID);
-    CALL_PtrParam(oCVobPtr);
-    CALL_zStringPtrParam(SlotName);
-    CALL__thiscall(MEM_InstToPtr(slf), oCNpc__PutInSlot);
-    return CALL_RetValAsInt();
-};
-
-//========================================
-// Vob von Npc entfernen
-//========================================
-func void oCNpc_RemoveFromSlot(var c_npc slf, var string SlotName, var int retVal, var int SlotID) {
-    CALL_IntParam(SlotID);
-    CALL_IntParam(retVal);
-    CALL_zStringPtrParam(SlotName);
-    CALL__thiscall(MEM_InstToPtr(slf), oCNpc__RemoveFromSlot);
-};
-
-//========================================
-// Item ablegen
-//========================================
-func void oCNpc_UnequipItem(var c_npc slf, var int oCItemPtr) {
-    CALL_PtrParam(oCItemPtr);
-    CALL__thiscall(MEM_InstToPtr(slf), oCNpc__UnequipItem);
-};
+const string Shield_SlotEquip = "ZS_LONGSWORD"; // Wohin wenn das Schild equipped wird?
+const string Shield_SlotDrawn = "ZS_LEFTHAND";  // Wohin wenn das Schild gezogen wird?
+const int    Shield_Slot      = 4;              // Genutzter Model-Slot
 
 //========================================
 // Schild ablegen

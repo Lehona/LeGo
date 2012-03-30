@@ -1,39 +1,19 @@
 
-func void oCItem_Render(var int itm, var int wld, var int view, var int rot) {
-    CALL_FloatParam(rot);
-    CALL_PtrParam(view);
-    CALL_PtrParam(wld);
-    CALL__thiscall(itm, oCItem__Render);
-};
+const int zCVob_bitfield4_posInQs = ((1 << 5) - 1) << 7;
+const int zCVob_bitfield4_amount = ((1 << 16) - 1) << 12;
 
-func void zCRenderer_DrawTile(var int this,
-                              var int tex,
-                              var int vec0x, var int vec0y,
-                              var int vec1x, var int vec1y,
-                              var int flt,
-                              var int vec2x, var int vec2y,
-                              var int vec3x, var int vec3y,
-                              var int color) {
-    const int vec = 0;
-    if(!vec) {
-        vec = MEM_Alloc(8);
-    };
-    CALL_IntParam(color);
-    CALL_PtrParam(vec);
-    CALL_PtrParam(vec);
-    CALL_FloatParam(flt);
-    CALL_PtrParam(vec);
-    MEM_WriteInt(vec+0, vec0x);
-    MEM_WriteInt(vec+4, vec0y);
-    CALL_PtrParam(vec);
-    CALL_PtrParam(tex);
-    CALL__thiscall(this, zCRenderer__DrawTile);
-};
-
-func void oCNpc_Equip(var int npcPtr, var int itmPtr) {
-    CALL_PtrParam(itmPtr);
-    CALL__thiscall(npcPtr, oCNpc__Equip);
-};
+const int    QS_SlotSize       = 90;                        // Größe des Renders auf dem Bildschirm
+const int    QS_DigitMarginX   = 2;                         // Abstand der Nummerierungen vom Rand des Slots
+const int    QS_DigitMarginY   = 12;                        // Abstand der Nummerierungen vom Boden des Slots
+const int    QS_DigitCol0      = COL_White;                 // Schriftfarbe
+const int    QS_DigitCol1      = COL_White;                 // Schriftfarbe
+const string QS_DigitFont      = "FONT_OLD_10_WHITE.TGA";   // Schriftart der Nummerierung
+const string QS_SlotBackTex    = "QUICKSLOTS.TGA";          // Hintergrundtextur
+const int    QS_SlotBackX      = 512;                       // Breite der Hintergrundtextur
+const int    QS_SlotBackY      = 128;                       // Höhe der Hintergrundtextur
+const int    QS_SlotBackMargin = 45;                        // Abstand der Mitte des Balkens zum unteren Bildschirmrand
+const int    QS_SlotDist       = 50;                        // Abstand der einzelnen Slots horizontal zueinander
+const int    QS_SlotDistSep    = 10;                        // Zusatzabstand zwischen Standardwaffen und Zusatzslots
 
 instance oWorld@(oWorld);
 
