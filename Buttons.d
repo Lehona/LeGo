@@ -26,6 +26,7 @@ func void _Button_Delete(var _Button btn) {
 	View_Delete(btn.view);
 };
 
+func void Button_Null(var int hndl) {};
 
 const int MAX_BUTTONS = 256;
 var int _Buttons[MAX_BUTTONS]; // Wer mehr Buttons hat, hat doch 'nen Rad ab :) Kann aber auch gerne erweitert werden.
