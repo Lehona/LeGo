@@ -130,14 +130,6 @@ func int SB_Length() {
 };
 
 //========================================
-// Länge setzen (nur schrumpfen möglich)
-//========================================
-func void SB_SetLength(var int l) {
-    if(l > SB_Length()) { return; };
-    MEM_WriteInt(_SB_Current+4, l);
-};
-
-//========================================
 // Rohbytes anhängen
 //========================================
 func void SBraw(var int ptr, var int len) {
@@ -216,6 +208,16 @@ func void SBflt(var float f) {
 //========================================
 func void SBf(var int f) {
     f; MEM_Call(SBflt);
+};
+
+//========================================
+// Länge setzen
+//========================================
+func void SB_SetLength(var int l) {
+    while(l > SB_Length());
+		SBw(0);
+	end;
+    MEM_WriteInt(_SB_Current+4, l);
 };
 
 //========================================

@@ -51,10 +51,14 @@ const int Gamestate_NewGame     = 0;
 const int Gamestate_Loaded      = 1;
 const int Gamestate_WorldChange = 2;
 
-
-
-
-
+//========================================
+// Cursor
+//========================================
+const int CUR_LeftClick  = 0;
+const int CUR_RightClick = 1;
+const int CUR_MidClick   = 2;
+const int CUR_WheelUp    = 3;
+const int CUR_WheelDown  = 4;
 
 
 /***********************************\

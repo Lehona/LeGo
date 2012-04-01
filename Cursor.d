@@ -15,12 +15,13 @@ var int Cursor_Mid;
 var int Cursor_Right;
 var int Cursor_NoEngine;
 
+var int Cursor_Event; // gCEvent(h)
+
 //========================================
 // [intern] Variablen
 //========================================
 var int Cursor_fX;
 var int Cursor_fY;
-
 
 //========================================
 // Cursor verstecken
@@ -108,7 +109,7 @@ func void Cursor_Update() {
 };
 
 func void _Cursor_GetVal() {
-    var _Cursor c; c = MEM_PtrToInst(Cursor_Ptr);
+    var _Cursor c; c = _^(Cursor_Ptr);
 
     Cursor_RelX = c.relX;
     Cursor_RelY = c.relY;
@@ -119,9 +120,27 @@ func void _Cursor_GetVal() {
     Cursor_Y = roundf(Cursor_fY);
     Cursor_Wheel = c.wheel;
 
-    Cursor_KeyState(MEM_GetIntAddress(Cursor_Left),  c.keyLeft);
-    Cursor_KeyState(MEM_GetIntAddress(Cursor_Mid),   c.keyMid);
-    Cursor_KeyState(MEM_GetIntAddress(Cursor_Right), c.keyRight);
+    Cursor_KeyState(_@(Cursor_Left),  c.keyLeft);
+    Cursor_KeyState(_@(Cursor_Right), c.keyRight);
+    Cursor_KeyState(_@(Cursor_Mid),   c.keyMid);
+	
+	if(Cursor_Left == KEY_PRESSED) {
+		Event_Execute(Cursor_Event, CUR_LeftClick);
+	};
+	if(Cursor_Right == KEY_PRESSED) {
+		Event_Execute(Cursor_Event, CUR_RightClick);
+	};
+	if(Cursor_Mid == KEY_PRESSED) {
+		Event_Execute(Cursor_Event, CUR_MidClick);
+	};
+	if(Cursor_Wheel != 0) {
+		if(Cursor_Wheel > 0) {
+			Event_Execute(Cursor_Event, CUR_WheelUp);
+		}
+		else {
+			Event_Execute(Cursor_Event, CUR_WheelDown);
+		};
+	};
 
     Print_GetScreenSize();
     if(Cursor_X > Print_Screen[PS_X]) {

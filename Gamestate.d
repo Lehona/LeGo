@@ -17,7 +17,7 @@ var int _Gamestate_Event;
 // Listener für Gamestate hinzufügen
 //========================================
 func void Gamestate_AddListener(var func f) {
-    Event_Add(_Gamestate_Event, f);
+    Event_AddOnce(_Gamestate_Event, f);
 };
 
 //========================================
@@ -34,6 +34,9 @@ func void _Gamestate_Init(var int state) {
     if(!_Gamestate_Event) {
         _Gamestate_Event = Event_Create();
     };
-    Event_Execute(_Gamestate_Event, state);
     Gamestate = state;
+	FF_ApplyExt(_Gamestate_InitLate, 1, 1);
+};
+func void _Gamestate_InitLate() {
+    Event_Execute(_Gamestate_Event, Gamestate);
 };

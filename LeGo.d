@@ -103,6 +103,10 @@ func void LeGo_InitAlways(var int f) {
         if(f & LeGo_Anim8) {
             FF_Apply(_Anim8_FFLoop);
         };
+
+        if(f & LeGo_Cursor) {
+            Cursor_Event = Event_Create();
+        };
     };
 
     if(f & LeGo_Timer) {
@@ -137,10 +141,10 @@ func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Saves) {
         HookEngineF(oCSavegameManager__SetAndWriteSavegame, 5, _BW_SAVEGAME);
     };
-	
-	if (f & LeGo_Interface) {	
-		Print_fixPS();
-	};
+
+    if (f & LeGo_Interface) {
+        Print_fixPS();
+    };
 };
 
 //========================================
@@ -156,7 +160,7 @@ func void LeGo_Init(var int flags) {
 
     MEM_Info(ConcatStrings(LeGo_Version, " wird initialisiert."));
 
-    LeGo_InitFlags(flags);
+    LeGo_InitFlags(flags | LeGo_Gamestate);
 
     if(!_LeGo_Init) {
         LeGo_InitGamestart(_LeGo_Flags);
@@ -166,8 +170,6 @@ func void LeGo_Init(var int flags) {
 
     _LeGo_Init = 1;
     _LeGo_Loaded = 1;
-	
-	
 };
 
 
