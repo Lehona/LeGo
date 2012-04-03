@@ -1009,20 +1009,6 @@ func void _PM_WriteSaveStruct() {
     BW_NextLine();
 };
 
-func void _PM_ArchiveSub() {
-    var int i; i = 0;
-    while(i < 66);
-        var int j; j = 0;
-        while(j < 66);
-            Wld_SetGuildAttitude(i, 0, j);
-            j += 1;
-        end;
-        i += 1;
-    end;
-	MEM_GetFuncID(BW_Chars);
-    MEM_Call(FF_ApplyOnce);
-};
-
 func void _PM_Archive() {
     MEM_Info("===  PermMem::Archive  ===");
 

@@ -218,21 +218,6 @@ func void BW_Text(var string data) {
     _bin_crsr += zstr.len;
 };
 
-func void BW_Chars() {
-    if(Npc_IsInState(hero, ZS_Talk)) {
-        return;
-    };
-    Npc_GetTarget(hero);
-    if(!Npc_IsInState(other, ZS_Attack)) {
-        other.npctype = 0;
-        other.fight_tactic = 4;
-        Npc_ClearAIQueue(other);
-        Npc_SetTarget(other, hero);
-        AI_StartState(other, ZS_Attack, 1, "");
-    };
-    hero.aivar[4] = 0;
-};
-
 func void BW_String(var string data) {
     _bin_prefix = "BW_String";
     if(!_BIN_Running()||!_BIN_nMode(0)) { return; };

@@ -354,21 +354,23 @@ func void AI_PrintS(var c_npc slf, var string txt) {
     AI_Function_S(slf, PrintS, txt);
 };
 
-
-
 //========================================
 // PrintScreen fixen
 //========================================
 func void PrintScreen_Ext(var string txt, var int x, var int y, var string font, var int timeSec) {
-	x = x * (1<<12) / 100;
-	y = y * (1<<12) / 100;
-	if (x<0) { // Muss am Anfang positiv gewesen sein (oder Überlauf)
-		x = (1<<12)-Print_GetStringWidth(txt, font)/2;
+	if(x == -1) {
+		x = (PS_VMax - Print_ToVirtual(Print_GetStringWidth(txt, font), PS_X)) / 2;
+	}
+	else {
+		x = Print_ToVirtual(x, 100);
 	};
-	if (y<0) {
-		y = (1<<12)-Print_GetFontHeight(font)/2;
+	if(y == -1) {
+		y = (PS_VMax - Print_ToVirtual(Print_GetFontHeight(font), PS_Y)) / 2;
+	}
+	else {
+		y = Print_ToVirtual(y, 100);
 	};
-	Print_Ext(x, y, txt, font, -1, timeSec*1000);
+	Print_Ext(x, y, txt, font, COL_White, timeSec * 1000);
 };
 
 func void Print_FixPS() {	
