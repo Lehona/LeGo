@@ -77,9 +77,4 @@ func void Event_Execute(var int h, var int d) {
         MEM_CallByID(MEM_ReadIntArray(a.array, i));
         i += 1;
     end;
-    if(h == _Gamestate_Event) {
-        i = 0; i + MEM_GetFuncID(foreachHndl) + 236;
-        i + 320000; i + 1;
-        MEM_Call(FF_ApplyOnceExt);
-    };
 };
