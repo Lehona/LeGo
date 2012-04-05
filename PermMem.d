@@ -9,6 +9,85 @@ func string MEM_ReadStringArray(var int arrayAddress, var int offset) {
     return MEM_ReadString(arrayAddress + 20 * offset);
 };
 
+/* const int _MEM_ArraySortFunc_Func = 0;
+func void _MEM_ArraySortFunc_Wrapper() {
+    MEM_ReadInt(MEM_ReadInt(ESP+4));
+    MEM_ReadInt(MEM_ReadInt(ESP+8));
+    MEM_CallByPtr(_MEM_ArraySortFunc_Func);
+    EAX = MEMINT_PopInt();
+
+    MEM_Info("leave wrapper");
+};
+
+func void MEM_ArraySortFunc(var int array, var func comparator) {
+    const int hook = 0;
+
+    if(!hook) {
+        const int ptr = 0;
+        ptr = MEM_Alloc(7);
+        MEM_WriteInt(ptr, ASMINT_OP_retn);
+        HookEngineF(ptr, 5, _MEM_ArraySortFunc_Wrapper);
+        hook = MEM_ReadInt(ptr + 1) + ptr + 5;
+        MEM_Free(ptr);
+    };
+
+    _MEM_ArraySortFunc_Func = MEM_GetFuncPtr(comparator);
+
+    var zCArray arr; arr = _^(array);
+
+    MEMINT_QSort(arr.array, arr.numInArray, 4, hook);
+
+    MEM_Info("leave func");
+}; */
+
+func int _MEM_ArraySortFuncC(var int v0, var int v1) {};
+
+func void _MEM_ArraySortFunc(var int l, var int r) {
+    locals();
+    if(l >= r) {
+        return;
+    };
+    var int c;
+    var int t; t = l;
+    var int m; m = r-4;
+    var int p; p = MEM_ReadInt(r);
+
+    MEM_Label(0);
+        //while((_MEM_ArraySortFuncC(MEM_ReadInt(t), p) <= 0)&&(t < r));
+        MEM_Label(1);
+        if((_MEM_ArraySortFuncC(MEM_ReadInt(t), p) <= 0)&&(t < r)) {
+            t += 4;
+            MEM_Goto(1);
+        };
+        //end;
+
+        // while((_MEM_ArraySortFuncC(MEM_ReadInt(m), p) >= 0)&&(m > l));
+        MEM_Label(2);
+        if((_MEM_ArraySortFuncC(MEM_ReadInt(m), p) >= 0)&&(m > l)) {
+            m -= 4;
+            MEM_Goto(2);
+        };
+        // end;
+    if(t < m) {
+        c = MEM_ReadInt(m);
+        MEM_WriteInt(m, MEM_ReadInt(t));
+        MEM_WriteInt(t, c);
+        MEM_Goto(0);
+    };
+    if(_MEM_ArraySortFuncC(MEM_ReadInt(t), p) > 0) {
+        c = MEM_ReadInt(t);
+        MEM_WriteInt(t, MEM_ReadInt(r));
+        MEM_WriteInt(r, c);
+    };
+    _MEM_ArraySortFunc(l, t-4);
+    _MEM_ArraySortFunc(t+4, r);
+};
+
+func void MEM_ArraySortFunc(var int stream, var func fnc) {
+    MEM_ReplaceFunc(_MEM_ArraySortFuncC, fnc);
+    _MEM_ArraySortFunc(MEM_ReadInt(stream), MEM_ReadInt(stream) + ((MEM_ArraySize(stream)-1)<<2));
+};
+
 //========================================
 // [intern] Variablen
 //========================================
@@ -128,8 +207,8 @@ func void _PM_AddToForeachTable(var int h) {
             c = MEM_ArrayCreate();
             MEM_WriteIntArray(_PM_foreachTable, i, c);
         };
-		// mem_info(concatstrings("add handle ", inttostring(h+1)));
-		// mem_info(concatstrings("inst is ", inttostring(i)));
+        // mem_info(concatstrings("add handle ", inttostring(h+1)));
+        // mem_info(concatstrings("inst is ", inttostring(i)));
         MEM_ArrayInsert(c, h+1);
     };
 };
@@ -155,7 +234,7 @@ func void _PM_CreateForeachTable() {
     if(_PM_foreachTable) {
         MEM_Free(_PM_foreachTable);
     };
-	foreachHndl_ptr = MEM_GetFuncPtr(foreachHndl);
+    foreachHndl_ptr = MEM_GetFuncPtr(foreachHndl);
     _PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
     if(Handles) {
         var int i; i = 0;
@@ -168,7 +247,7 @@ func void _PM_CreateForeachTable() {
 
 func void foreachHndl(var int inst, var func fnc) {
     locals();
-	if(!_PM_foreachTable) { return; };
+    if(!_PM_foreachTable) { return; };
     var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
     if(!c) {
         return;
@@ -179,30 +258,37 @@ func void foreachHndl(var int inst, var func fnc) {
     MEM_Copy(z.array, a, l);
     var int i; i = 0;
     var int o; o = MEM_GetFuncPtr(fnc);
-	var int p; p = MEM_StackPos.position;
-	// if(i < l) {
-	while(i < l);
+    var int p; p = MEM_StackPos.position;
+    // if(i < l) {
+    while(i < l);
         var int h; h = MEM_ReadInt(a+(i<<2));
         if(MEM_ReadInt(HandlesObj.array+((h-1)<<3))) {
             h;
             MEM_CallByPtr(o);
-			if(MEM_PopIntResult() == rBreak) {
-				break;
-				// i = l;
-			};
+            if(MEM_PopIntResult() == rBreak) {
+                break;
+                // i = l;
+            };
         };
-		i += 1;
-		// MEM_StackPos.position = p;
-	// };
-	end;
+        i += 1;
+        // MEM_StackPos.position = p;
+    // };
+    end;
     MEM_Free(a);
 };
 
 func int hasHndl(var int inst) {
-	if(!_PM_foreachTable) { return false; };
-	var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
-	if(!c) { return false; };
-	return MEM_ArraySize(c) > 0;
+    if(!_PM_foreachTable) { return false; };
+    var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
+    if(!c) { return false; };
+    return MEM_ArraySize(c) > 0;
+};
+
+func void foreachHndlSort(var int inst, var func cmp) {
+    if(!_PM_foreachTable) { return; };
+    var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
+    if(!c) { return; };
+    MEM_ArraySortFunc(c, cmp);
 };
 
 //========================================
@@ -319,22 +405,22 @@ func MEMINT_HelperClass get(var int h) {
 // Handle als Pointer holen
 //========================================
 func int getPtr(var int h) {
-	h -= 1;
-	if(h > HandlesObj.numInArray) {
-		return false;
-	};
-	return MEM_ReadIntArray(HandlesObj.array, h * 2);
+    h -= 1;
+    if(h > HandlesObj.numInArray) {
+        return false;
+    };
+    return MEM_ReadIntArray(HandlesObj.array, h * 2);
 };
 
 //========================================
 // Instanz eines Handles holen
 //========================================
 func int getInst(var int h) {
-	h -= 1;
-	if(h > HandlesObj.numInArray) {
-		return false;
-	};
-	return MEM_ReadIntArray(HandlesObj.array, (h * 2) + 1);
+    h -= 1;
+    if(h > HandlesObj.numInArray) {
+        return false;
+    };
+    return MEM_ReadIntArray(HandlesObj.array, (h * 2) + 1);
 };
 
 //========================================
@@ -1429,11 +1515,11 @@ func void PM_SaveFuncID(var string name, var int fnc) {
 };
 
 func void PM_SaveFuncOffset(var string name, var int fnc) {
-	PM_SaveFuncID(name, MEM_GetFuncIDByOffset(fnc));
+    PM_SaveFuncID(name, MEM_GetFuncIDByOffset(fnc));
 };
 
 func void PM_SaveFuncPtr(var string name, var int fnc) {
-	PM_SaveFuncOffset(name, fnc - currParserStackAddress);
+    PM_SaveFuncOffset(name, fnc - currParserStackAddress);
 };
 
 func void _PM_SaveClassPtr(var string name, var int ptr, var string className, var int p) {
@@ -1589,12 +1675,12 @@ func int PM_LoadFuncID(var string name) {
 };
 
 func int PM_LoadFuncOffset(var string name) {
-	var zCPar_Symbol s; s = _^(MEM_ReadIntArray(currSymbolTableAddress, PM_LoadFuncID(name)));
-	return s.content;
+    var zCPar_Symbol s; s = _^(MEM_ReadIntArray(currSymbolTableAddress, PM_LoadFuncID(name)));
+    return s.content;
 };
 
 func int PM_LoadFuncPtr(var string name) {
-	return PM_LoadFuncOffset(name) + currParserStackAddress;
+    return PM_LoadFuncOffset(name) + currParserStackAddress;
 };
 
 func void PM_LoadClass(var string name, var int destPtr) {

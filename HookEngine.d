@@ -27,7 +27,7 @@ var int EDI;
 //========================================
 // Engine hooken
 //========================================
-func void HookEngineI(var int address, var int oldInstr, var int function) { 
+func void HookEngineI(var int address, var int oldInstr, var int function) {
 
     var int SymbID;   // Symbolindex von 'function'
     var int ptr;      // Pointer auf den Zwischenspeicher der alten Anweisung
@@ -47,11 +47,11 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
 
     MemoryProtectionOverride (address, oldInstr+3);
     // ----- Eventuell geschützen Speicher behandeln -----
-	
-	if (MEM_ReadByte(address) == 233) { // Hook schon vorhanden
-		HookEngineI(MEM_ReadInt(address+1)+address+5+81, oldInstr, function); 
-		return;
-	};
+
+    if (MEM_ReadByte(address) == 233) { // Hook schon vorhanden
+        HookEngineI(MEM_ReadInt(address+1)+address+5+81, oldInstr, function);
+        return;
+    };
 
     // ----- Die alte Anweisung sichern -----
     ptr = MEM_Alloc(oldInstr);
@@ -140,7 +140,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
 };
 
 func void HookEngineF(var int address, var int oldInstr, var func function) {
-	HookEngineI(address, oldInstr, MEM_GetFuncID(function));
+    HookEngineI(address, oldInstr, MEM_GetFuncID(function));
 };
 func void HookEngine(var int address, var int oldInstr, var string function) {
     HookEngineI(address, oldInstr, MEM_FindParserSymbol(STR_Upper(function)));

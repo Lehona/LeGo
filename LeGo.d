@@ -35,8 +35,9 @@ const int LeGo_Buttons        = 1<<13; // Buttons.d
 const int LeGo_Timer          = 1<<14; // Timer.d
 const int LeGo_EventHandler   = 1<<15; // EventHandler.d
 const int LeGo_Gamestate      = 1<<16; // Gamestate.d
+const int LeGo_Sprite         = 1<<17; // Sprite.d
 
-const int LeGo_All            = (1<<17)-1; // Sämtliche Bibliotheken
+const int LeGo_All            = (1<<18)-1; // Sämtliche Bibliotheken
 
 //========================================
 // [intern] Variablen
@@ -59,6 +60,7 @@ func void LeGo_InitFlags(var int f) {
     if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
     if(f & LeGo_View)           { f = f | LeGo_PermMem; };
     if(f & LeGo_Interface)      { f = f | LeGo_PermMem; };
+    if(f & LeGo_Sprite)         { f = f | LeGo_PermMem; };
     if(f & LeGo_PermMem)        { f = f | LeGo_Saves; };
     if(f & LeGo_Saves)          { f = f | LeGo_HookEngine; };
     _LeGo_Flags = f;
@@ -142,9 +144,14 @@ func void LeGo_InitGamestart(var int f) {
         HookEngineF(oCSavegameManager__SetAndWriteSavegame, 5, _BW_SAVEGAME);
     };
 
-    if (f & LeGo_Interface) {
+    if(f & LeGo_Sprite) {
+        HookEngineF(zRND_D3D__EndFrame, 6, _Sprite_DoRender);
+    };
+
+    if(f & LeGo_Interface) {
         Print_fixPS();
     };
+
 };
 
 //========================================
@@ -160,7 +167,7 @@ func void LeGo_Init(var int flags) {
 
     MEM_Info(ConcatStrings(LeGo_Version, " wird initialisiert."));
 
-    LeGo_InitFlags(flags | LeGo_Gamestate);
+    LeGo_InitFlags(flags);
 
     if(!_LeGo_Init) {
         LeGo_InitGamestart(_LeGo_Flags);

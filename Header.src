@@ -8,12 +8,12 @@ Userconst.d
 StringBuilder.d
 Locals.d
 BinaryMachines.d
+HookEngine.d
 PermMem.d
 PermMem_Structs.d
 EventHandler.d
 List.d
 Anim8.d
-HookEngine.d
 FrameFunctions.d
 Random.d
 AI_Function.d
@@ -31,4 +31,5 @@ Focusnames.d
 Gamestate.d
 Saves.d
 Int64.d
+Sprite.d
 LeGo.d

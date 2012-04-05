@@ -41,18 +41,18 @@ const int WriteFile                                 = 8079292; //0x7B47BC
 const int zCAICamera_StartDialogCam                 = 4923632; //0x4B20F0
 const int zCAICamera__current                       = 9235128; //0x8CEAB8
 const int zCAICamera__StartDialogCam                = 4923632; //0x4B20F0
+const int zCFontMan__GetFont                        = 7898288; //0x7884B0
+const int zCFontMan__Load                           = 7897808; //0x7882D0
 const int zCFont__GetFontName                       = 7902368; //0x7894A0
 const int zCFont__GetFontX                          = 7902448; //0x7894F0
 const int zCFont__GetFontY                          = 7902432; //0x7894E0
-const int zCFontMan__Load                           = 7897808; //0x7882D0
-const int zCFontMan__GetFont                        = 7898288; //0x7884B0
-const int zFontMan                                  =11221460; //0xAB39D4
 const int zCInput_Win32__GetMouseButtonPressedLeft  = 5068688; //0x4D5790
 const int zCInput_Win32__GetMouseButtonPressedMid   = 5068704; //0x4D57A0
 const int zCInput_Win32__GetMouseButtonPressedRight = 5068720; //0x4D57B0
 const int zCInput_Win32__GetMousePos                = 5068592; //0x4D5730
 const int zCParser__CreateInstance                  = 7942048; //0x792FA0
 const int zCParser__CreatePrototype                 = 7942288; //0x793090
+const int zCParser__DoStack                         = 7936352; //0x791960
 const int zCRenderer__DrawTile                      = 6110448; //0x5D3CF0
 const int zCTexture__Load                           = 6239904; //0x5F36A0
 const int zCView__@zCView                           = 8017856; //0x7A57C0
@@ -65,8 +65,14 @@ const int zCView__SetFontColor                      = 8034576; //0x7A9910
 const int zCView__SetSize                           = 8026016; //0x7A77A0
 const int zCView__zCView                            = 8017664; //0x7A5700
 const int zCWorld__zCWorld                          = 6421056; //0x61FA40
+const int zFontMan                                  =11221460; //0xAB39D4
 const int zParser__CallFunc                         = 7940592; //0x7929F0
 const int zrenderer_adr                             = 9973512; //0x982F08
+const int zRND_D3D__DrawLine                        = 6609120; //0x64D8E0
+const int zRND_D3D__DrawPolySimple                  = 6597680; //0x64AC30
+const int zRND_D3D__EndFrame                        = 6610720; //0X64DF20 Hook: Sprite
+const int zRND_D3D__SetAlphaBlendFunc               = 6628880; //0x652610
+const int zSinCosApprox                             = 6269632; //0x5FAAC0
 
 //========================================
 // Globale Flagvariable

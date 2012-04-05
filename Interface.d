@@ -139,6 +139,15 @@ func int Print_ToRatio(var int size, var int dim) {
     return -1;
 };
 
+func int Print_ToRadian(var int angle) {
+    const int toRadian = 1016003125; // 0.017453292
+    mulf(angle, toRadian);
+};
+func int Print_ToDegree(var int angle) {
+    const int toDegree = 1113927393; // 57.29578
+    mulf(angle, toDegree);
+};
+
 //========================================
 // Erweitertes PrintScreen
 //========================================
@@ -183,15 +192,15 @@ func int Print_Ext(var int x, var int y, var string text, var string font, var i
     };
 
     if(!color) { color = 1; };
-	
-	txt.timed = (time != -1);
-	if (time != -1) { txt.timer = mkf(time); };
-	
+
+    txt.timed = (time != -1);
+    if (time != -1) { txt.timer = mkf(time); };
+
     txt.font = Print_GetFontPtr(font);
     txt.color = color;
     txt.text = text;
     txt.colored = 1;
-	
+
     txt.posx = x;
     if (x == -1) {
         txt.posx = ((1<<13)>>1)-(Print_GetStringWidth(text, font)/2);
@@ -358,29 +367,29 @@ func void AI_PrintS(var c_npc slf, var string txt) {
 // PrintScreen fixen
 //========================================
 func void PrintScreen_Ext(var string txt, var int x, var int y, var string font, var int timeSec) {
-	if(x == -1) {
-		x = (PS_VMax - Print_ToVirtual(Print_GetStringWidth(txt, font), PS_X)) / 2;
-	}
-	else {
-		x = Print_ToVirtual(x, 100);
-	};
-	if(y == -1) {
-		y = (PS_VMax - Print_ToVirtual(Print_GetFontHeight(font), PS_Y)) / 2;
-	}
-	else {
-		y = Print_ToVirtual(y, 100);
-	};
-	Print_Ext(x, y, txt, font, COL_White, timeSec * 1000);
+    if(x == -1) {
+        x = (PS_VMax - Print_ToVirtual(Print_GetStringWidth(txt, font), PS_X)) / 2;
+    }
+    else {
+        x = Print_ToVirtual(x, 100);
+    };
+    if(y == -1) {
+        y = (PS_VMax - Print_ToVirtual(Print_GetFontHeight(font), PS_Y)) / 2;
+    }
+    else {
+        y = Print_ToVirtual(y, 100);
+    };
+    Print_Ext(x, y, txt, font, COL_White, timeSec * 1000);
 };
 
-func void Print_FixPS() {	
-	var int test; test = MEM_GetFuncOffset(PrintScreen_Ext);
-	var zCPar_Symbol PS; PS = _^(MEM_ReadIntArray(contentSymbolTableAddress, MEM_GetFuncID(PrintScreen)));
+func void Print_FixPS() {
+    var int test; test = MEM_GetFuncOffset(PrintScreen_Ext);
+    var zCPar_Symbol PS; PS = _^(MEM_ReadIntArray(contentSymbolTableAddress, MEM_GetFuncID(PrintScreen)));
 
-	Call_Begin(0);
-		Call_IntParam(_@(test));
-		Call__thiscall(_@(ContentParserAddress), 7936352);
-	
-	PS.content = Call_Close();
+    Call_Begin(0);
+        Call_IntParam(_@(test));
+        Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
+
+    PS.content = Call_Close();
 };
 
