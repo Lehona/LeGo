@@ -106,8 +106,8 @@ class gCSprite {
     var int rot;    // float (radian)
     var int hidden; // bool
     var int prio;
-    var int buf;    // zCArray*
     var string textureName;
+    var int buf;    // zCArray*
 
     var int texture; // zCTexture*
     var int sin; // float (sin(rot)
@@ -115,7 +115,7 @@ class gCSprite {
     var int stream; // int* (buf->array)
 };
 
-const string gCSprite_Struct = "auto|9 void|4";
+const string gCSprite_Struct = "auto|8 zCArray* void|4";
 
 instance gCSprite@(gCSprite);
 
