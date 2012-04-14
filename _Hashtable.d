@@ -48,11 +48,13 @@ func int _HT_GetValue(var int ptr, var int key) {
 };
 
 func void MEM_SetUseInstance(var int inst) {
-	MEM_WriteInt(11232304, inst);
-	MEM_WriteInt(11232308, MEM_ReadInt(inst+28));
+	var int ptr; ptr = MEM_ReadIntArray (currSymbolTableAddress, inst);
+	MemoryProtectionOverride(11232304, 10);
+	MEM_WriteInt(11232304, ptr);
+	MEM_WriteInt(11232308, MEM_ReadInt(ptr+28));
 };
 
-func MEM_GetUseInstance() {
+func int MEM_GetUseInstance() {
 	return MEM_ReadInt(11232304);
 };
 		
