@@ -12,6 +12,7 @@ const int ASMINT_OP_JZ_Byte     = 116;   //0x74
 const int ASMINT_OP_popEAX      = 88;    //0x58
 // /* 2 Byte */
 const int ASMINT_OP_addMemToESP = 9475;  //0x2503
+const int ASMINT_OP_movESItoEAX = 61577; //0xF089
 
 //-------------------
 // Registervariablen
@@ -22,6 +23,7 @@ var int ESP;
 var int EBX;
 var int EBP;
 var int EDI;
+var int ESI;
 
 
 //========================================
@@ -100,6 +102,11 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     ASM_2(ASMINT_OP_movEDItoEAX);
     ASM_2(ASMINT_OP_movEAXtoMem);
     ASM_4(_@(EDI));
+	
+    // ESI in Daedalus Variable sichern	
+	ASM_2(ASMINT_OP_movESItoEAX);
+	ASM_2(ASMINT_OP_movEAXtoMem);
+	ASM_4(_@(ESI));
 
     // --- Daedalusfunktion aufrufen ---
 
