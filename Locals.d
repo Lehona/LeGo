@@ -54,7 +54,7 @@ func void Locals() {
     var string locals_retstr;
     var zCPar_Symbol retinst;
     var int arr, var int type;
-	var int sPtr;
+    var int sPtr;
 
     // Array vorbereiten
     const int locals_Arr = 0;
@@ -379,17 +379,79 @@ func void Locals() {
     MEM_WriteInt(foff+1, (stream+4) - currParserStackAddress);
 
     MEM_ArrayInsert(locals_Arr, stream);
-	
+
     MEM_CallByOffset(p);
-	
-	stream = MEM_ArrayPop(locals_Arr);
-	
+
+    stream = MEM_ArrayPop(locals_Arr);
+
     MEM_WriteInt(stream, 0);
     MEM_SetCallerStackPos(_@(zPAR_TOK_RET) - currParserStackAddress);
 };
 
 
+//========================================
+// Final
+//========================================
+func int Final() {
+    // Array vorbereiten
+    const int final_Arr = 0;
+    if(!final_Arr) {
+        final_Arr = MEM_ArrayCreate();
+    };
 
+    // Temporäre Variable + Symbolindex
+    var int tmp;
+    var zCPar_Symbol tmpSym;
+
+    // Alle benötigten Funktionsoffsets
+    const int arrayinsert  = -1;
+    const int arraypop     = -1;
+    const int getcallerpos = -1;
+    const int setcallerpos = -1;
+    if(arrayinsert == -1) {
+        arrayinsert  = MEM_GetFuncOffset(MEM_ArrayInsert);
+        arraypop     = MEM_GetFuncOffset(MEM_ArrayPop);
+        getcallerpos = MEM_GetFuncOffset(MEM_GetCallerStackPos);
+        setcallerpos = MEM_GetFuncOffset(MEM_SetCallerStackPos);
+    };
+
+    var int p;   p   = MEM_GetCallerStackPos();
+    var int ifp; ifp = MEM_ReadInt(p+1+currParserStackAddress);
+
+    MEM_SetCallerStackPos(p-5);
+
+    var int s; s = SB_New();
+
+    SBc(zPAR_TOK_PUSHVAR); SBw(tmpSym-1);
+    SBc(zPAR_OP_IS);
+    SBc(zPAR_TOK_PUSHVAR); SBw(tmpSym-2);
+    SBc(zPAR_TOK_PUSHVAR); SBw(tmpSym-1);
+    SBc(zPAR_TOK_CALL);    SBw(arrayinsert);
+    SBc(zPAR_TOK_PUSHINT); SBw(0);
+    SBc(zPAR_TOK_CALL);    SBw(setcallerpos);
+    SBc(zPAR_TOK_JUMP);    SBw(ifp);
+
+    SBraw(p+5+currParserStackAddress, ifp-p-5);
+
+    SBc(zPAR_TOK_PUSHVAR); SBw(tmpSym-2);
+    SBc(zPAR_TOK_CALL);    SBw(arraypop);
+    SBc(zPAR_TOK_CALL);    SBw(setcallerpos);
+    SBc(zPAR_TOK_RET);
+
+    var int ptr; ptr = SB_GetStream();
+    SB_Release();
+	
+	p += currParserStackAddress;
+
+    MEM_WriteInt(p-5,    zPAR_TOK_CALL);
+    MEM_WriteInt(p-4,    getcallerpos);
+    MEM_WriteInt(p,      zPAR_TOK_CALL);
+    MEM_WriteInt(p+1,    ptr - currParserStackAddress);
+
+    MEM_WriteInt(ptr+22, ptr - currParserStackAddress + 36);
+
+    return false;
+};
 
 
 

@@ -103,7 +103,6 @@ class gCSprite {
     var int y;      // float
     var int width;  // float
     var int height; // float
-    var int rot;    // float (radian)
     var int hidden; // bool
     var int prio;
     var string textureName;
@@ -128,16 +127,15 @@ func void _Sprite_CalcZ(var gCSprite s) {
     end;
 };
 
-func void _Sprite_CalcAngs(var gCSprite s) {
-    SinCosApprox(s.rot);
-    s.sin = sinApprox;
-    s.cos = cosApprox;
+func void _Sprite_CalcRotMat(var gCSprite s, var int x, var int y, var int resPtr) {
+    MEM_WriteInt(resPtr,     subf(mulf(x, s.cos), mulf(y, s.sin)));
+    MEM_WriteInt(resPtr + 4, addf(mulf(x, s.sin), mulf(y, s.cos)));
 };
 
 func void _Sprite_CalcRotForVert(var gCSprite s, var int v, var int x, var int y) {
-    var int off; off = s.stream + v * sizeof_zTRndSimpleVertex;
-    MEM_WriteInt(off,     addf(s.x, subf(mulf(x, s.cos), mulf(y, s.sin))));
-    MEM_WriteInt(off + 4, addf(s.y, addf(mulf(x, s.sin), mulf(y, s.cos))));
+    var int resPtr; resPtr = s.stream + v * sizeof_zTRndSimpleVertex;
+    MEM_WriteInt(resPtr,     addf(s.x, subf(mulf(x, s.cos), mulf(y, s.sin))));
+    MEM_WriteInt(resPtr + 4, addf(s.y, addf(mulf(x, s.sin), mulf(y, s.cos))));
 };
 
 func void _Sprite_CalcPos(var gCSprite s) {
@@ -246,10 +244,18 @@ func void Sprite_SetPos(var int h, var int x, var int y) {
 //========================================
 // Rotation eines Sprites
 //========================================
+func void Sprite_SetRotationSC(var int h, var int sin, var int cos) {
+    var gCSprite s; s = get(h);
+    s.sin = sin;
+    s.cos = cos;
+    _Sprite_CalcPos(s);
+};
+
 func void Sprite_SetRotationR(var int h, var int r) {
     var gCSprite s; s = get(h);
-    s.rot = r;
-    _Sprite_CalcAngs(s);
+    SinCosApprox(r);
+    s.sin = sinApprox;
+    s.cos = cosApprox;
     _Sprite_CalcPos(s);
 };
 
@@ -262,8 +268,11 @@ func void Sprite_SetRotation(var int h, var int r) {
 //========================================
 func void Sprite_RotateR(var int h, var int r) {
     var gCSprite s; s = get(h);
-    s.rot = addf(s.rot, r);
-    _Sprite_CalcAngs(s);
+    SinCosApprox(r);
+    var int res[2];
+    _Sprite_CalcRotMat(s, cosApprox, sinApprox, _@(res));
+    s.cos = res[0];
+    s.sin = res[1];
     _Sprite_CalcPos(s);
 };
 func void Sprite_Rotate(var int h, var int r) {
@@ -322,8 +331,8 @@ func void Sprite_Scale(var int h, var int x, var int y) {
 // Sprite verstecken
 //========================================
 func void Sprite_SetVisible(var int h, var int visible) {
-	var gCSprite s; s = get(h);
-	s.hidden = !visible;
+    var gCSprite s; s = get(h);
+    s.hidden = !visible;
 };
 
 //========================================
@@ -345,8 +354,8 @@ func int Sprite_CreatePxl(var int x, var int y, var int width, var int height, v
 
     Sprite_SetColor(h, color);
     Sprite_SetUV(h, floatNull, floatNull, floatEins, floatEins);
+    Sprite_SetRotationSC(h, floatNull, floatEins);
 
-    _Sprite_CalcAngs(s);
     _Sprite_CalcPos(s);
     _Sprite_CalcZ(s);
 

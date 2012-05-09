@@ -393,8 +393,9 @@ func int new(var int inst) {
 // Handle als Instanz holen
 //========================================
 func MEMINT_HelperClass get(var int h) {
-    if(Hlp_IsValidHandle(h)) {
-        MEM_PtrToInst(MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2));
+    var int p; p = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2);
+    if(p) {
+        MEM_PtrToInst(p);
         return;
     };
     MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
