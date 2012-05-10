@@ -398,7 +398,7 @@ func void zCView_Unarchiver(var zCView this) {
     PM_LoadArrayToPtr("posOpenClose_1", _@(this.posOpenClose_1));
 	
 	
-	if (this.intFlags) {
+	if (PM_Load("ondesk")) {
 		_View_Open(MEM_InstToPtr(this));
 	}; 
 	
