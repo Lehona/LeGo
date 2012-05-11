@@ -2,12 +2,6 @@
               PERMMEM
 \***********************************/
 
-//========================================
-// Aus Stringarray lesen
-//========================================
-func string MEM_ReadStringArray(var int arrayAddress, var int offset) {
-    return MEM_ReadString(arrayAddress + 20 * offset);
-};
 
 /* const int _MEM_ArraySortFunc_Func = 0;
 func void _MEM_ArraySortFunc_Wrapper() {
@@ -373,6 +367,50 @@ func int new(var int inst) {
     };
 
     ptr = create(inst);
+
+    if (h < HandlesObj.numInArray / 2) {
+        //alte Werte überschreiben
+        MEM_WriteIntArray(HandlesObj.array, h * 2, ptr);
+        MEM_WriteIntArray(HandlesObj.array, h * 2 + 1, inst);
+    }
+    else {
+        //oder Array erweitern
+        MEM_ArrayInsert(Handles, ptr);
+        MEM_ArrayInsert(Handles, inst);
+    };
+
+    _PM_AddToForeachTable(h+1);
+    return h+1; //das erste ValidHandle heißt 1
+};
+
+/* provisorisch */
+func int wrap(var int inst, var int ptr) {
+    locals();
+    var int h;
+
+    if (!Handles) {
+        //Falls das Array nicht existiert neu anlegen.
+        Handles = MEM_ArrayCreate();
+        HandlesObj = MEM_PtrToInst(Handles);
+    };
+
+    //ein freies Handle suchen, bei ValidHandle - 1 = 0 zu suchen beginnen
+    h = 0;
+
+    if(HandlesObj.array) {
+        ptr = MEM_StackPos.position;
+        //begin
+        //Falls Handle - 1 im Array liegt
+        if (h < HandlesObj.numInArray / 2)
+        //und der Pointer zum Handle != 0 ist
+        && (MEM_ReadIntArray(HandlesObj.array, h * 2)) {
+            //nächstes Handle überprüfen
+            h += 1;
+            MEM_StackPos.position = ptr; //continue
+        };
+        //end
+    };
+
 
     if (h < HandlesObj.numInArray / 2) {
         //alte Werte überschreiben
