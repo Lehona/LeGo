@@ -21,8 +21,8 @@ func int Projectile_Create(var int view, var int radius, var func onCollision) {
 	Projectile@.view = view;
 	Projectile@.onColl = MEM_GetFuncID(onCollision);
 	var zCView v; v = get(view);
-	var int midx; midx = v.vposx;// + (v.vsizex/2);
-	var int midy; midy = v.vposy;// + (v.vsizey/2);
+	var int midx; midx = v.vposx + (v.vsizex/2);
+	var int midy; midy = v.vposy + (v.vsizey/2);
 	Projectile@.posvec = Vec2_Create(midx, midy);
 	Projectile@.velvec = Vec2_Create(0, 0);
 	return +h;
@@ -235,8 +235,7 @@ func int _Projectile_CollDetRectRect(var int hndl) {
 	var int tx1; var int tx2;
 	if (!p.x) { // Die Geschwindigkeit ist 0, also darf ich nicht dadurch teilen!
 		if (subf(absf(m.x), mkf((v1.vsizex+v2.vsizex)/2)) >= 0) { 
-			tx1 = 0;
-			tx2 = 0;
+			return rContinue;
 		} else {
 			tx1 = 0;
 			tx2 = 1148846080; // 1000f
@@ -248,10 +247,9 @@ func int _Projectile_CollDetRectRect(var int hndl) {
 	
 	var int ty1; var int ty2;
 
-		if (!p.x) { // Die Geschwindigkeit ist 0, also darf ich nicht dadurch teilen!
+	if (!p.x) { // Die Geschwindigkeit ist 0, also darf ich nicht dadurch teilen!
 		if (subf(absf(m.x), mkf((v1.vsizex+v2.vsizex)/2)) >= 0) { 
-			ty1 = -1; // Kollidiert nicht :(
-			ty2 = -1;
+			return rContinue;
 		} else {
 			ty1 = 0;
 			ty2 = 1148846080; // 1000f
@@ -261,24 +259,29 @@ func int _Projectile_CollDetRectRect(var int hndl) {
 		ty2 = divf(addf(m.y,mkf((v1.vsizey+v2.vsizey)/2)), p.y); // distance/speed
 	};
 	
+	
+	
 	var int tmp; 
-	if (m.x < 0) { // If m is approaching from the left/bottom, this is wrong way around
+	if (m.x > 0) { // If m is approaching from the left/bottom, this is wrong way around
 		tmp = tx1;
 		tx1 = tx2;
 		tx2 = tmp;
 	};
-	if (m.y < 0) { 
+	
+	//Vec2_Print(Vec2_Createf(tx1, tx2));
+	if (m.y > 0) { 
 		tmp = ty1;
 		ty1 = ty2;
 		ty2 = tmp;
 	};
 	
 	if (tx2 < 0 || ty2 < 0) { // This it when it leaves the correct coordinates! If it's negative, no collision will occur.
+		Print("Not Yay");
 		return rContinue;
 	};
 	
-	if (gf(tx1, ty1)&&lf(tx1, ty2) || gf(ty1, tx1)&&lf(ty1, tx2)) {
-	 // Kollision!!
+	if (gef(tx1, ty1)&&lef(tx1, ty2) || gef(ty1, tx1)&&lef(ty1, tx2)) {
+		Print("YAY!");
 	};
 	
 	
@@ -292,8 +295,8 @@ func int _Projectile_Loop_Sub(var int hndl) {
 	Vec2_SetY(p.posvec, addf(Vec2_GetY(p.posvec), divf(Vec2_GetY(p.velvec), mkf(P_TPS)))); 
 	var zCView v; v = get(p.view);
 	
-	var int x; x = roundf(Vec2_GetX(p.posvec));// - v.vsizex/2;
-	var int y; y = roundf(Vec2_GetY(p.posvec));// - v.vsizey/2;
+	var int x; x = roundf(Vec2_GetX(p.posvec)) - v.vsizex/2;
+	var int y; y = roundf(Vec2_GetY(p.posvec)) - v.vsizey/2;
 	
 	View_MoveTo(p.view, x, y);
 	_P_Curr = hndl;
@@ -302,7 +305,7 @@ func int _Projectile_Loop_Sub(var int hndl) {
 		//ForEachHndl(Projectile_Rectangle, _Projectile_CollDetCircleRect);
 	} else {
 		//ForEachHndl(Projectile_Circle, _Projectile_CollDetRectCircle);
-		//ForEachHndl(Projectile_Rectangle, _Projectile_CollDetRectRect);
+		ForEachHndl(Projectile@, _Projectile_CollDetRectRect);
 	};
 		
 	return rContinue;
