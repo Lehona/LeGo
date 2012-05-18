@@ -13,6 +13,7 @@ const int ASMINT_OP_popEAX      = 88;    //0x58
 // /* 2 Byte */
 const int ASMINT_OP_addMemToESP = 9475;  //0x2503
 const int ASMINT_OP_movESItoEAX = 61577; //0xF089
+const int ASMINT_OP_movEAXtoEDI = 51081; //0xC789
 
 //-------------------
 // Registervariablen
@@ -127,9 +128,14 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     ASM_1(ASMINT_OP_movMemToEAX);
     ASM_4(_@(ECX));
     ASM_2(ASMINT_OP_movEAXtoECX);
+		
+	ASM_1(ASMINT_OP_movMemToEax);
+	ASM_4(_@(EDI));
+	ASM_2(ASMINT_OP_movEAXtoEDI);
 
     ASM_1(ASMINT_OP_movMemToEAX);
     ASM_4(_@(EAX));
+
 
 
     // Alte Anweisung wieder einfügen
