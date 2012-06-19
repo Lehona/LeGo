@@ -114,6 +114,10 @@ func void LeGo_InitAlways(var int f) {
     if(f & LeGo_Timer) {
         _Timer_Init();
     };
+	
+	if(f & LeGo_Interface) {
+        Print_fixPS();
+    };
 };
 
 //========================================
@@ -148,9 +152,6 @@ func void LeGo_InitGamestart(var int f) {
         HookEngineF(zRND_D3D__EndFrame, 6, _Sprite_DoRender);
     };
 
-    if(f & LeGo_Interface) {
-        Print_fixPS();
-    };
 
 };
 
