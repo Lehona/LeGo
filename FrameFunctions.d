@@ -10,6 +10,8 @@ class FFItem {
     var int next;
     var int delay;
     var int cycles;
+	var int data;
+	var int hasData;
 };
 instance FFItem@(FFItem);
 
@@ -20,6 +22,7 @@ func void FFItem_Archiver(var FFItem this) {
     if(this.cycles != -1) {
         PM_SaveInt("cycles", this.cycles);
     };
+	if (this.hasData) { PM_SaveInt("data", this.data); };
 };
 
 func void FFItem_Unarchiver(var FFItem this) {
@@ -32,6 +35,10 @@ func void FFItem_Unarchiver(var FFItem this) {
     else {
         this.cycles = -1;
     };
+	if (PM_Exists("data")) {
+		this.data = PM_Load("data");
+		this.hasData = 1;
+	};
 };
 
 var int _FF_Symbol;
@@ -39,6 +46,17 @@ var int _FF_Symbol;
 //========================================
 // Funktion hinzufügen
 //========================================
+func void FF_ApplyExtData(var func function, var int delay, var int cycles, var int data) {
+	var int hndl; hndl = new(FFItem@);
+    var FFItem itm; itm = get(hndl);
+    itm.fncID = MEM_GetFuncPtr(function);
+    itm.cycles = cycles;
+    itm.delay = delay;
+    itm.next = Timer() + itm.delay;
+	itm.data = data;
+	itm.hasData = 1;
+};
+
 func void FF_ApplyExt(var func function, var int delay, var int cycles) {
     var int hndl; hndl = new(FFItem@);
     var FFItem itm; itm = get(hndl);
@@ -120,6 +138,9 @@ func int FrameFunctions(var int hndl) {
 
     MEM_Label(0);
     if(t >= itm.next) {
+		if (itm.hasData) {
+			itm.data;
+		};
         MEM_CallByPtr(itm.fncID);
         if(itm.cycles != -1) {
             itm.cycles -= 1;
