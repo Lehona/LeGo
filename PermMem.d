@@ -2,6 +2,9 @@
               PERMMEM
 \***********************************/
 
+func string MEM_ReadStringArray(var int array, var int offset) {
+	return MEM_ReadString(array + offset * sizeof_zString);
+};
 
 /* const int _MEM_ArraySortFunc_Func = 0;
 func void _MEM_ArraySortFunc_Wrapper() {

@@ -2,12 +2,6 @@
             DIALOGGESTURES
 \***********************************/
 
-// Danke an Sektenspinner für diese "Notlösung"
-func string ReadStringArr(var string name, var int offset) {
-    var zCPar_Symbol sym; sym = MEM_PtrToInst(MEM_GetParserSymbol(name));
-    MEMINT_StackPushVar(sym.content + offset * sizeof_zString);
-};
-
 //========================================
 // [intern]
 //========================================
