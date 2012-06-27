@@ -385,6 +385,9 @@ func void Sprite_Render(var int h) {
 //========================================
 func void _Sprite_DoRender() {
     zRND_XD3D_SetRenderState(D3DRS_ZENABLE, false); // Disable depthbuffer
+	
     zRND_D3D_SetAlphaBlendFunc(zRND_ALPHA_FUNC_BLEND);
     foreachHndl(gCSprite@, Sprite_Render);
+	
+    zRND_XD3D_SetRenderState(D3DRS_ZENABLE, true); // Enable depthbuffer
 };
