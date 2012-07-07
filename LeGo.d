@@ -36,8 +36,9 @@ const int LeGo_Timer          = 1<<14; // Timer.d
 const int LeGo_EventHandler   = 1<<15; // EventHandler.d
 const int LeGo_Gamestate      = 1<<16; // Gamestate.d
 const int LeGo_Sprite         = 1<<17; // Sprite.d
+const int LeGo_Hotkey		  = 1<<18; // Hotkey.d
 
-const int LeGo_All            = (1<<18)-1; // Sämtliche Bibliotheken
+const int LeGo_All            = (1<<19)-1; // Sämtliche Bibliotheken
 
 //========================================
 // [intern] Variablen
@@ -109,6 +110,11 @@ func void LeGo_InitAlways(var int f) {
         if(f & LeGo_Cursor) {
             Cursor_Event = Event_Create();
         };
+		
+		if (f & LeGo_Hotkey) {
+			_Hotkey_Array = new(zCArray@);
+			FF_Apply(_Hotkey_Do);
+		};
     };
 
     if(f & LeGo_Timer) {

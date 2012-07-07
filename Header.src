@@ -32,4 +32,5 @@ Gamestate.d
 Saves.d
 Int64.d
 Sprite.d
+Hotkey.d
 LeGo.d
