@@ -21,7 +21,7 @@ func string _BIN_GetSavefilePath(var int slot) {
         _BIN_ini = STR_SubStr(cmd, STR_IndexOf(cmd, "-GAME:")+6, 1024);
         _BIN_ini = STR_Split(_BIN_ini, ".", 0);
     };
-    if(Hlp_StrCmp(_BIN_ini, "GOTHICGAME")) {
+    if(Hlp_StrCmp(_BIN_ini, "GOTHICGAME") || (Hlp_StrCmp(_BIN_ini, ""))) {
         path = "saves";
     }
     else {
