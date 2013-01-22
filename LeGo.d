@@ -81,14 +81,18 @@ func void LeGo_InitAlways(var int f) {
             _PM_Reset();
         };
     };
-
+	
+	if(f & LeGo_Timer) {
+        _Timer_Init();
+    };
+	
     if(_LeGo_Loaded) {
         // Wenn ein Spielstand geladen wird
         if(f & LeGo_Saves) {
             _BR_LoadGame();
         };
     };
-
+	
     if(!_LeGo_Loaded) {
         // Nur beim ersten Spielstart
         if(f & LeGo_Gamestate) {
@@ -115,10 +119,7 @@ func void LeGo_InitAlways(var int f) {
 			_Hotkey_Array = new(zCArray@);
 			FF_Apply(_Hotkey_Do);
 		};
-    };
-
-    if(f & LeGo_Timer) {
-        _Timer_Init();
+		
     };
 	
 	if(f & LeGo_Interface) {
@@ -169,19 +170,15 @@ func void LeGo_Init(var int flags) {
         MEM_Error("LeGo benötigt mindestens Ikarus 1.2!");
         return;
     };
-
+	
     MEM_InitAll();
-
     MEM_Info(ConcatStrings(LeGo_Version, " wird initialisiert."));
 
     LeGo_InitFlags(flags);
-
     if(!_LeGo_Init) {
         LeGo_InitGamestart(_LeGo_Flags);
     };
-
     LeGo_InitAlways(_LeGo_Flags);
-
     _LeGo_Init = 1;
     _LeGo_Loaded = 1;
 };
