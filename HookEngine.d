@@ -52,7 +52,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     // ----- Eventuell geschützen Speicher behandeln -----
 
     if (MEM_ReadByte(address) == 233) { // Hook schon vorhanden
-        HookEngineI(MEM_ReadInt(address+1)+address+5+81, oldInstr, function);
+        HookEngineI(MEM_ReadInt(address+1)+address+5+96, oldInstr, function);
         return;
     };
 
