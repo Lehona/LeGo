@@ -127,6 +127,8 @@ func int _FF_RemoveL(var int hndl) {
 // [intern] Enginehook
 //========================================
 func void _FF_Hook() {
+	if(!Hlp_IsValidNpc(hero)) { return; };
+
     MEM_PushIntParam(FFItem@);
     MEM_GetFuncID(FrameFunctions);
     MEM_StackPos.position = foreachHndl_ptr;

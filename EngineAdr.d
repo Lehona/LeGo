@@ -148,9 +148,13 @@ func int Print_GetFontHeight(var string font) {
 //========================================
 // Beliebigen Waypoint holen
 //========================================
-func string MEM_GetAnyWP() {
+func int MEM_GetAnyWPPtr() {
     var zCWaynet wayNet; wayNet = MEM_PtrToInst(MEM_World.wayNet);
-    var zCWaypoint wp;   wp = MEM_PtrToInst(MEM_ReadInt(wayNet.wplist_next+4));
+    return MEM_ReadInt(wayNet.wplist_next+4);
+};
+
+func string MEM_GetAnyWP() {
+    var zCWaypoint wp; wp = _^(MEM_GetAnyWPPtr());
     return wp.name;
 };
 

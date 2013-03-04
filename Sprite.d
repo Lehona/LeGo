@@ -114,7 +114,7 @@ class gCSprite {
     var int stream; // int* (buf->array)
 };
 
-const string gCSprite_Struct = "auto|8 zCArray* void|4";
+const string gCSprite_Struct = "auto|7 zCArray* void|4";
 
 instance gCSprite@(gCSprite);
 
@@ -230,15 +230,19 @@ func int _Sprite_PrioComparer(var int l, var int r) {
 //========================================
 // Position eines Sprites
 //========================================
-func void Sprite_SetPosPxl(var int h, var int x, var int y) {
+func void Sprite_SetPosPxlF(var int h, var int xf, var int yf) {
     var gCSprite s; s = get(h);
-    s.x = mkf(x);
-    s.y = mkf(y);
+    s.x = xf;
+    s.y = yf;
     _Sprite_CalcPos(s);
 };
 
+func void Sprite_SetPosPxl(var int h, var int x, var int y) {
+    Sprite_SetPosPxlF(h, mkf(x), mkf(y));
+};
+
 func void Sprite_SetPos(var int h, var int x, var int y) {
-    Sprite_SetPosPxl(h, Print_ToPixel(x, PS_X), Print_ToPixel(y, PS_Y));
+    Sprite_SetPosPxlF(h, Print_ToPixel(x, PS_X), Print_ToPixel(y, PS_Y));
 };
 
 //========================================
@@ -384,10 +388,12 @@ func void Sprite_Render(var int h) {
 // [intern] alle Sprites rendern
 //========================================
 func void _Sprite_DoRender() {
+    if(!Hlp_IsValidNpc(hero)) { return; }; // Vielen Dank an Sektenspinner für diesen "Hack"
+
     zRND_XD3D_SetRenderState(D3DRS_ZENABLE, false); // Disable depthbuffer
-	
+
     zRND_D3D_SetAlphaBlendFunc(zRND_ALPHA_FUNC_BLEND);
     foreachHndl(gCSprite@, Sprite_Render);
-	
+
     zRND_XD3D_SetRenderState(D3DRS_ZENABLE, true); // Enable depthbuffer
 };

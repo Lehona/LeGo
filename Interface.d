@@ -130,6 +130,20 @@ func int Print_ToPixel(var int vrt, var int dim) {
     return vrt / 8192;
 };
 
+func int Print_ToPixelF(var int vrt, var int dim) {
+    Print_GetScreenSize();
+    if(dim == PS_X) {
+        vrt *= Print_Screen[PS_X];
+    }
+    else if(dim == PS_Y) {
+        vrt *= Print_Screen[PS_Y];
+    }
+    else {
+        vrt *= dim;
+    };
+    return fracf(vrt, PS_VMax);
+};
+
 func int Print_ToRatio(var int size, var int dim) {
     if (dim == PS_Y) {
         return roundf(mulf(mkf(size), Print_Ratio));
