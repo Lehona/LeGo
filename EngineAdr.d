@@ -209,6 +209,9 @@ func void oCNpc_UnequipItem(var c_npc slf, var int oCItemPtr) {
 // Ein Item auf einem View rendern
 //========================================
 func void oCItem_Render(var int itm, var int wld, var int view, var int rot) {
+	var zCView v; v = _^(view); 
+	if(v.vposy < 0||(v.vposy+v.vsizey) > 8192) { return; };
+	if(v.vposy < 0||(v.vposy+v.vsizey) > 8192) { return; };
     CALL_FloatParam(rot);
     CALL_PtrParam(view);
     CALL_PtrParam(wld);
