@@ -33,6 +33,10 @@ func void MEM_ArraySortFunc(var int array, var func comparator) {
     MEM_Info("leave func");
 }; */
 
+func string MEM_ReadStringArray(var int arr, var int index) {
+	return MEM_ReadString(arr+20*index);
+};
+
 func int _MEM_ArraySortFuncC(var int v0, var int v1) {};
 
 func void _MEM_ArraySortFunc(var int l, var int r) {
