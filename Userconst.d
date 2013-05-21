@@ -50,6 +50,7 @@ const int PS_VMax = 8192;
 const int Gamestate_NewGame     = 0;
 const int Gamestate_Loaded      = 1;
 const int Gamestate_WorldChange = 2;
+const int Gamestate_Saving      = 3;
 
 //========================================
 // Cursor

@@ -50,7 +50,11 @@ func int _BR_GetSelectedSlot() {
 // [intern] Ruft BW_Savegame auf
 //========================================
 func void _BW_SaveGame() {
-    if(BW_NewFile(_BIN_GetSavefilePath(MEM_ReadInt(EBP+60)))) {
+    var int ext; ext = MEM_ReadInt(EBP+60);
+    if(_LeGo_Flags & LeGo_Gamestate) {
+        _Gamestate_Init(Gamestate_Saving);
+    };
+    if(BW_NewFile(_BIN_GetSavefilePath(ext))) {
         if(_LeGo_Flags & LeGo_PermMem) {
             _PM_Archive();
         };
