@@ -9,6 +9,7 @@ StringBuilder.d
 Locals.d
 BinaryMachines.d
 HookEngine.d
+_Hashtable.d
 PermMem.d
 PermMem_Structs.d
 EventHandler.d
