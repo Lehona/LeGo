@@ -88,20 +88,22 @@ func void MEM_ArraySortFunc(var int stream, var func fnc) {
 //========================================
 // [intern] Variablen
 //========================================
-const int Handles = 0;
+const int Handles_Pointer 		= 0;
+const int Handles_Instances 	= 0;
+var int nextHandle; // = 1;
 var zCArray HandlesObj;
 var int _PM_ArrayElements;
 var int _PM_Inst;
 var int _PM_Stack;
-const int PM_CurrHandle = 0;
-const int _PM_foreachTable = 0;
+const int PM_CurrHandle 		= 0;
+const int _PM_foreachTable 		= 0;
 
 //========================================
 // Anzahl Handles
 //========================================
 func int numHandles() {
-    if (Handles) {
-        return (HandlesObj.numInArray>>1)+1;
+    if (Handles_Pointer) {
+        return _HT_GetNumber(Handles_Pointer);
     };
     return false;
 };
@@ -120,14 +122,8 @@ func int zCParser_CreateInstance(var int inst, var int ptr) {
 // Handle auf Gültigkeit prüfen
 //========================================
 func int Hlp_IsValidHandle(var int h) {
-    if (!handles) { return false; };
-
-    if (h > 0)
-    && (h <= HandlesObj.numInArray / 2) {
-        return MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2) > 0;
-    };
-
-    return false;
+    if (!handles_pointer) { return false; };
+	return !!_HT_Get(Handles_Pointer, h);
 };
 
 //========================================
@@ -168,10 +164,13 @@ func int sizeof(var int inst) {
 //========================================
 func void clear(var int h) {
     if (!Hlp_IsValidHandle(h)) { return; };
-    var int a;
-    a = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2);
-    MEM_Free(a);
-    MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, 0);
+	MEM_Free(_HT_Get(Handles_Pointer, h));
+    _HT_Remove(Handles_Pointer, h);
+	_HT_Remove(Handles_Instances, h);
+	// var int a;
+    // a = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2);
+    // MEM_Free(a);
+    // MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, 0);
 };
 
 //========================================
@@ -179,8 +178,8 @@ func void clear(var int h) {
 //========================================
 func void release(var int h) {
     if (!Hlp_IsValidHandle(h)) { return; };
-    MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, 0);
-    MEM_WriteIntArray(HandlesObj.array, ((h - 1) * 2)+1, 0);
+    _HT_Remove(Handles_Pointer, h);
+	_HT_Remove(Handles_Instances, h);
 };
 
 //========================================
@@ -195,10 +194,9 @@ func void _PM_AddToForeachTable(var int h) {
         MEM_Call(_PM_CreateForeachTable);
         return;
     };
-    h -= 1;
-    var int p; p = MEM_ReadIntArray(HandlesObj.array, h<<1);
+    var int p; p = _HT_Get(Handles_Pointer, h);
     if(p) {
-        var int i; i = MEM_ReadIntArray(HandlesObj.array, (h<<1)+1);
+        var int i; i = _HT_Get(Handles_Instances, h);
         var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
         if(!c) {
             c = MEM_ArrayCreate();
@@ -206,25 +204,28 @@ func void _PM_AddToForeachTable(var int h) {
         };
         // mem_info(concatstrings("add handle ", inttostring(h+1)));
         // mem_info(concatstrings("inst is ", inttostring(i)));
-        MEM_ArrayInsert(c, h+1);
+        MEM_ArrayInsert(c, h);
     };
 };
 
 func void _PM_RemoveFromForeachTable(var int h) {
-    h -= 1;
-    var int p; p = MEM_ReadIntArray(HandlesObj.array, h<<1);
+    var int p; p = _HT_Get(Handles_Pointer, h);
     if(p) {
-        var int i; i = MEM_ReadIntArray(HandlesObj.array, (h<<1)+1);
+        var int i; i = _HT_Get(Handles_Instances, h);
         var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
         if(!c) {
             return;
         };
-        MEM_ArrayRemoveValue(c, h+1);
+        MEM_ArrayRemoveValue(c, h);
         if(!MEM_ArraySize(c)) {
             MEM_ArrayFree(c);
             MEM_WriteIntArray(_PM_foreachTable, i, 0);
         };
     };
+};
+
+func void _PM_CreateForeachTableSub(var int val, var int key) {
+	_PM_AddToForeachTable(key);
 };
 
 func void _PM_CreateForeachTable() {
@@ -233,12 +234,8 @@ func void _PM_CreateForeachTable() {
     };
     foreachHndl_ptr = MEM_GetFuncPtr(foreachHndl);
     _PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
-    if(Handles) {
-        var int i; i = 0;
-        var int m; m = HandlesObj.numInArray / 2;
-        repeat(i, m);
-            _PM_AddToForeachTable(i+1);
-        end;
+    if(Handles_Pointer) {
+		_HT_ForEach(Handles_Pointer, _PM_CreateForeachTableSub);
     };
 };
 
@@ -259,7 +256,7 @@ func void foreachHndl(var int inst, var func fnc) {
     // if(i < l) {
     while(i < l);
         var int h; h = MEM_ReadInt(a+(i<<2));
-        if(MEM_ReadInt(HandlesObj.array+((h-1)<<3))) {
+        if(Hlp_IsValidHandle(h)) {
             h;
             MEM_CallByPtr(o);
             if(MEM_PopIntResult() == rBreak) {
@@ -295,11 +292,11 @@ func void delete(var int h) {
     locals();
     if (!Hlp_IsValidHandle(h)) { return; };
     _PM_RemoveFromForeachTable(h);
-    var int inst; inst = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2 + 1);
+    var int inst; inst = _HT_Get(Handles_Instances, h);
     var zCPar_Symbol symbCls; symbCls = _PM_ToClass(inst);
     var int fnc; fnc = MEM_FindParserSymbol(ConcatStrings(symbCls.name, "_DELETE"));
     if(fnc != -1) {
-        var int ptr; ptr = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2);
+        var int ptr; ptr = _HT_Get(Handles_Pointer, h);
         symbCls = MEM_PtrToInst(ptr);
         MEMINT_StackPushInst(symbCls);
         MEM_CallByID(fnc);
@@ -344,125 +341,75 @@ func int create(var int inst) {
 //========================================
 func int new(var int inst) {
     locals();
-    var int h; var int ptr;
-
-    if (!Handles) {
+    var int ptr;
+	
+	nextHandle += 1;
+    if (!Handles_Pointer) {
         //Falls das Array nicht existiert neu anlegen.
-        Handles = MEM_ArrayCreate();
-        HandlesObj = MEM_PtrToInst(Handles);
+        Handles_Pointer		= _HT_CreatePtr(349);
+		Handles_Instances	= _HT_CreatePtr(349);
     };
 
-    //ein freies Handle suchen, bei ValidHandle - 1 = 0 zu suchen beginnen
-    h = 0;
+	ptr = create(inst);
 
-    if(HandlesObj.array) {
-        ptr = MEM_StackPos.position;
-        //begin
-        //Falls Handle - 1 im Array liegt
-        if (h < HandlesObj.numInArray / 2)
-        //und der Pointer zum Handle != 0 ist
-        && (MEM_ReadIntArray(HandlesObj.array, h * 2)) {
-            //nächstes Handle überprüfen
-            h += 1;
-            MEM_StackPos.position = ptr; //continue
-        };
-        //end
-    };
+	_HT_Insert(Handles_Pointer, ptr, nextHandle);
+	_HT_Insert(Handles_Instances, inst, nextHandle);
 
-    ptr = create(inst);
+    _PM_AddToForeachTable(nextHandle);
 
-    if (h < HandlesObj.numInArray / 2) {
-        //alte Werte überschreiben
-        MEM_WriteIntArray(HandlesObj.array, h * 2, ptr);
-        MEM_WriteIntArray(HandlesObj.array, h * 2 + 1, inst);
-    }
-    else {
-        //oder Array erweitern
-        MEM_ArrayInsert(Handles, ptr);
-        MEM_ArrayInsert(Handles, inst);
-    };
-
-    _PM_AddToForeachTable(h+1);
-    return h+1; //das erste ValidHandle heißt 1
+    return nextHandle; //zuvor inkrementiert
 };
 
 /* provisorisch */
 func int wrap(var int inst, var int ptr) {
     locals();
-    var int h;
 
-    if (!Handles) {
+    if (!Handles_Pointer) {
         //Falls das Array nicht existiert neu anlegen.
-        Handles = MEM_ArrayCreate();
-        HandlesObj = MEM_PtrToInst(Handles);
+        Handles_Pointer		= _HT_CreatePtr(349);
+		Handles_Instances	= _HT_CreatePtr(349);
     };
 
-    //ein freies Handle suchen, bei ValidHandle - 1 = 0 zu suchen beginnen
-    h = 0;
+	_HT_Insert(Handles_Pointer, ptr, nextHandle);
+	_HT_Insert(Handles_Instances, inst, nextHandle);
 
-    if(HandlesObj.array) {
-        ptr = MEM_StackPos.position;
-        //begin
-        //Falls Handle - 1 im Array liegt
-        if (h < HandlesObj.numInArray / 2)
-        //und der Pointer zum Handle != 0 ist
-        && (MEM_ReadIntArray(HandlesObj.array, h * 2)) {
-            //nächstes Handle überprüfen
-            h += 1;
-            MEM_StackPos.position = ptr; //continue
-        };
-        //end
-    };
-
-
-    if (h < HandlesObj.numInArray / 2) {
-        //alte Werte überschreiben
-        MEM_WriteIntArray(HandlesObj.array, h * 2, ptr);
-        MEM_WriteIntArray(HandlesObj.array, h * 2 + 1, inst);
-    }
-    else {
-        //oder Array erweitern
-        MEM_ArrayInsert(Handles, ptr);
-        MEM_ArrayInsert(Handles, inst);
-    };
-
-    _PM_AddToForeachTable(h+1);
-    return h+1; //das erste ValidHandle heißt 1
+    _PM_AddToForeachTable(nextHandle);
+	nextHandle += 1;
+    return nextHandle-1; //zuvor inkrementiert
 };
 
 //========================================
 // Handle als Instanz holen
 //========================================
 func MEMINT_HelperClass get(var int h) {
-    var int p; p = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2);
-    if(p) {
-        MEM_PtrToInst(p);
-        return;
-    };
-    MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
-    MEMINT_StackPushInst(MEMINT_INSTUNASSIGNED);
+	if (!Hlp_IsValidHandle(h)) { 
+		MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
+		MEMINT_StackPushInst(MEMINT_INSTUNASSIGNED);
+	};
+    MEM_PtrToInst(_HT_Get(Handles_Pointer, h));
+    return;
 };
 
 //========================================
 // Handle als Pointer holen
 //========================================
 func int getPtr(var int h) {
-    h -= 1;
-    if(h > HandlesObj.numInArray) {
-        return false;
-    };
-    return MEM_ReadIntArray(HandlesObj.array, h * 2);
+	if (!Hlp_IsValidHandle(h)) { 
+		MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
+		return 0;
+	};
+    return _HT_Get(Handles_Pointer, h);
 };
 
 //========================================
 // Instanz eines Handles holen
 //========================================
 func int getInst(var int h) {
-    h -= 1;
-    if(h > HandlesObj.numInArray) {
-        return false;
-    };
-    return MEM_ReadIntArray(HandlesObj.array, (h * 2) + 1);
+	if (!Hlp_IsValidHandle(h)) { 
+		MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
+		return 0;
+	};
+    return _HT_Get(Handles_Instances, h);
 };
 
 //========================================
@@ -477,22 +424,17 @@ func void setPtr(var int h, var int ptr) {
 // Betrachten der folgenden
 // Scripte auf eigene Gefahr :0
 //========================================
+func void _PM_ResetSub(var int ptr, var int handle) {
+	delete(handle);
+};
 func void _PM_Reset() {
     MEM_Info("Reset ALL the handles!");
-    if(Handles) {
-        HandlesObj = MEM_PtrToInst(Handles);
-        var int i; i = 1;
-        var int p; p = MEM_StackPos.position;
-        if(i < numHandles()) {
-            if(Hlp_IsValidHandle(i)) {
-                delete(i);
-            };
-            i += 1;
-            MEM_StackPos.position = p;
-        };
-        MEM_ArrayFree(Handles);
-        Handles = 0;
-        HandlesObj = MEM_NullToInst();
+    if(Handles_Pointer) {
+		_HT_ForEach(Handles_Pointer, _PM_ResetSub);
+        _HT_Destroy(Handles_Pointer);
+		_HT_Destroy(Handles_Instances);
+        Handles_Pointer = 0;
+		Handles_Instances = 0;
     };
 };
 
@@ -1146,7 +1088,7 @@ func void _PM_Archive() {
 
     _PM_Mode = 1;
 
-    var int arrMax; arrMax = HandlesObj.numInArray / 2;
+    var int arrMax; arrMax = _HT_GetNumber(Handles_Pointer);
 
     var int newArr; newArr = MEM_ArrayCreate();
 
@@ -1159,8 +1101,8 @@ func void _PM_Archive() {
     var int i; i = 0;
     var int p; p = MEM_StackPos.position;
     if(i < arrMax) {
-        var int ptr; ptr = MEM_ReadIntArray(HandlesObj.array, i * 2);
-        var int inst; inst = MEM_ReadIntArray(HandlesObj.array, i * 2 + 1);
+        var int ptr; ptr = _HT_Get(Handles_Pointer, i);
+        var int inst; inst = _HT_Get(Handles_Instances, i);
 
         if(ptr) {
             PM_CurrHandle = i+1;
@@ -1475,20 +1417,13 @@ func void _PM_Unarchive() {
     _PM_Reset();
     _PM_Line = 2;
 
-    Handles = MEM_ArrayCreate();
-    HandlesObj = MEM_PtrToInst(Handles);
-
+    Handles_Pointer 	= _HT_CreatePtr(349);
+	Handles_Instances 	= _HT_CreatePtr(349);
+	
     var int p; p = MEM_StackPos.position;
     str = _PM_TextLine();
     if(!STR_Compare("HNDL:", STR_Prefix(str, 5))) {
         var int i; i = STR_ToInt(STR_SubStr(str, 5, STR_Len(str)-5));
-        // Eventuelle Lücke auffüllen
-        var int p1; p1 = MEM_StackPos.position;
-        if((HandlesObj.numInArray/2) < (i-1)) {
-            MEM_ArrayInsert(Handles, 0);
-            MEM_ArrayInsert(Handles, 0);
-            MEM_StackPos.position = p1;
-        };
 
         PM_CurrHandle = i;
 
@@ -1499,8 +1434,8 @@ func void _PM_Unarchive() {
         BR_NextLine();
         _PM_Line += 1;
 
-        MEM_ArrayInsert(Handles, _PM_Head.currOffs);
-        MEM_ArrayInsert(Handles, _PM_Head.inst);
+		_HT_Insert(Handles_Pointer  , _PM_Head.currOffs, i);
+		_HT_Insert(Handles_Instances, _PM_Head.inst, i);
 
         MEM_StackPos.position = p;
     }

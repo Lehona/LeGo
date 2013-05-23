@@ -4,7 +4,7 @@ class _HT_Obj {
 	var int key;
 	var int val;
 };
-const int HT_SIZE = 599; // Primzahl
+const int HT_SIZE = 71; // Primzahl
 
 
 
@@ -26,7 +26,6 @@ func int hash(var int val) {
 	return hash & 2147483647; // No negative values
 };
 
-
 func void _HT_Insert(var int ptr, var int val, var int key) {
 	var zCArray arr; arr = _^(ptr);
 	var int h; h = hash(key) % (arr.numAlloc/4);
@@ -35,6 +34,16 @@ func void _HT_Insert(var int ptr, var int val, var int key) {
 		MEM_WriteIntArray(arr.array, h, MEM_ArrayCreate());
 		bucket = MEM_ReadIntArray(arr.array, h);
 	};
+	
+	/* Check whether an entry with the same key already exists */
+	var zCArray buck; buck = _^(bucket);
+	var int i;
+	repeat(i, buck.numInArray/2);
+		if (MEM_ArrayRead(bucket, i*2) == key) {
+			MEM_Error("HT: A key has been assigned with two values!");
+		};
+	end;
+	
 	MEM_ArrayInsert(bucket, key);
 	MEM_ArrayInsert(bucket, val);
 	arr.numInArray += 1;
@@ -70,11 +79,12 @@ func void _HT_Resize(var int ptr, var int size) {
 		
 		
 
-func int _HT_GetValue(var int ptr, var int key) {
+func int _HT_Get(var int ptr, var int key) {
+	var zCPar_Symbol symb; symb = _^(MEM_ReadIntArray (currSymbolTableAddress, MEM_GetFuncIDByOffset(MEM_GetCallerStackPos())));
 	var zCArray arr; arr = _^(ptr);
 	var int h; h = hash(key) % (arr.numAlloc/4);
 	var int bucket; bucket = MEM_ReadIntArray(arr.array, h);
-	if (!bucket) { MEM_Info("HT: Key not found"); return -1; };
+	if (!bucket) { MEM_Info(ConcatStrings("HT: Key not found", symb.name)); return false; };
 	var zCArray buck; buck = _^(bucket);
 	var int i;
 	repeat(i, buck.numInArray/2);
@@ -83,25 +93,67 @@ func int _HT_GetValue(var int ptr, var int key) {
 		};
 	end;
 	
-	MEM_Info("HT: Key not found");	
-	return -1;
+	MEM_Info(ConcatStrings("HT: Key not found", symb.name));
+	return false;
 };
 
 func void _HT_Remove(var int ptr, var int key) {
 	var zCArray arr; arr = _^(ptr);
 	var int h; h = hash(key) % (arr.numAlloc/4);
 	var int bucket; bucket = MEM_ReadIntArray(arr.array, h);
-	if (!bucket) { MEM_Info("HT: Key not found"); return; };
+	if (!bucket) { MEM_Error("HT: Key not found"); return; };
 	var zCArray buck; buck = _^(bucket);
 	var int i;
 	repeat(i, buck.numInArray/2);
 		if (MEM_ArrayRead(bucket, i*2) == key) {
 			MEM_ArrayRemoveIndex(bucket, i*2+1);
 			MEM_ArrayRemoveIndex(bucket, i*2);
+			arr.numInArray -= 1;
 			return;
 		};
 	end;
-	MEM_Info("HT: Key not found"); 
+	MEM_Error("HT: Key not found"); 
+};
+
+func void _HT_Change(var int ptr, var int val, var int key) {
+	/* A very lazy implementation but I doubt this will be used much */
+	_HT_Remove(ptr, key);
+	_HT_Insert(ptr, val, key);
+};
+
+func int _HT_GetNumber(var int ptr) {
+	var zCArray arr; arr = _^(ptr);
+	return arr.numInArray;
+};
+func void _HT_ForEach(var int ptr, var func fnc) {
+	var zCArray arr; arr = _^(ptr); var zCArray buck;
+	var int i; var int j; var int bucket; i = 0; j = 0;
+	repeat(i, arr.numAlloc/4);
+		bucket = MEM_ReadIntArray(arr.array, i);
+		if (bucket) {
+			buck = _^(bucket);
+			repeat(j, buck.numInArray/2);
+				MEM_ReadIntArray(bucket, j*2+1);
+				MEM_ReadIntArray(bucket, j*2  );
+				MEM_Call(fnc);
+			end;
+		};
+	end;
+};
+
+func void _HT_Destroy(var int ptr) {
+	var zCArray arr; arr = _^(ptr); var zCArray buck;
+	var int i; var int j; var int bucket; i = 0; j = 0;
+	repeat(i, arr.numAlloc/4);
+		bucket = MEM_ReadIntArray(arr.array, i);
+		if (bucket) {
+			buck = _^(bucket);
+			MEM_Free(buck.array);
+			MEM_Free(bucket);
+		};
+	end;
+	MEM_Free(arr.array);
+	MEM_Free(ptr);
 };
 	
 func void MEM_SetUseInstance(var int inst) {

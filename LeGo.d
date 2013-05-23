@@ -72,11 +72,10 @@ func void LeGo_InitFlags(var int f) {
 //========================================
 func void LeGo_InitAlways(var int f) {
     if(f & LeGo_PermMem) {
-        if(Handles) {
+        if(Handles_Pointer) {
             // Weltenwechsel
-            HandlesObj = MEM_PtrToInst(Handles);
         };
-        if((Handles)&&(!_LeGo_Loaded)) {
+        if((Handles_Pointer)&&(!_LeGo_Loaded)) {
             // Passiert bei 'Neues Spiel' -> 'Neues Spiel'
             _PM_Reset();
         };
