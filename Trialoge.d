@@ -160,6 +160,8 @@ func void _TRIA_Copy(var int n0, var int n1) {
     MEM_SwapBytes(n0+292,  n1+292,  604-292); // name, voice..
     MEM_SwapBytes(n0+1884, n1+1884, 20);      // bitfield
     MEM_SwapBytes(n0+1908, n1+1908, 76);      // visuals
+	MEM_SwapBytes(n0+260,  n1+260,  20);
+	MEM_SwapBytes(n0+204,  n1+204,   4);
     Mdl_SetModelScale(np0, fn0.f0, fn0.f1, fn0.f2);
     Mdl_SetModelScale(np1, fn1.f0, fn1.f1, fn1.f2);
     Mdl_SetModelFatness(np0, fn0.f3);
