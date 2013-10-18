@@ -84,7 +84,7 @@ func int _HT_Get(var int ptr, var int key) {
 	var zCArray arr; arr = _^(ptr);
 	var int h; h = hash(key) % (arr.numAlloc/4);
 	var int bucket; bucket = MEM_ReadIntArray(arr.array, h);
-	if (!bucket) { MEM_Info(ConcatStrings("HT: Key not found", symb.name)); return false; };
+	if (!bucket) { MEM_Info(ConcatStrings("HT: Key not found: ", symb.name)); return false; };
 	var zCArray buck; buck = _^(bucket);
 	var int i;
 	repeat(i, buck.numInArray/2);
@@ -93,7 +93,7 @@ func int _HT_Get(var int ptr, var int key) {
 		};
 	end;
 	
-	MEM_Info(ConcatStrings("HT: Key not found", symb.name));
+	MEM_Info(ConcatStrings("HT: Key not found: ", symb.name));
 	return false;
 };
 
@@ -125,7 +125,7 @@ func int _HT_GetNumber(var int ptr) {
 	var zCArray arr; arr = _^(ptr);
 	return arr.numInArray;
 };
-func void _HT_ForEach(var int ptr, var func fnc) {
+func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int val, int key)
 	var zCArray arr; arr = _^(ptr); var zCArray buck;
 	var int i; var int j; var int bucket; i = 0; j = 0;
 	repeat(i, arr.numAlloc/4);
@@ -155,16 +155,5 @@ func void _HT_Destroy(var int ptr) {
 	MEM_Free(arr.array);
 	MEM_Free(ptr);
 };
-	
-func void MEM_SetUseInstance(var int inst) {
-	var int ptr; ptr = MEM_ReadIntArray (currSymbolTableAddress, inst);
-	MemoryProtectionOverride(11232304, 10);
-	MEM_WriteInt(11232304, ptr);
-	MEM_WriteInt(11232308, MEM_ReadInt(ptr+28));
-};
 
-func int MEM_GetUseInstance() {
-	return MEM_ReadInt(11232304);
-};
-		
 	
