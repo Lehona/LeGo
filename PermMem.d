@@ -88,24 +88,24 @@ func void MEM_ArraySortFunc(var int stream, var func fnc) {
 //========================================
 // [intern] Variablen
 //========================================
-const int Handles_Pointer 		= 0;
-const int Handles_Instances 	= 0;
-var int nextHandle; // = 1;
-var zCArray HandlesObj;
+const int HandlesPointer = 0;
+const int HandlesInstance = 0;
+var int nextHandle; 
 var int _PM_ArrayElements;
 var int _PM_Inst;
 var int _PM_Stack;
-const int PM_CurrHandle 		= 0;
-const int _PM_foreachTable 		= 0;
+const int PM_CurrHandle = 1;
+const int _PM_foreachTable = 0;
 
 //========================================
 // Anzahl Handles
 //========================================
 func int numHandles() {
-    if (Handles_Pointer) {
-        return _HT_GetNumber(Handles_Pointer);
+    if (HandlesPointer) {
+        return (_HT_GetNumber(HandlesPointer));
     };
     return false;
+	/* return (!!HandlesPointer*(_HT_GetNumber(HandlesPointer))); wäre viel schöner gewesen :( */
 };
 
 //========================================
@@ -122,8 +122,8 @@ func int zCParser_CreateInstance(var int inst, var int ptr) {
 // Handle auf Gültigkeit prüfen
 //========================================
 func int Hlp_IsValidHandle(var int h) {
-    if (!handles_pointer) { return false; };
-	return !!_HT_Get(Handles_Pointer, h);
+    if (!HandlesPointer) { return false; };
+	return !!_HT_Get(HandlesPointer, h);
 };
 
 //========================================
@@ -164,13 +164,11 @@ func int sizeof(var int inst) {
 //========================================
 func void clear(var int h) {
     if (!Hlp_IsValidHandle(h)) { return; };
-	MEM_Free(_HT_Get(Handles_Pointer, h));
-    _HT_Remove(Handles_Pointer, h);
-	_HT_Remove(Handles_Instances, h);
-	// var int a;
-    // a = MEM_ReadIntArray(HandlesObj.array, (h - 1) * 2);
-    // MEM_Free(a);
-    // MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, 0);
+    var int a;
+    a = _HT_Get(HandlesPointer, h);
+    MEM_Free(a);
+	_HT_Remove(HandlesPointer, h);
+	_HT_Remove(HandlesInstance, h);
 };
 
 //========================================
@@ -178,8 +176,8 @@ func void clear(var int h) {
 //========================================
 func void release(var int h) {
     if (!Hlp_IsValidHandle(h)) { return; };
-    _HT_Remove(Handles_Pointer, h);
-	_HT_Remove(Handles_Instances, h);
+	_HT_Remove(HandlesPointer, h);
+	_HT_Remove(HandlesInstance, h);
 };
 
 //========================================
@@ -188,15 +186,15 @@ func void release(var int h) {
 const int rBreak = break;
 const int rContinue = continue;
 const int foreachHndl_ptr = 0;
-
+//TODO: ForEachHandle-Scripte auf Hashtable überführen
 func void _PM_AddToForeachTable(var int h) {
     if(!_PM_foreachTable) {
         MEM_Call(_PM_CreateForeachTable);
         return;
     };
-    var int p; p = _HT_Get(Handles_Pointer, h);
+    var int p; p = _HT_Get(HandlesPointer, h);
     if(p) {
-        var int i; i = _HT_Get(Handles_Instances, h);
+        var int i; i = _HT_Get(HandlesInstance, h);
         var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
         if(!c) {
             c = MEM_ArrayCreate();
@@ -209,9 +207,9 @@ func void _PM_AddToForeachTable(var int h) {
 };
 
 func void _PM_RemoveFromForeachTable(var int h) {
-    var int p; p = _HT_Get(Handles_Pointer, h);
+    var int p; p = _HT_Get(HandlesPointer, h);
     if(p) {
-        var int i; i = _HT_Get(Handles_Instances, h);
+        var int i; i = _HT_Get(HandlesInstance, h);
         var int c; c = MEM_ReadIntArray(_PM_foreachTable, i);
         if(!c) {
             return;
@@ -224,18 +222,18 @@ func void _PM_RemoveFromForeachTable(var int h) {
     };
 };
 
-func void _PM_CreateForeachTableSub(var int val, var int key) {
-	_PM_AddToForeachTable(key);
-};
-
 func void _PM_CreateForeachTable() {
     if(_PM_foreachTable) {
         MEM_Free(_PM_foreachTable);
     };
     foreachHndl_ptr = MEM_GetFuncPtr(foreachHndl);
     _PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
-    if(Handles_Pointer) {
-		_HT_ForEach(Handles_Pointer, _PM_CreateForeachTableSub);
+    if(HandlesPointer) {
+        var int i; i = 0;
+        var int m; m = _HT_GetNumber(HandlesPointer);
+        repeat(i, m);
+            _PM_AddToForeachTable(i+1); // 1 bis m
+        end;
     };
 };
 
@@ -248,15 +246,14 @@ func void foreachHndl(var int inst, var func fnc) {
     };
     var zCArray z; z = _^(c);
     var int l; l = z.numInArray;
-    var int a; a = MEM_Alloc(l<<2);
+    var int a; a = MEM_Alloc(l<<2); 
     MEM_Copy(z.array, a, l);
     var int i; i = 0;
     var int o; o = MEM_GetFuncPtr(fnc);
     var int p; p = MEM_StackPos.position;
-    // if(i < l) {
     while(i < l);
-        var int h; h = MEM_ReadInt(a+(i<<2));
-        if(Hlp_IsValidHandle(h)) {
+        var int h; h = MEM_ReadInt(a+(i<<2)); //handle
+        if(_HT_Get(HandlesPointer, h)) {
             h;
             MEM_CallByPtr(o);
             if(MEM_PopIntResult() == rBreak) {
@@ -265,8 +262,6 @@ func void foreachHndl(var int inst, var func fnc) {
             };
         };
         i += 1;
-        // MEM_StackPos.position = p;
-    // };
     end;
     MEM_Free(a);
 };
@@ -292,11 +287,11 @@ func void delete(var int h) {
     locals();
     if (!Hlp_IsValidHandle(h)) { return; };
     _PM_RemoveFromForeachTable(h);
-    var int inst; inst = _HT_Get(Handles_Instances, h);
+    var int inst; inst = _HT_Get(HandlesInstance, h);
     var zCPar_Symbol symbCls; symbCls = _PM_ToClass(inst);
     var int fnc; fnc = MEM_FindParserSymbol(ConcatStrings(symbCls.name, "_DELETE"));
     if(fnc != -1) {
-        var int ptr; ptr = _HT_Get(Handles_Pointer, h);
+        var int ptr; ptr = _HT_Get(HandlesPointer, h);
         symbCls = MEM_PtrToInst(ptr);
         MEMINT_StackPushInst(symbCls);
         MEM_CallByID(fnc);
@@ -313,13 +308,13 @@ func void free(var int h, var int inst) {
     var int fnc; fnc = MEM_FindParserSymbol(ConcatStrings(symbCls.name, "_DELETE"));
     if(fnc != -1) {
         symbCls = MEM_PtrToInst(h);
-        h;
+        h; // 'local' variable
         MEMINT_StackPushInst(symbCls);
         MEM_CallByID(fnc);
         h = MEMINT_StackPopInt();
     };
     MEM_Free(h);
-};
+}; 
 
 //========================================
 // Speicher reservieren.
@@ -340,76 +335,66 @@ func int create(var int inst) {
 // Neues Handle anlegen
 //========================================
 func int new(var int inst) {
-    locals();
-    var int ptr;
+    locals(); var int ptr;
 	
 	nextHandle += 1;
-    if (!Handles_Pointer) {
+    if (!HandlesPointer) {
         //Falls das Array nicht existiert neu anlegen.
-        Handles_Pointer		= _HT_CreatePtr(349);
-		Handles_Instances	= _HT_CreatePtr(349);
+        HandlesPointer = _HT_Create();
+        HandlesInstance = _HT_Create();
     };
-
-	ptr = create(inst);
-
-	_HT_Insert(Handles_Pointer, ptr, nextHandle);
-	_HT_Insert(Handles_Instances, inst, nextHandle);
-
+    ptr = create(inst);
+	_HT_Insert(HandlesPointer, ptr, nextHandle);
+	_HT_Insert(HandlesInstance, inst, nextHandle);
     _PM_AddToForeachTable(nextHandle);
-
-    return nextHandle; //zuvor inkrementiert
+    return nextHandle; //das erste Handle ist somit 1
 };
 
 /* provisorisch */
 func int wrap(var int inst, var int ptr) {
     locals();
-
-    if (!Handles_Pointer) {
-        //Falls das Array nicht existiert neu anlegen.
-        Handles_Pointer		= _HT_CreatePtr(349);
-		Handles_Instances	= _HT_CreatePtr(349);
-    };
-
-	_HT_Insert(Handles_Pointer, ptr, nextHandle);
-	_HT_Insert(Handles_Instances, inst, nextHandle);
-
-    _PM_AddToForeachTable(nextHandle);
+	
 	nextHandle += 1;
-    return nextHandle-1; //zuvor inkrementiert
+    if (!HandlesPointer) {
+        //Falls das Array nicht existiert neu anlegen.
+        HandlesPointer = _HT_Create();
+        HandlesInstance = _HT_Create();
+    };
+	
+	_HT_Insert(HandlesPointer, ptr, nextHandle);
+	_HT_Insert(HandlesInstance, inst, nextHandle);
+    _PM_AddToForeachTable(nextHandle);
+    return nextHandle; //das erste Handle ist somit 1
 };
 
 //========================================
 // Handle als Instanz holen
 //========================================
 func MEMINT_HelperClass get(var int h) {
-	if (!Hlp_IsValidHandle(h)) { 
-		MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
-		MEMINT_StackPushInst(MEMINT_INSTUNASSIGNED);
-	};
-    MEM_PtrToInst(_HT_Get(Handles_Pointer, h));
-    return;
+	if (!Hlp_IsValidHandle(h)) { return; };
+    var int p; p = _HT_Get(HandlesPointer, h);
+    if(p) {
+        MEM_PtrToInst(p);
+        return;
+    };
+    MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
+    MEMINT_StackPushInst(MEMINT_INSTUNASSIGNED);
 };
 
 //========================================
 // Handle als Pointer holen
 //========================================
 func int getPtr(var int h) {
-	if (!Hlp_IsValidHandle(h)) { 
-		MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
-		return 0;
-	};
-    return _HT_Get(Handles_Pointer, h);
+    if (!Hlp_IsValidHandle(h)) { return 0; };
+	return _HT_Get(HandlesPointer, h);
 };
 
 //========================================
 // Instanz eines Handles holen
 //========================================
 func int getInst(var int h) {
-	if (!Hlp_IsValidHandle(h)) { 
-		MEM_Error(ConcatStrings("Tried to 'get' invalid handle ", IntToString(h)));
-		return 0;
-	};
-    return _HT_Get(Handles_Instances, h);
+	if (!Hlp_IsValidHandle(h)) { return 0; };
+	return _HT_Get(HandlesInstance, h);
 };
 
 //========================================
@@ -417,24 +402,22 @@ func int getInst(var int h) {
 //========================================
 func void setPtr(var int h, var int ptr) {
     if (!Hlp_IsValidHandle(h)){ return; };
-    MEM_WriteIntArray(HandlesObj.array, (h - 1) * 2, ptr);
+    _HT_Change(HandlesPointer, ptr, h);
 };
 
 //========================================
 // Betrachten der folgenden
 // Scripte auf eigene Gefahr :0
 //========================================
-func void _PM_ResetSub(var int ptr, var int handle) {
-	delete(handle);
+func void _deleteAll(var int val, var int key) {
+	delete(key);
 };
 func void _PM_Reset() {
     MEM_Info("Reset ALL the handles!");
-    if(Handles_Pointer) {
-		_HT_ForEach(Handles_Pointer, _PM_ResetSub);
-        _HT_Destroy(Handles_Pointer);
-		_HT_Destroy(Handles_Instances);
-        Handles_Pointer = 0;
-		Handles_Instances = 0;
+    if(HandlesPointer) {
+		_HT_ForEach(HandlesPointer, _deleteAll);
+		_HT_Destroy(HandlesPointer);
+		_HT_Destroy(HandlesInstance);
     };
 };
 
@@ -993,7 +976,6 @@ func void _PM_WriteArray(var int obj) {
     BW_NextLine();
 
     _PM_Tabs += 1;
-
     var int j; j = 0;
     var int p; p = MEM_StackPos.position;
     if(j < oArr.elements) {
@@ -1088,7 +1070,7 @@ func void _PM_Archive() {
 
     _PM_Mode = 1;
 
-    var int arrMax; arrMax = _HT_GetNumber(Handles_Pointer);
+    var int arrMax; arrMax = _HT_GetNumber(HandlesPointer);
 
     var int newArr; newArr = MEM_ArrayCreate();
 
@@ -1101,14 +1083,14 @@ func void _PM_Archive() {
     var int i; i = 0;
     var int p; p = MEM_StackPos.position;
     if(i < arrMax) {
-        var int ptr; ptr = _HT_Get(Handles_Pointer, i);
-        var int inst; inst = _HT_Get(Handles_Instances, i);
+        var int ptr; ptr = _HT_Get(HandlesPointer, i);
+        var int inst; inst = _HT_Get(HandlesInstance, i);
 
         if(ptr) {
-            PM_CurrHandle = i+1;
+            PM_CurrHandle = i;//+1;
             _PM_InstToSaveStruct(ptr, inst);
 
-            BW_Text(ConcatStrings("HNDL:", IntToString(i+1)));
+            BW_Text(ConcatStrings("HNDL:", IntToString(i/*+1*/)));
             BW_NextLine();
 
             _PM_WriteSaveStruct();
@@ -1118,7 +1100,7 @@ func void _PM_Archive() {
         MEM_StackPos.position = p;
     };
 
-    PM_CurrHandle = 0;
+    PM_CurrHandle = 1;
 
     BW_Text("PermMem::End");
     BW_NextLine();
@@ -1417,13 +1399,21 @@ func void _PM_Unarchive() {
     _PM_Reset();
     _PM_Line = 2;
 
-    Handles_Pointer 	= _HT_CreatePtr(349);
-	Handles_Instances 	= _HT_CreatePtr(349);
-	
+    HandlesPointer = _HT_Create();
+    HandlesInstance = _HT_Create();
+
     var int p; p = MEM_StackPos.position;
     str = _PM_TextLine();
     if(!STR_Compare("HNDL:", STR_Prefix(str, 5))) {
-        var int i; i = STR_ToInt(STR_SubStr(str, 5, STR_Len(str)-5));
+         var int i; i = STR_ToInt(STR_SubStr(str, 5, STR_Len(str)-5));
+		//Sollte egal sein, da mit Hashtables Lücken wumpe sind.
+        //Eventuelle Lücke auffüllen
+        // var int p1; p1 = MEM_StackPos.position;
+        // if((HandlesObj.numInArray/2) < (i-1)) {
+            // MEM_ArrayInsert(Handles, 0);
+            // MEM_ArrayInsert(Handles, 0);
+            // MEM_StackPos.position = p1;
+        // };
 
         PM_CurrHandle = i;
 
@@ -1434,8 +1424,8 @@ func void _PM_Unarchive() {
         BR_NextLine();
         _PM_Line += 1;
 
-		_HT_Insert(Handles_Pointer  , _PM_Head.currOffs, i);
-		_HT_Insert(Handles_Instances, _PM_Head.inst, i);
+        _HT_Insert(HandlesPointer, _PM_Head.currOffs, i);
+        _HT_Insert(HandlesInstance, _PM_Head.inst, i);
 
         MEM_StackPos.position = p;
     }
@@ -1444,7 +1434,7 @@ func void _PM_Unarchive() {
         return;
     };
 
-    PM_CurrHandle = 0;
+    PM_CurrHandle = 1;
     free(_PM_HeadPtr, _PM_SaveStruct@);
     _PM_HeadPtr = 0;
 
@@ -1459,14 +1449,14 @@ func void _PM_Unarchive() {
 };
 
 func void _PM_ArchiveError() {
-    if(_PM_Mode == 1&&PM_CurrHandle) {
+    if(_PM_Mode == 1&&(PM_CurrHandle != 1)) {
         return;
     };
     _PM_Error("Archiverfunktionen dürfen nur innerhalb eines Archivers genutzt werden!");
 };
 
 func void _PM_UnarchiveError() {
-    if(_PM_Mode == 0&&PM_CurrHandle) {
+    if(_PM_Mode == 0&&(PM_CurrHandle != 1)) {
         return;
     };
     _PM_Error("Unarchiverfunktionen dürfen nur innerhalb eines Unarchivers genutzt werden!");
