@@ -1449,14 +1449,14 @@ func void _PM_Unarchive() {
 };
 
 func void _PM_ArchiveError() {
-    if(_PM_Mode == 1&&(PM_CurrHandle != 1)) {
+    if(_PM_Mode == 1&&(PM_CurrHandle)) {
         return;
     };
     _PM_Error("Archiverfunktionen dürfen nur innerhalb eines Archivers genutzt werden!");
 };
 
 func void _PM_UnarchiveError() {
-    if(_PM_Mode == 0&&(PM_CurrHandle != 1)) {
+    if(_PM_Mode == 0&&(PM_CurrHandle)) {
         return;
     };
     _PM_Error("Unarchiverfunktionen dürfen nur innerhalb eines Unarchivers genutzt werden!");
