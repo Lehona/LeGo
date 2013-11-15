@@ -199,10 +199,15 @@ func void List_Delete(var int list, var int nr) {
         _List_ErrPtr("Delete");
         return;
     };
-    if(nr <= 1) {
-        _List_ErrNum("Delete", 2);
+    if(nr == 1) {
+		var zCList l; l = _^(list);
+		l.data = 0; 
         return;
     };
+	if (nr < 1) {
+		_List_ErrNum("Delete", 1);
+		return;
+	};
     var int p; p = List_Node(list, nr-1);
     if(!p) { return; };
     var zCList prev; prev = _^(p);
@@ -220,10 +225,15 @@ func void List_DeleteS(var int list, var int nr) {
         _List_ErrPtr("DeleteS");
         return;
     };
-    if(nr <= 1) {
-        _List_ErrNum("DeleteS", 2);
+    if(nr == 1) {
+		var zCListSort l; l = _^(list);
+		l.data = 0; 
         return;
     };
+	if (nr < 1) {
+		_List_ErrNum("DeleteS", 1);
+		return;
+	};
     var int p; p = List_NodeS(list, nr-1);
     if(!p) { return; };
     var zCListSort prev; prev = _^(p);
@@ -421,7 +431,7 @@ func int List_ContainsS(var int list, var int data) {
 };
 
 //========================================
-// Nach Data suchen
+// Data an einem Offset einfügen
 //========================================
 func void List_AddOffset(var int list, var int offset, var int data) {
     if(!list) {
@@ -576,3 +586,95 @@ func void List_ConcatS(var int list0, var int list1) {
     var zCListSort l; l = _^(List_EndS(list0));
     l.next = list1;
 };
+
+//========================================
+// In eine sortierte Liste einfügen
+//========================================
+func int List_Compare(var int data1, var int data2, var func compare) { // True if data1 > data2
+	data1;
+	data2;
+	MEM_Call(compare);
+};
+func void List_InsertSorted(var int list, var int data, var func compare) {
+    if(!list) {
+        _List_ErrPtr("InsertSorted");
+        return;
+    };
+	
+	var zCList lp; var zCList ln; lp = _^(list);
+	var int lptr; lptr = create(zClist@);
+	var zCList lnew; lnew = _^(lptr);
+
+	if (List_Compare(lp.data, data, compare)) { // In this case data is smaller than the first node, so I have to insert the data and swap values to preserve the pointer
+		lnew.next = lp.next;
+		lp.next = lptr;
+		lnew.data = lp.data;
+		lp.data = data;
+		return;
+	};
+	
+	while(lp.next); // while there is a next node
+		ln = _^(lp.next);
+		if (List_Compare(ln.data, data, compare)) {
+			/* ln.data is bigger, but lp.data isn't, so I have to insert it inbetween! */
+			lnew.next = lp.next;
+			lp.next = lptr;
+			lnew.data = data;
+			return;
+		};
+		lp = _^(lp.next);
+	end;
+	/* this means even the last node is smaller than data */
+	lp.next = lptr;
+	lnew.data = data;
+};
+
+
+func void List_InsertSortedS(var int list, var int data, var func compare) {
+    if(!list) {
+        _List_ErrPtr("InsertSortedS");
+        return;
+    };
+	
+	var zCListSort lp; var zCListSort ln; lp = _^(list);
+	var int lptr; lptr = create(zCListSort@);
+	var zCListSort lnew; lnew = _^(lptr);
+
+	if (List_Compare(lp.data, data, compare)) { // In this case data is smaller than the first node, so I have to insert the data and swap values to preserve the pointer
+		lnew.next = lp.next;
+		lp.next = lptr;
+		lnew.data = lp.data;
+		lp.data = data;
+		return;
+	};
+	
+	while(lp.next); // while there is a next node
+		ln = _^(lp.next);
+		if (List_Compare(ln.data, data, compare)) {
+			/* ln.data is bigger, but lp.data isn't, so I have to insert it inbetween! */
+			lnew.next = lp.next;
+			lp.next = lptr;
+			lnew.data = data;
+			return;
+		};
+		lp = _^(lp.next);
+	end;
+	/* this means even the last node is smaller than data */
+	lp.next = lptr;
+	lnew.data = data;
+};
+		
+		
+		
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
+	
