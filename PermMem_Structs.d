@@ -12,6 +12,8 @@
     zCArray
  */
 
+class _empty {}; // Empty class used for internal (and bad) purposes
+instance _empty@(_empty);
 class _int { var int i; };
 instance int@(_int);
 instance func@(_int);
