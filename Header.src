@@ -30,6 +30,7 @@ Box.d
 Dialoggestures.d
 Focusnames.d
 Gamestate.d
+Render.d
 Saves.d
 Int64.d
 Sprite.d
