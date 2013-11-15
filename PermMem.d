@@ -186,7 +186,7 @@ func void release(var int h) {
 const int rBreak = break;
 const int rContinue = continue;
 const int foreachHndl_ptr = 0;
-//TODO: ForEachHandle-Scripte auf Hashtable überführen
+
 func void _PM_AddToForeachTable(var int h) {
     if(!_PM_foreachTable) {
         MEM_Call(_PM_CreateForeachTable);
@@ -200,8 +200,6 @@ func void _PM_AddToForeachTable(var int h) {
             c = MEM_ArrayCreate();
             MEM_WriteIntArray(_PM_foreachTable, i, c);
         };
-        // mem_info(concatstrings("add handle ", inttostring(h+1)));
-        // mem_info(concatstrings("inst is ", inttostring(i)));
         MEM_ArrayInsert(c, h);
     };
 };
@@ -419,6 +417,7 @@ func void _PM_Reset() {
 		_HT_Destroy(HandlesPointer);
 		_HT_Destroy(HandlesInstance);
     };
+	MEM_Info("Resetting done.");
 };
 
 const int _PM_Version = 2;
@@ -555,7 +554,7 @@ func void _PM_SaveStruct_DeleteArr(var int arr) {
             };
             oc.name = "";
         };
-        MEM_Free(o);
+       MEM_Free(o);
         i += 1;
         MEM_StackPos.position = p;
     };
@@ -1406,14 +1405,6 @@ func void _PM_Unarchive() {
     str = _PM_TextLine();
     if(!STR_Compare("HNDL:", STR_Prefix(str, 5))) {
          var int i; i = STR_ToInt(STR_SubStr(str, 5, STR_Len(str)-5));
-		//Sollte egal sein, da mit Hashtables Lücken wumpe sind.
-        //Eventuelle Lücke auffüllen
-        // var int p1; p1 = MEM_StackPos.position;
-        // if((HandlesObj.numInArray/2) < (i-1)) {
-            // MEM_ArrayInsert(Handles, 0);
-            // MEM_ArrayInsert(Handles, 0);
-            // MEM_StackPos.position = p1;
-        // };
 
         PM_CurrHandle = i;
 
