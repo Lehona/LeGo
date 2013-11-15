@@ -18,27 +18,28 @@ const string LeGo_Version = "LeGo 2.2.3";
 const int LeGo_PrintS         = 1<<0;  // Interface.d
 const int LeGo_HookEngine     = 1<<1;  // HookEngine.d
 const int LeGo_AI_Function    = 1<<2;  // AI_Function.d
-const int LeGo_Trialoge       = 1<<2;  // Trialoge.d
-const int LeGo_Dialoggestures = 1<<2;  // Dialoggestures.d
-const int LeGo_FrameFunctions = 1<<3;  // FrameFunctions.d
-const int LeGo_Cursor         = 1<<3;  // Cursor.d
-const int LeGo_Focusnames     = 1<<4;  // Focusnames.d
-const int LeGo_Random         = 1<<5;  // Random.d
-const int LeGo_Bloodsplats    = 1<<6;  // Bloodsplats.d
-const int LeGo_Saves          = 1<<7;  // Saves.d
-const int LeGo_PermMem        = 1<<8;  // PermMemory.d
-const int LeGo_Anim8          = 1<<9;  // Anim8.d
-const int LeGo_View           = 1<<10; // View.d
-const int LeGo_Interface      = 1<<11; // Interface.d
-const int LeGo_Bars           = 1<<12; // Bars.d
-const int LeGo_Buttons        = 1<<13; // Buttons.d
-const int LeGo_Timer          = 1<<14; // Timer.d
-const int LeGo_EventHandler   = 1<<15; // EventHandler.d
-const int LeGo_Gamestate      = 1<<16; // Gamestate.d
-const int LeGo_Sprite         = 1<<17; // Sprite.d
-const int LeGo_Hotkey		  = 1<<18; // Hotkey.d
+const int LeGo_Trialoge       = 1<<3;  // Trialoge.d
+const int LeGo_Dialoggestures = 1<<4;  // Dialoggestures.d
+const int LeGo_FrameFunctions = 1<<5;  // FrameFunctions.d
+const int LeGo_Cursor         = 1<<6;  // Cursor.d
+const int LeGo_Focusnames     = 1<<7;  // Focusnames.d
+const int LeGo_Random         = 1<<8;  // Random.d
+const int LeGo_Bloodsplats    = 1<<9;  // Bloodsplats.d
+const int LeGo_Saves          = 1<<10;  // Saves.d
+const int LeGo_PermMem        = 1<<11;  // PermMemory.d
+const int LeGo_Anim8          = 1<<12;  // Anim8.d
+const int LeGo_View           = 1<<13; // View.d
+const int LeGo_Interface      = 1<<14; // Interface.d
+const int LeGo_Bars           = 1<<15; // Bars.d
+const int LeGo_Buttons        = 1<<16; // Buttons.d
+const int LeGo_Timer          = 1<<17; // Timer.d
+const int LeGo_EventHandler   = 1<<18; // EventHandler.d
+const int LeGo_Gamestate      = 1<<19; // Gamestate.d
+const int LeGo_Sprite         = 1<<20; // Sprite.d
+const int LeGo_Render		  = 1<<21; // Render.d
+const int LeGo_Hotkey		  = 1<<22; // Hotkey.d
 
-const int LeGo_All            = (1<<19)-1; // Sämtliche Bibliotheken
+const int LeGo_All            = (1<<23)-1; // Sämtliche Bibliotheken
 
 //========================================
 // [intern] Variablen
@@ -75,8 +76,8 @@ func void LeGo_InitAlways(var int f) {
         if(HandlesPointer) {
             // Weltenwechsel
         };
-        if((HandlesPointer)&&(!_LeGo_Loaded)) {
-            // Passiert bei 'Neues Spiel' -> 'Neues Spiel'
+        if((_LeGo_Init)&&(!_LeGo_Loaded)) {
+            MEM_InfoBox("Neues Spiel -> Neues Spiel");
             _PM_Reset();
         };
     };
@@ -119,7 +120,16 @@ func void LeGo_InitAlways(var int f) {
 			FF_Apply(_Hotkey_Do);
 		};
 		
+		if (f & LeGo_Render) {
+			_render_list = new(zCList@);
+		};
+			
     };
+	
+	if (f & LeGo_Render) {
+		_Render_RestorePointer();
+		GameState_AddListener(_Render_RestorePointer_Listener);
+	};
 	
 	if(f & LeGo_Interface) {
         Print_fixPS();
@@ -133,7 +143,7 @@ func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Cursor) {
         HookEngineF(5062907, 5, _CURSOR_GETVAL);
     };
-
+	
     if(f & LeGo_Random) {
         r_DefaultInit();
     };
@@ -157,7 +167,15 @@ func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Sprite) {
         HookEngineF(zRND_D3D__EndFrame, 6, _Sprite_DoRender);
     };
-
+	
+	if (f & LeGo_Render) {
+		HookEngineF(oCGame__RenderX, 6, _Render_Hook);
+		// Welt zum Rendern
+		_render_wld = create(oWorld@);
+		CALL__thiscall(_render_wld, zCWorld__zCWorld);
+		var oWorld w; w = MEM_PtrToInst(_render_wld);
+		w.m_bIsInventoryWorld = 1;
+	};
 
 };
 
@@ -180,6 +198,8 @@ func void LeGo_Init(var int flags) {
     LeGo_InitAlways(_LeGo_Flags);
     _LeGo_Init = 1;
     _LeGo_Loaded = 1;
+	
+	MEM_Info(ConcatStrings(LeGo_Version, " wurde erfolgreich initialisiert."));
 };
 
 
