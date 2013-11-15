@@ -84,7 +84,7 @@ func int _HT_Get(var int ptr, var int key) {
 	var zCArray arr; arr = _^(ptr);
 	var int h; h = hash(key) % (arr.numAlloc/4);
 	var int bucket; bucket = MEM_ReadIntArray(arr.array, h);
-	if (!bucket) { MEM_Info(ConcatStrings("HT: Key not found: ", symb.name)); return false; };
+	if (!bucket) { /* MEM_Info(ConcatStrings("HT: Key not found: ", symb.name)); */ return false; };
 	var zCArray buck; buck = _^(bucket);
 	var int i;
 	repeat(i, buck.numInArray/2);
@@ -93,7 +93,7 @@ func int _HT_Get(var int ptr, var int key) {
 		};
 	end;
 	
-	MEM_Info(ConcatStrings("HT: Key not found: ", symb.name));
+//	MEM_Info(ConcatStrings("HT: Key not found: ", symb.name));
 	return false;
 };
 
