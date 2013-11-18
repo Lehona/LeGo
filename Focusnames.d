@@ -23,7 +23,7 @@ func int Focusnames_Color_Hostile() {
 // [intern] Färben der Namen
 //========================================
 func void _Focusnames() {
-    var int col;
+    var int col; col = -1; // Stupid pseudo-locals
     var oCNpc her; her = Hlp_GetNpc(hero);
 
 if(Hlp_Is_oCNpc(her.focus_vob)) {
