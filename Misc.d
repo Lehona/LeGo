@@ -1,13 +1,3 @@
-
-
-func int magnitude2D(var int x, var int y) {
-	return +sqrtf(mkf(x*x+y*y));
-};
-
-func int dotproduct(var int x1, var int y1, var int x2, var int y2)  {
-	return +addf(mulf(x1,x2), mulf(y1,y2));
-};
-
 const int phi = 1070141312; // PI/2
 
 func int atan2f(var int x, var int y) {
@@ -74,4 +64,3 @@ func int asin(var int sine) {
 func int cos(var int angle) {
 	return +sin(subf(phi, angle));
 };
-

@@ -135,3 +135,13 @@ func void _Render_RestorePointer_Listener(var int state) {
 		_Render_RestorePointer();
 	};
 };
+
+instance oWorld@(oWorld);
+func void _Render_Init() {
+	 HookEngineF(oCGame__RenderX, 6, _Render_Hook);
+	// Welt zum Rendern
+	_render_wld = create(oWorld@);
+	CALL__thiscall(_render_wld, zCWorld__zCWorld);
+	var oWorld w; w = MEM_PtrToInst(_render_wld);
+	w.m_bIsInventoryWorld = 1;
+};

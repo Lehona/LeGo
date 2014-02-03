@@ -76,8 +76,7 @@ func void LeGo_InitAlways(var int f) {
         if(HandlesPointer) {
             // Weltenwechsel
         };
-        if((_LeGo_Init)&&(!_LeGo_Loaded)) {
-            MEM_InfoBox("Neues Spiel -> Neues Spiel");
+        if((_LeGo_Init)&&(!_LeGo_Loaded)) { // Neues Spiel -> Neues Spiel
             _PM_Reset();
         };
     };
@@ -132,6 +131,8 @@ func void LeGo_InitAlways(var int f) {
 	};
 	
 	if(f & LeGo_Interface) {
+		// TODO: Check whether this is working!
+		// TODO: Check whether log entries are invisible sometimes
         Print_fixPS();
     };
 };
@@ -169,12 +170,7 @@ func void LeGo_InitGamestart(var int f) {
     };
 	
 	if (f & LeGo_Render) {
-		HookEngineF(oCGame__RenderX, 6, _Render_Hook);
-		// Welt zum Rendern
-		_render_wld = create(oWorld@);
-		CALL__thiscall(_render_wld, zCWorld__zCWorld);
-		var oWorld w; w = MEM_PtrToInst(_render_wld);
-		w.m_bIsInventoryWorld = 1;
+		_Render_Init();
 	};
 
 };
