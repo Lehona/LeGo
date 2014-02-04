@@ -26,7 +26,6 @@ Trialoge.d
 Names.d
 Bars.d
 Buttons.d
-Box.d
 Dialoggestures.d
 Focusnames.d
 Gamestate.d
@@ -34,5 +33,5 @@ Render.d
 Saves.d
 Int64.d
 Sprite.d
-Hotkey.d
+Hashtable.d
 LeGo.d
