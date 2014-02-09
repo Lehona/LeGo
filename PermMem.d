@@ -416,6 +416,8 @@ func void _PM_Reset() {
 		_HT_ForEach(HandlesPointer, _deleteAll);
 		_HT_Destroy(HandlesPointer);
 		_HT_Destroy(HandlesInstance);
+		HandlesPointer = 0;
+		HandlesInstance = 0;
     };
 	MEM_Info("Resetting done.");
 };
