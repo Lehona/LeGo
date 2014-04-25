@@ -125,7 +125,8 @@ func int _HT_GetNumber(var int ptr) {
 	var zCArray arr; arr = _^(ptr);
 	return arr.numInArray;
 };
-func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int val, int key)
+func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
+	// TODO: fixen (bugged)
 	var zCArray arr; arr = _^(ptr); var zCArray buck;
 	var int i; var int j; var int bucket; i = 0; j = 0;
 	repeat(i, arr.numAlloc/4);
@@ -133,8 +134,8 @@ func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int val, int key)
 		if (bucket) {
 			buck = _^(bucket);
 			repeat(j, buck.numInArray/2);
-				MEM_ReadIntArray(bucket, j*2+1);
-				MEM_ReadIntArray(bucket, j*2  );
+				MEM_ReadIntArray(buck.array, j*2  );
+				MEM_ReadIntArray(buck.array, j*2+1);
 				MEM_Call(fnc);
 			end;
 		};

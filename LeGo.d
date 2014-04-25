@@ -75,7 +75,7 @@ func void LeGo_InitAlways(var int f) {
         if(HandlesPointer) {
             // Weltenwechsel
         };
-        if((_LeGo_Init)&&(!_LeGo_Loaded)) { // Neues Spiel -> Neues Spiel
+        if((_LeGo_Init)&&(!_LeGo_Loaded)) { // Aus einem Spiel heraus -> Neues Spiel
             _PM_Reset();
         };
     };
