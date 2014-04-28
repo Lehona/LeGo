@@ -80,11 +80,10 @@ func void _HT_Resize(var int ptr, var int size) {
 		
 
 func int _HT_Get(var int ptr, var int key) {
-	var zCPar_Symbol symb; symb = _^(MEM_ReadIntArray (currSymbolTableAddress, MEM_GetFuncIDByOffset(MEM_GetCallerStackPos())));
 	var zCArray arr; arr = _^(ptr);
 	var int h; h = hash(key) % (arr.numAlloc/4);
 	var int bucket; bucket = MEM_ReadIntArray(arr.array, h);
-	if (!bucket) { /* MEM_Info(ConcatStrings("HT: Key not found: ", symb.name)); */ return false; };
+	if (!bucket) { return false; };
 	var zCArray buck; buck = _^(bucket);
 	var int i;
 	repeat(i, buck.numInArray/2);
@@ -92,8 +91,6 @@ func int _HT_Get(var int ptr, var int key) {
 			return (MEM_ArrayRead(bucket, i*2+1));
 		};
 	end;
-	
-//	MEM_Info(ConcatStrings("HT: Key not found: ", symb.name));
 	return false;
 };
 
@@ -126,7 +123,6 @@ func int _HT_GetNumber(var int ptr) {
 	return arr.numInArray;
 };
 func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
-	// TODO: fixen (bugged)
 	var zCArray arr; arr = _^(ptr); var zCArray buck;
 	var int i; var int j; var int bucket; i = 0; j = 0;
 	repeat(i, arr.numAlloc/4);

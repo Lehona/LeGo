@@ -50,7 +50,7 @@ var int _LeGo_Loaded;
 // [intern] Abhängigkeiten bestimmen
 //========================================
 func void LeGo_InitFlags(var int f) {
-    if(f & LeGo_Bloodsplats)    { f = f | LeGo_FrameFunctions | LeGo_HookEngine | LeGo_Random; };
+    if(f & LeGo_Bloodsplats)    { f = f | LeGo_FrameFunctions | LeGo_HookEngine | LeGo_Random | LeGo_Anim8; };
     if(f & LeGo_Gamestate)      { f = f | LeGo_EventHandler | LeGo_Saves; };
     if(f & LeGo_Cursor)         { f = f | LeGo_Interface | LeGo_View; };
     if(f & LeGo_PrintS)         { f = f | LeGo_AI_Function | LeGo_Anim8 | LeGo_Interface; };
