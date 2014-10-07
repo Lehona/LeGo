@@ -257,7 +257,7 @@ func void TRIA_Start() {
         MEM_StackPos.position = p;
     };
 
-    Npc_ClearAIQueue(self);
+    // Npc_ClearAIQueue(self); //Mit diesem Befehl beendet sich der Dialog nicht richtig, daher auskommentiert. Ich habe Angst, dass ich irgendwas anderes kaputt gemacht habe, aber bisher konnte ich keine Probleme feststellen.
     Npc_ClearAIQueue(hero);
     Ai_Output(hero,self,"");
 
@@ -378,7 +378,7 @@ func void _TRIA_Finish() {
     var int p; p = MEM_StackPos.position;
     if(i < TRIA_CPtr-1) {
         var c_npc slf; slf = MEM_PtrToInst(MEM_ReadStatArr(TRIA_NpcPtr, i));
-        AI_ContinueRoutine(slf);
+        //AI_ContinueRoutine(slf);
         i += 1;
         MEM_StackPos.position = p;
     };

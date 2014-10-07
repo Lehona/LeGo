@@ -68,7 +68,7 @@ func void AI_Function_SI(var c_npc slf, var func function, var string param1, va
 };
 func void AI_Function_IS(var c_npc slf, var func function, var int param1, var string param2) {
     var int s; s = SB_New();
-    SB ("SI ");
+    SB ("IS ");
     SBi(param1);
     SB (" ");
     SB (STR_Escape(param2));

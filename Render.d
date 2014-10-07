@@ -6,7 +6,7 @@ class RenderItem {
 	var int itmPtr; // oCItem*
 	var int view;
 	var int view_open;
-	var int priority; // standardmäßig 0!
+	var int priority; // standardmäßig 0! TODO: Höhere Priorität = weiter oben oder unten?
 };
 instance RenderItem@(RenderItem);
 
@@ -18,7 +18,7 @@ func int Render_AddItemPrio(var int itemInst, var int x1, var int y1, var int x2
 	itm.view = View_Create(x1, y1, x2, y2);
 	itm.priority = priority;
 	View_Open(itm.view);
-	MEMINT_GetMemHelper(); // Ich sichere mir jetzt Items im MEM_Helper von Ikarus - gute Idee???
+	MEMINT_GetMemHelper(); // Ich sichere mir jetzt Items im MEM_Helper von Ikarus - gute Idee??? // Nein, unbedingt beheben! TODO
 	CreateInvItem(MEM_Helper, itemInst);
 	itm.itmPtr = _@(item);
 	var zCList l; l = get(_render_list);
@@ -111,6 +111,7 @@ func int _Render_Comparator(var int data1, var int data2) {
 };
 
 func void _Render_RestorePointer_Sub(var int list) {
+	// TODO: Nach dieser Funktion hat der Render immer nur 1 Item von jeder Instanz im Inventar, das könnte gehörig schief gehen?
 	var RenderItem itm; 
 	var zCList l; l = _^(list);
 	if (l.data) {
