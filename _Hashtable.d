@@ -57,11 +57,12 @@ func void _HT_Insert(var int ptr, var int val, var int key) {
 };
 
 
+
 func void _HT_Resize(var int ptr, var int size) {
 	var zCArray arr; arr = _^(ptr); var zCArray buck;
 	var int htbl; htbl = _HT_CreatePtr(size); var zCArray hArr; hArr = _^(htbl);
 	var int i; var int j; var int bucket; i = 0; j = 0;
-	repeat(i, arr.numAlloc);
+	repeat(i, arr.numAlloc/4);
 		bucket = MEM_ReadIntArray(arr.array, i);
 		if (bucket) {
 			buck = _^(bucket);
@@ -74,9 +75,8 @@ func void _HT_Resize(var int ptr, var int size) {
 	MEM_Free(arr.array);
 	arr.array = hArr.array;
 	arr.numAlloc = size*4;
-	arr.numInArray = hArr.array;
+	arr.numInArray = hArr.numInArray;
 };
-		
 		
 
 func int _HT_Get(var int ptr, var int key) {

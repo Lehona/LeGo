@@ -419,19 +419,19 @@ func void AI_PrintScreen_Ext(var string txt, var int x, var int y, var string fo
 	AI_Function_I(self, AI_PrintScreen_Execute, h);
 };
 func void Print_FixPS() {
-    var int test; test = MEM_GetFuncOffset(PrintScreen_Ext);
+    var int PS_Ext; PS_Ext = MEM_GetFuncOffset(PrintScreen_Ext);
     var zCPar_Symbol PS; PS = _^(MEM_ReadIntArray(contentSymbolTableAddress, MEM_GetFuncID(PrintScreen)));
 
     Call_Begin(0);
-        Call_IntParam(_@(test));
+        Call_IntParam(_@(PS_Ext));
         Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
 
     PS.content = Call_Close();
-    test = MEM_GetFuncOffset(AI_PrintScreen_Ext);
+    var int AI_PS_Ext; AI_PS_Ext = MEM_GetFuncOffset(AI_PrintScreen_Ext);
      PS = _^(MEM_ReadIntArray(contentSymbolTableAddress, MEM_GetFuncID(AI_PrintScreen)));
 
     Call_Begin(0);
-        Call_IntParam(_@(test));
+        Call_IntParam(_@(AI_PS_Ext));
         Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
 
     PS.content = Call_Close();
