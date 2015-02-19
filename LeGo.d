@@ -36,7 +36,7 @@ const int LeGo_Timer          = 1<<17; // Timer.d
 const int LeGo_EventHandler   = 1<<18; // EventHandler.d
 const int LeGo_Gamestate      = 1<<19; // Gamestate.d
 const int LeGo_Sprite         = 1<<20; // Sprite.d
-const int LeGo_Render		  = 1<<21; // Render.d
+const int LeGo_Render          = 1<<21; // Render.d
 
 const int LeGo_All            = (1<<22)-1; // Sämtliche Bibliotheken
 
@@ -79,18 +79,18 @@ func void LeGo_InitAlways(var int f) {
             _PM_Reset();
         };
     };
-	
-	if(f & LeGo_Timer) {
+
+    if(f & LeGo_Timer) {
         _Timer_Init();
     };
-	
+
     if(_LeGo_Loaded) {
         // Wenn ein Spielstand geladen wird
         if(f & LeGo_Saves) {
             _BR_LoadGame();
         };
     };
-	
+
     if(!_LeGo_Loaded) {
         // Nur beim ersten Spielstart
         if(f & LeGo_Gamestate) {
@@ -112,21 +112,21 @@ func void LeGo_InitAlways(var int f) {
         if(f & LeGo_Cursor) {
             Cursor_Event = Event_Create();
         };
-		
-		if (f & LeGo_Render) {
-			_render_list = new(zCList@);
-		};
-			
+
+        if (f & LeGo_Render) {
+            _render_list = new(zCList@);
+        };
+
     };
-	
-	if (f & LeGo_Render) {
-		_Render_RestorePointer();
-		GameState_AddListener(_Render_RestorePointer_Listener);
-	};
-	
-	if(f & LeGo_Interface) {
-		// TODO: Check whether this is working!
-		// TODO: Check whether log entries are invisible sometimes
+
+    if (f & LeGo_Render) {
+        _Render_RestorePointer();
+        GameState_AddListener(_Render_RestorePointer_Listener);
+    };
+
+    if(f & LeGo_Interface) {
+        // TODO: Check whether this is working!
+        // TODO: Check whether log entries are invisible sometimes
         Print_fixPS();
     };
 };
@@ -138,7 +138,7 @@ func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Cursor) {
         HookEngineF(5062907, 5, _CURSOR_GETVAL);
     };
-	
+
     if(f & LeGo_Random) {
         r_DefaultInit();
     };
@@ -162,10 +162,10 @@ func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Sprite) {
         HookEngineF(zRND_D3D__EndFrame, 6, _Sprite_DoRender);
     };
-	
-	if (f & LeGo_Render) {
-		_Render_Init();
-	};
+
+    if (f & LeGo_Render) {
+        _Render_Init();
+    };
 
 };
 
@@ -177,7 +177,7 @@ func void LeGo_Init(var int flags) {
         MEM_Error("LeGo benötigt mindestens Ikarus 1.2!");
         return;
     };
-	
+
     MEM_InitAll();
     MEM_Info(ConcatStrings(LeGo_Version, " wird initialisiert."));
 
@@ -188,8 +188,8 @@ func void LeGo_Init(var int flags) {
     LeGo_InitAlways(_LeGo_Flags);
     _LeGo_Init = 1;
     _LeGo_Loaded = 1;
-	
-	MEM_Info(ConcatStrings(LeGo_Version, " wurde erfolgreich initialisiert."));
+
+    MEM_Info(ConcatStrings(LeGo_Version, " wurde erfolgreich initialisiert."));
 };
 
 

@@ -49,11 +49,22 @@ func int Print_CreateText(var string text, var string font) {
 
 func int Print_CreateTextPtr(var string text, var string font) {
     var int ptr; ptr = create(zCViewText@);
-    var zCViewText txt; txt = MEM_PtrToInst(ptr);
+    var zCViewText txt; txt = _^(ptr);
     txt.timed = 0;
     txt.font = Print_GetFontPtr(font);
     txt.text = text;
     txt.color = -1;
+    return ptr;
+};
+
+func int Print_CreateTextPtrColored(var string text, var string font, var int color) {
+    var int ptr; ptr = create(zCViewText@);
+    var zCViewText txt; txt = _^(ptr);
+    txt.timed = 0;
+    txt.font = Print_GetFontPtr(font);
+    txt.text = text;
+    txt.color = color;
+    txt.colored = 1;
     return ptr;
 };
 
@@ -73,7 +84,7 @@ func int Print_GetTextPtr(var int hndl) {
 //========================================
 func void Print_DeleteText(var int hndl) {
     if (!Hlp_IsValidHandle(hndl)) { return; };
-    var zCView v; v = MEM_PtrToInst(MEM_Game.array_view[0]);
+    var zCView v; v = _^(MEM_Game.array_view[0]);
     var int list; list = _@(v.textLines_data);
     var int offs; offs = List_Contains(list, getPtr(hndl));
     if(offs > 1) {
@@ -187,7 +198,7 @@ func void zCViewTextPrint_UnArchiver(var zCViewText this) {
     this.timed = PM_LoadInt("timed");
     this.colored = PM_LoadInt("colored");
 
-    var zCView v; v = MEM_PtrToInst(MEM_Game.array_view[0]);
+    var zCView v; v = _^(MEM_Game.array_view[0]);
     if (v.textlines_next) {
         List_Add(v.textlines_next, MEM_InstToPtr(this));
     } else {
@@ -202,7 +213,7 @@ func int Print_Ext(var int x, var int y, var string text, var string font, var i
         var zCViewText txt; txt = get(h);
     } else {
         h = -1;
-        txt = MEM_PtrToInst(create(zCViewTextPrint));
+        txt = _^(create(zCViewTextPrint));
     };
 
     if(!color) { color = 1; };
@@ -224,7 +235,7 @@ func int Print_Ext(var int x, var int y, var string text, var string font, var i
         txt.posy = (PS_VMax - Print_ToVirtual(Print_GetFontHeight(font), PS_Y)) / 2;
     };
 
-    var zCView v; v = MEM_PtrToInst(MEM_Game.array_view[0]);
+    var zCView v; v = _^(MEM_Game.array_view[0]);
     if (v.textlines_next) {
         List_Add(v.textlines_next, MEM_InstToPtr(txt));
     } else {
@@ -271,7 +282,7 @@ func int Print_TextField(var int x, var int y, var string text, var string font,
     var int cnt; cnt = STR_SplitCount(text, Print_LineSeperator);
     var int i; i = 1;
     var int ptr; ptr = Print_CreateTextPtr(STR_Split(text, Print_LineSeperator, 0), font);
-    var zCViewText txt; txt = MEM_PtrToInst(ptr);
+    var zCViewText txt; txt = _^(ptr);
     txt.posx = x;
     txt.posy = y;
 
@@ -281,7 +292,7 @@ func int Print_TextField(var int x, var int y, var string text, var string font,
         return list;
     };
         ptr = Print_CreateTextPtr(STR_Split(text, Print_LineSeperator, i), font);
-        txt = MEM_PtrToInst(ptr);
+        txt = _^(ptr);
         txt.posx = x;
         txt.posy = y+(height*i);
 
@@ -396,27 +407,27 @@ func void PrintScreen_Ext(var string txt, var int x, var int y, var string font,
     Print_Ext(x, y, txt, font, COL_White, timeSec * 1000);
 };
 class PS_Param {
-	var string txt;
-	var int x;
-	var int y;
-	var string font;
-	var int timesec;
+    var string txt;
+    var int x;
+    var int y;
+    var string font;
+    var int timesec;
 }; instance PS_Param@(PS_Param);
 
 func void AI_PrintScreen_Execute(var int h) {
-	var PS_Param p; p = get(h);
-	PrintScreen_Ext(p.txt, p.x, p.y, p.font, p.timeSec);
-	delete(h);
+    var PS_Param p; p = get(h);
+    PrintScreen_Ext(p.txt, p.x, p.y, p.font, p.timeSec);
+    delete(h);
 };
 
 func void AI_PrintScreen_Ext(var string txt, var int x, var int y, var string font, var int timeSec) {
-	var int h; h = New(PS_Param@);
-	PS_Param@.txt = txt;
-	PS_Param@.x = x;
-	PS_Param@.y = y;
-	PS_Param@.font = font;
-	PS_Param@.timeSec = timeSec;
-	AI_Function_I(self, AI_PrintScreen_Execute, h);
+    var int h; h = New(PS_Param@);
+    PS_Param@.txt = txt;
+    PS_Param@.x = x;
+    PS_Param@.y = y;
+    PS_Param@.font = font;
+    PS_Param@.timeSec = timeSec;
+    AI_Function_I(self, AI_PrintScreen_Execute, h);
 };
 func void Print_FixPS() {
     var int PS_Ext; PS_Ext = MEM_GetFuncOffset(PrintScreen_Ext);

@@ -141,7 +141,7 @@ func int List_Node(var int list, var int nr) {
             return 0;
         };
         list = l.next;
-		l = _^(list);
+        l = _^(list);
         i += 1;
     end;
     return list;
@@ -200,14 +200,14 @@ func void List_Delete(var int list, var int nr) {
         return;
     };
     if(nr == 1) {
-		var zCList l; l = _^(list);
-		l.data = 0; 
+        var zCList l; l = _^(list);
+        l.data = 0;
         return;
     };
-	if (nr < 1) {
-		_List_ErrNum("Delete", 1);
-		return;
-	};
+    if (nr < 1) {
+        _List_ErrNum("Delete", 1);
+        return;
+    };
     var int p; p = List_Node(list, nr-1);
     if(!p) { return; };
     var zCList prev; prev = _^(p);
@@ -226,14 +226,14 @@ func void List_DeleteS(var int list, var int nr) {
         return;
     };
     if(nr == 1) {
-		var zCListSort l; l = _^(list);
-		l.data = 0; 
+        var zCListSort l; l = _^(list);
+        l.data = 0;
         return;
     };
-	if (nr < 1) {
-		_List_ErrNum("DeleteS", 1);
-		return;
-	};
+    if (nr < 1) {
+        _List_ErrNum("DeleteS", 1);
+        return;
+    };
     var int p; p = List_NodeS(list, nr-1);
     if(!p) { return; };
     var zCListSort prev; prev = _^(p);
@@ -278,6 +278,19 @@ func void List_DestroyS(var int list) {
 //========================================
 // Funktion auf eine Liste anwenden
 //========================================
+func void List_ForF(var int list, var func fnc) {
+    if(!list) {
+        _List_ErrPtr("ForF");
+        return;
+    };
+    var zCList l;
+    while(list);
+        l = _^(list);
+        list;
+        MEM_Call(fnc);
+        list = l.next;
+    end;
+};
 func void List_For(var int list, var string fnc) {
     if(!list) {
         _List_ErrPtr("For");
@@ -293,6 +306,19 @@ func void List_For(var int list, var string fnc) {
     end;
 };
 
+func void List_ForFS(var int list, var func fnc) {
+    if(!list) {
+        _List_ErrPtr("ForFS");
+        return;
+    };
+    var zCListSort l;
+    while(list);
+        l = _^(list);
+        list;
+        MEM_Call(fnc);
+        list = l.next;
+    end;
+};
 func void List_ForS(var int list, var string fnc) {
     if(!list) {
         _List_ErrPtr("ForS");
@@ -554,7 +580,7 @@ func int List_Create(var int data) {
     var int ptr; ptr = create(zCList@);
     var zCList l; l = _^(ptr);
     l.data = data;
-	l.next = 0;
+    l.next = 0;
     return ptr;
 };
 
@@ -562,7 +588,7 @@ func int List_CreateS(var int data) {
     var int ptr; ptr = create(zCListSort@);
     var zCListSort l; l = _^(ptr);
     l.data = data;
-	l.next = 0;
+    l.next = 0;
     return ptr;
 };
 
@@ -591,42 +617,42 @@ func void List_ConcatS(var int list0, var int list1) {
 // In eine sortierte Liste einfügen
 //========================================
 func int List_Compare(var int data1, var int data2, var func compare) { // True if data1 > data2
-	data1;
-	data2;
-	MEM_Call(compare);
+    data1;
+    data2;
+    MEM_Call(compare);
 };
 func void List_InsertSorted(var int list, var int data, var func compare) {
     if(!list) {
         _List_ErrPtr("InsertSorted");
         return;
     };
-	
-	var zCList lp; var zCList ln; lp = _^(list);
-	var int lptr; lptr = create(zClist@);
-	var zCList lnew; lnew = _^(lptr);
 
-	if (List_Compare(lp.data, data, compare)) { // In this case data is smaller than the first node, so I have to insert the data and swap values to preserve the pointer
-		lnew.next = lp.next;
-		lp.next = lptr;
-		lnew.data = lp.data;
-		lp.data = data;
-		return;
-	};
-	
-	while(lp.next); // while there is a next node
-		ln = _^(lp.next);
-		if (List_Compare(ln.data, data, compare)) {
-			/* ln.data is bigger, but lp.data isn't, so I have to insert it inbetween! */
-			lnew.next = lp.next;
-			lp.next = lptr;
-			lnew.data = data;
-			return;
-		};
-		lp = _^(lp.next);
-	end;
-	/* this means even the last node is smaller than data */
-	lp.next = lptr;
-	lnew.data = data;
+    var zCList lp; var zCList ln; lp = _^(list);
+    var int lptr; lptr = create(zClist@);
+    var zCList lnew; lnew = _^(lptr);
+
+    if (List_Compare(lp.data, data, compare)) { // In this case data is smaller than the first node, so I have to insert the data and swap values to preserve the pointer
+        lnew.next = lp.next;
+        lp.next = lptr;
+        lnew.data = lp.data;
+        lp.data = data;
+        return;
+    };
+
+    while(lp.next); // while there is a next node
+        ln = _^(lp.next);
+        if (List_Compare(ln.data, data, compare)) {
+            /* ln.data is bigger, but lp.data isn't, so I have to insert it inbetween! */
+            lnew.next = lp.next;
+            lp.next = lptr;
+            lnew.data = data;
+            return;
+        };
+        lp = _^(lp.next);
+    end;
+    /* this means even the last node is smaller than data */
+    lp.next = lptr;
+    lnew.data = data;
 };
 
 
@@ -635,46 +661,45 @@ func void List_InsertSortedS(var int list, var int data, var func compare) {
         _List_ErrPtr("InsertSortedS");
         return;
     };
-	
-	var zCListSort lp; var zCListSort ln; lp = _^(list);
-	var int lptr; lptr = create(zCListSort@);
-	var zCListSort lnew; lnew = _^(lptr);
 
-	if (List_Compare(lp.data, data, compare)) { // In this case data is smaller than the first node, so I have to insert the data and swap values to preserve the pointer
-		lnew.next = lp.next;
-		lp.next = lptr;
-		lnew.data = lp.data;
-		lp.data = data;
-		return;
-	};
-	
-	while(lp.next); // while there is a next node
-		ln = _^(lp.next);
-		if (List_Compare(ln.data, data, compare)) {
-			/* ln.data is bigger, but lp.data isn't, so I have to insert it inbetween! */
-			lnew.next = lp.next;
-			lp.next = lptr;
-			lnew.data = data;
-			return;
-		};
-		lp = _^(lp.next);
-	end;
-	/* this means even the last node is smaller than data */
-	lp.next = lptr;
-	lnew.data = data;
+    var zCListSort lp; var zCListSort ln; lp = _^(list);
+    var int lptr; lptr = create(zCListSort@);
+    var zCListSort lnew; lnew = _^(lptr);
+
+    if (List_Compare(lp.data, data, compare)) { // In this case data is smaller than the first node, so I have to insert the data and swap values to preserve the pointer
+        lnew.next = lp.next;
+        lp.next = lptr;
+        lnew.data = lp.data;
+        lp.data = data;
+        return;
+    };
+
+    while(lp.next); // while there is a next node
+        ln = _^(lp.next);
+        if (List_Compare(ln.data, data, compare)) {
+            /* ln.data is bigger, but lp.data isn't, so I have to insert it inbetween! */
+            lnew.next = lp.next;
+            lp.next = lptr;
+            lnew.data = data;
+            return;
+        };
+        lp = _^(lp.next);
+    end;
+    /* this means even the last node is smaller than data */
+    lp.next = lptr;
+    lnew.data = data;
 };
-		
-		
-		
-	
-	
-	
-	
-	
-	
-	
-	
 
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+

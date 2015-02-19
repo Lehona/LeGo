@@ -11,7 +11,7 @@ instance zCView@ (zCView);
 //========================================
 // View erzeugen
 //========================================
-func void _View_Create(var int ptr, var int x1, var int y1, var int x2, var int y2) {
+func void _ViewPtr_CreateIntoPtr(var int ptr, var int x1, var int y1, var int x2, var int y2) {
     CALL_IntParam(2);
     CALL_IntParam(y2);
     CALL_IntParam(x2);
@@ -22,16 +22,32 @@ func void _View_Create(var int ptr, var int x1, var int y1, var int x2, var int 
     vw.fxOpen = 0; // Das sieht einfach nur hässlich aus.
     vw.fxClose = 0;
 };
+func int ViewPtr_Create(var int x1, var int y1, var int x2, var int y2) {
+    var int ptr; ptr = create(zCView@);
+    _ViewPtr_CreateIntoPtr(ptr, x1, y1, x2, y2);
+    return ptr;
+};
 func int View_Create(var int x1, var int y1, var int x2, var int y2) {
     var int hndl; hndl = new(zCView@);
     var zCView v; v = get(hndl);
-    _View_Create(getPtr(hndl), x1, y1, x2, y2);
+    _ViewPtr_CreateIntoPtr(getPtr(hndl), x1, y1, x2, y2);
     return hndl;
+};
+
+func int ViewPtr_New() {
+    return ViewPtr_Create(0, 0, 0, 0);
+};
+func int View_New() {
+    return View_Create(0, 0, 0, 0);
 };
 
 //========================================
 // View erzeugen (Pixel)
 //========================================
+func int ViewPtr_CreatePxl(var int x1, var int y1, var int x2, var int y2) {
+    return ViewPtr_Create(Print_ToVirtual(x1, PS_X), Print_ToVirtual(y1, PS_Y),
+                          Print_ToVirtual(x2, PS_X), Print_ToVirtual(y2, PS_Y));
+};
 func int View_CreatePxl(var int x1, var int y1, var int x2, var int y2) {
     return View_Create(Print_ToVirtual(x1, PS_X), Print_ToVirtual(y1, PS_Y),
                        Print_ToVirtual(x2, PS_X), Print_ToVirtual(y2, PS_Y));
@@ -40,6 +56,9 @@ func int View_CreatePxl(var int x1, var int y1, var int x2, var int y2) {
 //========================================
 // View erzeugen (Mittelpunkt)
 //========================================
+func int ViewPtr_CreateCenter(var int x, var int y, var int w, var int h) {
+    return ViewPtr_Create(x-(w>>1), y-(h>>1), x+((w+1)>>1), y+((h+1)>>1));
+};
 func int View_CreateCenter(var int x, var int y, var int w, var int h) {
     return View_Create(x-(w>>1), y-(h>>1), x+((w+1)>>1), y+((h+1)>>1));
 };
@@ -47,6 +66,10 @@ func int View_CreateCenter(var int x, var int y, var int w, var int h) {
 //========================================
 // View erzeugen (Mittelpunkt)(Pixel)
 //========================================
+func int ViewPtr_CreateCenterPxl(var int x, var int y, var int w, var int h) {
+    return ViewPtr_CreateCenter(Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y),
+                                Print_ToVirtual(w, PS_X), Print_ToVirtual(h, PS_Y));
+};
 func int View_CreateCenterPxl(var int x, var int y, var int w, var int h) {
     return View_CreateCenter(Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y),
                              Print_ToVirtual(w, PS_X), Print_ToVirtual(h, PS_Y));
@@ -69,38 +92,59 @@ func int View_GetPtr(var int hndl) {
 //========================================
 // View rendern (sollte nicht benutzt werden!)
 //========================================
-func void View_Render(var int hndl) {
-    CALL__thiscall(getPtr(hndl), zCView__Render);
+func void ViewPtr_Render(var int ptr) {
+    CALL__thiscall(ptr, zCView__Render);
 };
-
+func void View_Render(var int hndl) {
+    ViewPtr_Render(getPtr(hndl));
+};
 
 //========================================
 // View eine Textur zuweisen
 //========================================
-func void _View_SetTexture(var int ptr, var string tex) {
+func void ViewPtr_SetTexture(var int ptr, var string tex) {
+    tex = STR_Upper(tex);
     CALL_zStringPtrParam(tex);
     CALL__thiscall(ptr, zCView__InsertBack);
 };
 func void View_SetTexture(var int hndl, var string tex) {
-    tex = STR_Upper(tex);
-    _View_SetTexture(getPtr(hndl), tex);
+    ViewPtr_SetTexture(getPtr(hndl), tex);
 };
 
-func string View_GetTexture(var int hndl) {
-    var zCView v; v = get(hndl);
+func string ViewPtr_GetTexture(var int ptr) {
+    var zCView v; v = _^(ptr);
     var zCObject obj; obj = MEM_PtrToInst(v.backtex);
     return obj.objectName;
+};
+func string View_GetTexture(var int hndl) {
+    return ViewPtr_GetTexture(getPtr(hndl));
 };
 
 
 //========================================
 // View einfärben
 //========================================
+func void ViewPtr_SetColor(var int ptr, var int zColor) {
+    var zCView v; v = _^(ptr);
+    v.color = zColor;
+    v.alpha = (zColor >> zCOLOR_SHIFT_ALPHA) & zCOLOR_CHANNEL;
+    if((v.alpha != 255) && (v.alphafunc == 1)) {
+        v.alphafunc = 2;
+    };
+};
 func void View_SetColor(var int hndl, var int zColor) {
     var zCView v; v = get(hndl);
     v.color = zColor;
+    v.alpha = (zColor >> zCOLOR_SHIFT_ALPHA) & zCOLOR_CHANNEL;
+    if((v.alpha != 255) && (v.alphafunc == 1)) {
+        v.alphafunc = 2;
+    };
 };
 
+func int ViewPtr_GetColor(var int ptr) {
+    var zCView v; v = _^(ptr);
+    return v.color;
+};
 func int View_GetColor(var int hndl) {
     var zCView v; v = get(hndl);
     return v.color;
@@ -109,17 +153,24 @@ func int View_GetColor(var int hndl) {
 //========================================
 // View anzeigen
 //========================================
-func void _View_Open(var int ptr) {
+func void ViewPtr_Open(var int ptr) {
+    var zCView v; v = _^(ptr);
+    var int textlinesBak; textlinesBak = v.textLines_next;
+    v.textLines_next = 0;
+
+    // zCView::Open destroys all textlines (why??)
     CALL__thiscall(ptr, zCView__Open);
+
+    v.textLines_next = textlinesBak;
 };
 func void View_Open(var int hndl) {
-    CALL__thiscall(getPtr(hndl), zCView__Open);
+    ViewPtr_Open(getPtr(hndl));
 };
 
 //========================================
 // View schließen
 //========================================
-func void _View_Close(var int ptr) {
+func void ViewPtr_Close(var int ptr) {
     CALL__thiscall(ptr, zCView__Close);
 };
 func void View_Close(var int hndl) {
@@ -130,25 +181,30 @@ func void View_Close(var int hndl) {
 // View löschen
 //========================================
 func void zCView_Delete(var zCView this) {
-	if (this.textlines_next) {
-		//free(this.textlines_next, zCList__zCViewText@);
-		this.textlines_next = 0;
-	};
-	CALL__thiscall(MEM_InstToPtr(this), zCView__@zCView);
+    if (this.textlines_next) {
+        //free(this.textlines_next, zCList__zCViewText@);
+        this.textlines_next = 0;
+    };
+    CALL__thiscall(MEM_InstToPtr(this), zCView__@zCView);
 };
 
+func void ViewPtr_Delete(var int ptr) {
+    var zCView v; v = _^(ptr);
+    zCView_Delete(v);
+    MEM_Free(ptr);
+};
 func void View_Delete(var int hndl) {
-	var zCView v; v = MEM_PtrToInst(getPtr(hndl));
-	zCView_Delete(v);
-	release(hndl);
+    var zCView v; v = get(hndl);
+    zCView_Delete(v);
+    release(hndl);
 };
 
 
 //========================================
 // Größe ändern
 //========================================
-func void View_Resize(var int hndl, var int x, var int y) {
-    var zCView v; v = get(hndl);
+func void ViewPtr_Resize(var int ptr, var int x, var int y) {
+    var zCView v; v = _^(ptr);
     if(y < 0) {
         CALL_IntParam(v.vsizey);
     }
@@ -161,82 +217,264 @@ func void View_Resize(var int hndl, var int x, var int y) {
     else {
         CALL_IntParam(x);
     };
-    CALL__thiscall(getPtr(hndl), zCView__SetSize);
+    CALL__thiscall(ptr, zCView__SetSize);
+
+    v.psizex = Print_ToPixel(v.vsizex, PS_X);
+    v.psizey = Print_ToPixel(v.vsizey, PS_Y);
+};
+func void View_Resize(var int hndl, var int x, var int y) {
+    ViewPtr_Resize(getPtr(hndl), x, y);
 };
 
 //========================================
 // Größe ändern (pxl)
 //========================================
+func void ViewPtr_ResizePxl(var int ptr, var int x, var int y) {
+    ViewPtr_Resize(ptr, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
+};
 func void View_ResizePxl(var int hndl, var int x, var int y) {
-    View_Resize(hndl, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
+    ViewPtr_ResizePxl(hndl, x, y);
 };
 
 //========================================
 // Bewegen
 //========================================
-func void View_Move(var int hndl, var int x, var int y) {
-    if(!Hlp_IsValidHandle(hndl)) { return; };
-    var zCView v; v = get(hndl);
+func void ViewPtr_Move(var int ptr, var int x, var int y) {
+    var zCView v; v = _^(ptr);
     CALL_IntParam(y);
     CALL_IntParam(x);
-    CALL__thiscall(getPtr(hndl), zCView__Move);
+    CALL__thiscall(ptr, zCView__Move);
+
+    v.pposx = Print_ToPixel(v.vposx, PS_X);
+    v.pposy = Print_ToPixel(v.vposy, PS_Y);
+};
+func void View_Move(var int hndl, var int x, var int y) {
+    ViewPtr_Move(getPtr(hndl), x, y);
 };
 
 //========================================
 // Bewegen (pxl)
 //========================================
+func void ViewPtr_MovePxl(var int ptr, var int x, var int y) {
+    ViewPtr_Move(ptr, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
+};
 func void View_MovePxl(var int hndl, var int x, var int y) {
-    View_Move(hndl, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
+    ViewPtr_MovePxl(getPtr(hndl), x, y);
 };
 
 //========================================
 // Bewegen (absolut)
 //========================================
-func void View_MoveTo(var int hndl, var int x, var int y) {
-    var zCView v; v = get(hndl);
+func void ViewPtr_MoveTo(var int ptr, var int x, var int y) {
+    var zCView v; v = _^(ptr);
     if(x == -1) { x = v.vposx; };
     if(y == -1) { y = v.vposy; };
-    View_Move(hndl, -v.vposx, -v.vposy);
-    View_Move(hndl, x,  y);
+    ViewPtr_Move(ptr, -v.vposx, -v.vposy);
+    ViewPtr_Move(ptr, x,  y);
+};
+func void View_MoveTo(var int hndl, var int x, var int y) {
+    ViewPtr_MoveTo(getPtr(hndl), x, y);
 };
 
 //========================================
 // Bewegen (absolut)(pxl)
 //========================================
-func void View_MoveToPxl(var int hndl, var int x, var int y) {
+func void ViewPtr_MoveToPxl(var int ptr, var int x, var int y) {
     if(x != -1) { x = Print_ToVirtual(x, PS_X); };
     if(y != -1) { y = Print_ToVirtual(y, PS_Y); };
-    View_MoveTo(hndl, x, y);
+    ViewPtr_MoveTo(ptr, x, y);
+};
+func void View_MoveToPxl(var int hndl, var int x, var int y) {
+    ViewPtr_MoveToPxl(getPtr(hndl), x, y);
 };
 
+//========================================
+// Text entfernen
+//========================================
 func void View_DeleteTextSub(var int listPtr) {
-	var zCList l; l = MEM_PtrToInst(listPtr);
-	MEM_Free(l.data);
+    var zCList l; l = MEM_PtrToInst(listPtr);
+    MEM_Free(l.data);
+};
+func void ViewPtr_DeleteText(var int ptr) {
+    var zCView v; v = _^(ptr);
+    if (v.textLines_next) {
+        List_ForF(v.textLines_next, View_DeleteTextSub);
+        List_Destroy(v.textLines_next);
+        v.textLines_next = 0;
+    };
 };
 func void View_DeleteText(var int hndl) {
-	var zCView v; v = get(hndl);
-	if (v.textLines_next) { 
-		List_For(v.textLines_next, "View_DeleteTextSub");
-		List_Destroy(v.textLines_next);
-		v.textLines_next = 0;
-	};
+    ViewPtr_DeleteText(getPtr(hndl));
 };
 
-func void View_AddText(var int hndl, var int x, var int y, var string text, var string font) {
-    if(!Hlp_IsValidHandle(hndl)) { return; };
-    var zCView v; v = get(hndl);	
-	var int ptr; ptr = Print_TextField(x, y, text, font, Print_ToVirtual(Print_GetFontHeight(font), v.pposy+v.psizey));
-	if(v.textLines_next) {	
-		List_Concat(v.textLines_next, ptr);
+//========================================
+// Text hinzufügen
+//========================================
+func void ViewPtr_AddText(var int ptr, var int x, var int y, var string text, var string font) {
+    var zCView v; v = _^(ptr);
+    var int field; field = Print_TextField(x, y, text, font, Print_ToVirtual(Print_GetFontHeight(font), v.pposy+v.psizey));
+    if(v.textLines_next) {
+        List_Concat(v.textLines_next, field);
     }
     else {
-        v.textLines_next = ptr;
+        v.textLines_next = field;
+    };
+};
+func void View_AddText(var int hndl, var int x, var int y, var string text, var string font) {
+    ViewPtr_AddText(getPtr(hndl), x, y, text, font);
+};
+
+//========================================
+// Textview hinzufügen
+//========================================
+func void ViewPtr_AddTextView(var int ptr, var int view) {
+    var zCView v; v = _^(ptr);
+    if(v.textLines_next) {
+        List_Concat(v.textLines_next, view);
+    }
+    else {
+        v.textLines_next = List_Create(view);
+    };
+};
+func void View_AddTextView(var int hndl, var int view) {
+    ViewPtr_AddTextView(getPtr(hndl), view);
+};
+
+//========================================
+// Views ausrichten
+//========================================
+func void ViewPtr_SetMargin(var int ptr, var int parent, var int align, var int mT, var int mR, var int mB, var int mL) {
+    var zCView v;
+    if(!parent) {
+        // using screen if no parent is given
+        v = _^(MEM_ReadInt(screen));
+    }
+    else {
+        v = _^(parent);
+    };
+
+    if(align == ALIGN_LEFT) {
+        ViewPtr_MoveTo(ptr, v.vposx + mL, v.vposy + mT);
+        ViewPtr_Resize(ptr, mR, v.vsizey - mT - mB);
+    }
+    else if(align == ALIGN_RIGHT) {
+        ViewPtr_MoveTo(ptr, v.vposx + v.vsizex - mR - mL, v.vposy + mT);
+        ViewPtr_Resize(ptr, mL, v.vsizey - mT - mB);
+    }
+    else if(align == ALIGN_TOP) {
+        ViewPtr_MoveTo(ptr, v.vposx + mL, v.vposy + mT);
+        ViewPtr_Resize(ptr, v.vsizex - mL - mR, mB);
+    }
+    else if(align == ALIGN_BOTTOM) {
+        ViewPtr_MoveTo(ptr, v.vposx + mL, v.vposy + v.vsizey - mT - mB);
+        ViewPtr_Resize(ptr, v.vsizex - mL - mR, mT);
+    }
+    else {
+        ViewPtr_MoveTo(ptr, v.vposx + mL, v.vposy + mT);
+        ViewPtr_Resize(ptr, v.vsizex - mL - mR, v.vsizey - mT - mB);
+    };
+};
+func void ViewPtr_SetMarginPxl(var int ptr, var int parent, var int align, var int mT, var int mR, var int mB, var int mL) {
+    ViewPtr_SetMargin(ptr, parent, align, Print_ToVirtual(mT, PS_Y), Print_ToVirtual(mR, PS_X), Print_ToVirtual(mB, PS_Y), Print_ToVirtual(mL, PS_X));
+};
+
+//========================================
+// Eine Viewliste an einen parent kleben
+//========================================
+func void ViewList_GlueToAxis(var int list, var int parent, var int axis, var int mT, var int mR, var int mB, var int mL) {
+    var zCView v;
+    if(!parent) {
+        // using screen if no parent is given
+        v = _^(MEM_ReadInt(screen));
+    }
+    else {
+        v = _^(parent);
+    };
+
+    var int i; i = 0;
+    var int itemSize;
+    var int items; items = List_Length(list);
+    var zCList l;
+
+    if(axis == PS_X) {
+        l = _^(list);
+
+        itemSize = v.vsizex / items;
+
+        repeat(i, items);
+            ViewPtr_SetMargin(l.data, parent, ALIGN_LEFT, mT, itemSize - mL - mR, mB, i * itemSize + mL);
+            if(l.next) {
+                l = _^(l.next);
+            };
+        end;
+    }
+    else {
+        l = _^(list);
+
+        itemSize = v.vsizey / items;
+
+        repeat(i, items);
+            ViewPtr_SetMargin(l.data, parent, ALIGN_TOP, i * itemSize + mT, mL, itemSize - mT - mB, mR);
+            if(l.next) {
+                l = _^(l.next);
+            };
+        end;
+    };
+};
+func void ViewList_GlueToAxisPxl(var int list, var int parent, var int axis, var int mT, var int mR, var int mB, var int mL) {
+    ViewList_GlueToAxis(list, parent, axis, Print_ToVirtual(mT, PS_Y), Print_ToVirtual(mR, PS_X), Print_ToVirtual(mB, PS_Y), Print_ToVirtual(mL, PS_X));
+};
+
+//========================================
+// Text ausrichten
+//========================================
+func void ViewPtr_AlignText(var int ptr, var int margin) {
+    var zCView v;  v = _^(ptr);
+    var int    lp; lp = v.textLines_next;
+    var zCList l;
+    var zCViewText vt;
+
+    var int width;
+
+    if(margin == 0) {
+        while(lp);
+            l = _^(lp);
+            vt = _^(l.data);
+            width = Print_ToVirtual(Print_GetStringWidthPtr(vt.text, vt.font), PS_X) * PS_VMAX / v.vsizex;
+            vt.posx = PS_VMAX / 2 - width / 2;
+            lp = l.next;
+        end;
+    }
+    else if(margin > 0) {
+        while(lp);
+            l = _^(lp);
+            vt = _^(l.data);
+            vt.posx = margin;
+            lp = l.next;
+        end;
+    }
+    else {
+        while(lp);
+            l = _^(lp);
+            vt = _^(l.data);
+            width = Print_ToVirtual(Print_GetStringWidthPtr(vt.text, vt.font), PS_X) * PS_VMAX / v.vsizex;
+            vt.posx = PS_VMAX - width - margin;
+            lp = l.next;
+        end;
     };
 };
 
-func void View_Top(var int hndl) {
+
+
+//========================================
+// View nach oben bewegen
+//========================================
+func void ViewPtr_Top(var int ptr) {
     const int zCView_Top = 8021904; //007A6790
-    Call__thiscall(getPtr(hndl), zCView_Top);
+    Call__thiscall(ptr, zCView_Top);
+};
+func void View_Top(var int hndl) {
+    ViewPtr_Top(getPtr(hndl));
 };
 
 
@@ -274,8 +512,8 @@ func void zCView_Archiver(var zCView this) {
     PM_SaveInt("pposy", this.pposy);
     PM_SaveInt("psizex", this.psizex);
     PM_SaveInt("psizey", this.psizey);
-		
-	PM_SaveString("font", Print_GetFontName(this.font));
+
+    PM_SaveString("font", Print_GetFontName(this.font));
     PM_SaveInt("fontColor", this.fontColor);
 
     PM_SaveInt("px1", this.px1);
@@ -315,67 +553,67 @@ func void zCView_Archiver(var zCView this) {
 };
 
 func void zCView_Unarchiver(var zCView this) {
-	var int vx1; vx1 = PM_Load("vposx");
-	var int vy1; vy1 = PM_Load("vposy");
-	var int vx2; vx2 = vx1 + PM_Load("vsizex");
-	var int vy2; vy2 = vy1 + PM_Load("vsizey");
-	
-	_View_Create(MEM_InstToPtr(this), vx1, vy1, vx2, vy2);
+    var int vx1; vx1 = PM_Load("vposx");
+    var int vy1; vy1 = PM_Load("vposy");
+    var int vx2; vx2 = vx1 + PM_Load("vsizex");
+    var int vy2; vy2 = vy1 + PM_Load("vsizey");
 
-	this._vtbl = PM_LoadInt("_vtbl");
-	this._zCInputCallBack_vtbl = PM_LoadInt("_zCInputCallBack_vtbl");
-	
-	this.m_bFillZ = PM_LoadInt("m_bFillZ");
-	// this.next = PM_LoadInt("next"); // Darf ich nicht überschreiben, habs der Übersicht halber aber hier gelassen
-	
-	this.viewID = PM_LoadInt("ViewID");
-	this.flags = PM_LoadInt("flags");
-	this.intflags = PM_LoadInt("intflags");
+    _ViewPtr_CreateIntoPtr(_@(this), vx1, vy1, vx2, vy2);
+
+    this._vtbl = PM_LoadInt("_vtbl");
+    this._zCInputCallBack_vtbl = PM_LoadInt("_zCInputCallBack_vtbl");
+
+    this.m_bFillZ = PM_LoadInt("m_bFillZ");
+    // this.next = PM_LoadInt("next"); // Darf ich nicht überschreiben, habs der Übersicht halber aber hier gelassen
+
+    this.viewID = PM_LoadInt("ViewID");
+    this.flags = PM_LoadInt("flags");
+    this.intflags = PM_LoadInt("intflags");
 
     // this.onDesk darf nicht geladen werden.
 
-	
-	this.alphaFunc = PM_LoadInt("alphaFunc");
-	this.color = PM_LoadInt("color");
-	this.alpha = PM_LoadInt("alpha");
-	
-	
-	
-	
-	/*this.childs_compare = PM_LoadInt("childs_compare"); // Darf ich eventuell überschreiben, ist aber eh Schwachsinn da Pointer
-	this.childs_count = PM_LoadInt("childs_count");
-	this.childs_last = PM_LoadInt("childs_last");
-	this.childs_wurzel = PM_LoadInt("childs_wurzel"); */ 
-	
-	// this.owner = PM_LoadInt("owner"); // Darf ich nicht überschreiben, habs der Übersicht halber aber hier gelassen
-	
-	_View_SetTexture(MEM_InstToPtr(this), PM_LoadString("backtex")); 
-	
-	this.vposx = PM_LoadInt("vposx");
-	this.vposy = PM_LoadInt("vposy");
-	this.vsizex = PM_LoadInt("vsizex");
-	this.vsizey = PM_LoadInt("vsizey");
-	
-	this.pposx = PM_LoadInt("pposx");
-	this.pposy = PM_LoadInt("pposy");
-	this.psizex = PM_LoadInt("psizex");
-	this.psizey = PM_LoadInt("psizey");
 
-	
-	this.font = Print_GetFontPtr(PM_LoadString("font"));
-	
-	this.fontColor = PM_LoadInt("fontColor");
-	
-	this.px1 = PM_LoadInt("px1");
-	this.py1 = PM_LoadInt("py1");
-	this.px2 = PM_LoadInt("px2");
-	this.py2 = PM_LoadInt("py2");
-	
-	this.winx = PM_LoadInt("winx");
-	this.winy = PM_LoadInt("winy");
-	
-	this.scrollMaxTime = PM_LoadInt("scrollMaxTime");
-	this.scrollTimer = PM_LoadInt("scrollTimer");
+    this.alphaFunc = PM_LoadInt("alphaFunc");
+    this.color = PM_LoadInt("color");
+    this.alpha = PM_LoadInt("alpha");
+
+
+
+
+    /*this.childs_compare = PM_LoadInt("childs_compare"); // Darf ich eventuell überschreiben, ist aber eh Schwachsinn da Pointer
+    this.childs_count = PM_LoadInt("childs_count");
+    this.childs_last = PM_LoadInt("childs_last");
+    this.childs_wurzel = PM_LoadInt("childs_wurzel"); */
+
+    // this.owner = PM_LoadInt("owner"); // Darf ich nicht überschreiben, habs der Übersicht halber aber hier gelassen
+
+    ViewPtr_SetTexture(_@(this), PM_LoadString("backtex"));
+
+    this.vposx = PM_LoadInt("vposx");
+    this.vposy = PM_LoadInt("vposy");
+    this.vsizex = PM_LoadInt("vsizex");
+    this.vsizey = PM_LoadInt("vsizey");
+
+    this.pposx = PM_LoadInt("pposx");
+    this.pposy = PM_LoadInt("pposy");
+    this.psizex = PM_LoadInt("psizex");
+    this.psizey = PM_LoadInt("psizey");
+
+
+    this.font = Print_GetFontPtr(PM_LoadString("font"));
+
+    this.fontColor = PM_LoadInt("fontColor");
+
+    this.px1 = PM_LoadInt("px1");
+    this.py1 = PM_LoadInt("py1");
+    this.px2 = PM_LoadInt("px2");
+    this.py2 = PM_LoadInt("py2");
+
+    this.winx = PM_LoadInt("winx");
+    this.winy = PM_LoadInt("winy");
+
+    this.scrollMaxTime = PM_LoadInt("scrollMaxTime");
+    this.scrollTimer = PM_LoadInt("scrollTimer");
 
     this.fxOpen = PM_LoadInt("fxOpen");
     this.fxClose = PM_LoadInt("fxClose");
@@ -396,13 +634,13 @@ func void zCView_Unarchiver(var zCView this) {
     PM_LoadArrayToPtr("posCurrent_1", _@(this.posCurrent_1));
     PM_LoadArrayToPtr("posOpenClose_0", _@(this.posOpenClose_0));
     PM_LoadArrayToPtr("posOpenClose_1", _@(this.posOpenClose_1));
-	
-	
-	if (PM_Load("ondesk")) {
-		_View_Open(MEM_InstToPtr(this));
-	}; 
-	
-	this.textLines_next = PM_LoadClassPtr("textLines"); // Muss ich nach dem öffnen machen... >.>
+
+
+    if (PM_Load("ondesk")) {
+        ViewPtr_Open(_@(this));
+    };
+
+    this.textLines_next = PM_LoadClassPtr("textLines"); // Muss ich nach dem öffnen machen... >.>
 
 };
 

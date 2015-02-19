@@ -36,6 +36,7 @@ const int oCNpc__UseItem                            = 7584784; //0x73BC10
 const int oCSavegameManager__SetAndWriteSavegame    = 4428037; //0x439105 Hook: Saves
 const int parser                                    =11223232; //0xAB40C0
 const int ReadFile                                  = 8272388; //0x7E3A04
+const int screen                                     =11232360; //0xAB6468
 const int sysGetTimePtr                             = 5264000; //0x505280
 const int WriteFile                                 = 8079292; //0x7B47BC
 const int zCAICamera_StartDialogCam                 = 4923632; //0x4B20F0
@@ -129,11 +130,13 @@ func string Print_GetFontName(var int fontPtr) {
 //========================================
 // Breite eines Strings holen
 //========================================
-func int Print_GetStringWidth(var string s, var string font) {
-    var int adr; adr = Print_GetFontPtr(font);
+func int Print_GetStringWidthPtr(var string s, var int font) {
     CALL_zStringPtrParam(s);
-    CALL__Thiscall(adr, zCFont__GetFontX);
+    CALL__Thiscall(font, zCFont__GetFontX);
     return CALL_RetValAsInt();
+};
+func int Print_GetStringWidth(var string s, var string font) {
+    return Print_GetStringWidthPtr(s, Print_GetFontPtr(font));
 };
 
 //========================================
@@ -209,9 +212,9 @@ func void oCNpc_UnequipItem(var c_npc slf, var int oCItemPtr) {
 // Ein Item auf einem View rendern
 //========================================
 func void oCItem_Render(var int itm, var int wld, var int view, var int rot) {
-	var zCView v; v = _^(view); 
-	if(v.vposy < 0||(v.vposy+v.vsizey) > 8192) { return; };
-	if(v.vposy < 0||(v.vposy+v.vsizey) > 8192) { return; };
+    var zCView v; v = _^(view);
+    if(v.vposy < 0||(v.vposy+v.vsizey) > 8192) { return; };
+    if(v.vposy < 0||(v.vposy+v.vsizey) > 8192) { return; };
     CALL_FloatParam(rot);
     CALL_PtrParam(view);
     CALL_PtrParam(wld);
@@ -257,14 +260,13 @@ func void oCNpc_Equip(var int npcPtr, var int itmPtr) {
 // Aktuelle Instanz bearbeiten
 //========================================
 func void MEM_SetUseInstance(var int inst) {
-	var int ptr; ptr = MEM_ReadIntArray (currSymbolTableAddress, inst);
-	MemoryProtectionOverride(11232304, 10);
-	MEM_WriteInt(11232304, ptr);
-	MEM_WriteInt(11232308, MEM_ReadInt(ptr+28));
+    var int ptr; ptr = MEM_ReadIntArray (currSymbolTableAddress, inst);
+    MemoryProtectionOverride(11232304, 10);
+    MEM_WriteInt(11232304, ptr);
+    MEM_WriteInt(11232308, MEM_ReadInt(ptr+28));
 };
 
 func int MEM_GetUseInstance() {
-	return MEM_ReadInt(11232304);
+    return MEM_ReadInt(11232304);
 };
-		
-	
+

@@ -19,6 +19,16 @@ const int BUTTON_ACTIVE = 1;
 const int BUTTON_ENTERED = 2;
 
 //========================================
+// Aligns (benutzt in View)
+//========================================
+const int ALIGN_CENTER = 0;
+const int ALIGN_LEFT   = 1;
+const int ALIGN_RIGHT  = 2;
+const int ALIGN_TOP    = 3;
+const int ALIGN_BOTTOM = 4;
+
+
+//========================================
 // Interface
 //========================================
 //                        R           G          B          A           R G B

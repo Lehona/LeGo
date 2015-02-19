@@ -7,7 +7,7 @@ const int    QS_DigitMarginX   = 2;                         // Abstand der Numme
 const int    QS_DigitMarginY   = 12;                        // Abstand der Nummerierungen vom Boden des Slots
 const int    QS_DigitCol0      = COL_White;                 // Schriftfarbe
 const int    QS_DigitCol1      = COL_White;                 // Schriftfarbe
-const string QS_DigitFont      = "FONT_OLD_10_WHITE.TGA";   // Schriftart der Nummerierung
+const string QS_DigitFont      = "FONT_UBUNTU_23.TGA";   // Schriftart der Nummerierung
 const string QS_SlotBackTex    = "QUICKSLOTS.TGA";          // Hintergrundtextur
 const int    QS_SlotBackX      = 512;                       // Breite der Hintergrundtextur
 const int    QS_SlotBackY      = 128;                       // Höhe der Hintergrundtextur
@@ -15,7 +15,7 @@ const int    QS_SlotBackMargin = 45;                        // Abstand der Mitte
 const int    QS_SlotDist       = 50;                        // Abstand der einzelnen Slots horizontal zueinander
 const int    QS_SlotDistSep    = 10;                        // Zusatzabstand zwischen Standardwaffen und Zusatzslots
 
-instance oWorld@(oWorld);
+// instance oWorld@(oWorld);
 
 const int _QS_Wld = 0; // oWorld*
 
@@ -79,7 +79,7 @@ func void _QS_RenderItem(var int itm, var int slot) {
 var int _QS_AvSlots;
 func void _Quickslots_Hook() {
     // MEM_Call(cNI_Loop);
-	
+
     var zCView vw; vw = View_Get(_QS_Bg);
     vw.alpha = 255;
     View_Render(_QS_Bg);
@@ -158,9 +158,9 @@ func void QS_Init() {
         var oWorld w; w = MEM_PtrToInst(_QS_Wld);
         w.m_bIsInventoryWorld = 1;
 
-        HookEngine(oCGame__RenderX, 6, "_Quickslots_Hook");
-        HookEngine(oCNpc__CloseInventory, 6, "_QS_CloseInv");
-        HookEngine(oCNpc__OpenInventory, 6, "_QS_OpenInv");
+        // HookEngineF(oCGame__RenderX, 6, _Quickslots_Hook);
+        HookEngineF(oCNpc__CloseInventory, 6, _QS_CloseInv);
+        HookEngineF(oCNpc__OpenInventory, 6, _QS_OpenInv);
         // Neue Quest: Vernichte die Runenmagie
         MemoryProtectionOverride(7577148, 5);
         MEM_WriteByte(7577148+0, 233/*E9*/);
@@ -190,34 +190,7 @@ func void QS_Init() {
     var zCView vw; vw = View_Get(_QS_Bg);
     vw.alpha = 0;
 
-    p = MEM_StackPos.position;
-    if(i < 9) {
-        c1 = new(cQS_Slot@);
-        t = get(c1);
-        if(i < 2) {
-            MEM_WriteStatArr(_QS_SlotData, i+7, c1);
-        }
-        else {
-            MEM_WriteStatArr(_QS_SlotData, i-2, c1);
-        };
-
-        if(i == 2) {
-            m += QS_SlotDistSep;
-        };
-        q = m+o;
-        t.v = View_CreateCenterPxl(q, k, QS_SlotSize, QS_SlotSize);
-        View_Open(t.v);
-
-        x = q-(QS_SlotDist/2)+QS_DigitMarginX;
-        y = k-(QS_SlotDist/2)+QS_DigitMarginY-Print_GetFontHeight(QS_DigitFont);
-
-        t.t = Print_ExtPxl(x, y, IntToString(((i+1)+(i>1))%10), QS_DigitFont, QS_DigitCol0, -1);
-        t.a = Print_ExtPxl(x, y, "", QS_DigitFont, QS_DigitCol1, -1); // Hier werden Koordinaten später sowieso angepasst
-
-        m += s;
-        i += 1;
-        MEM_StackPos.position = p;
-    };
+    Render_AddViewPrio(_QS_Bg, 100);
 
     QSA8 = Anim8_NewExt(vw.vposy, QS_A8Handler, 0, false);
     FF_Apply(_QS_FFLoop);
@@ -257,7 +230,7 @@ func void _QS_OpenInv() {
 };
 
 func void _QS_CloseInv() {
-    if(MEM_InstToPtr(hero) != ECX&&!_QS_O) {
+    if(MEM_InstToPtr(hero) != ECX && !_QS_O) {
         return;
     };
     QS_Show();
