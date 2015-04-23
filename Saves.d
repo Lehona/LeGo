@@ -56,10 +56,7 @@ func void _BW_SaveGame() {
     };
     if(BW_NewFile(_BIN_GetSavefilePath(ext))) {
         if(_LeGo_Flags & LeGo_PermMem) {
-			var int i1; i1 = new(_empty@);
-			var int i2; i2 = new(_empty@);
             _PM_Archive();
-			delete(i1); delete(i2);
         };
         BW_Savegame();
         BW_Close();

@@ -1063,6 +1063,17 @@ func void _PM_WriteSaveStruct() {
     BW_NextLine();
 };
 
+
+func void _PM_Archive_HTSub(var int key, var int val) {
+    PM_CurrHandle = key;
+    _PM_InstToSaveStruct(val, _HT_Get(HandlesInstance, key));
+
+    BW_Text(ConcatStrings("HNDL:", IntToString(key/*+1*/)));
+    BW_NextLine();
+
+    _PM_WriteSaveStruct();
+};
+
 func void _PM_Archive() {
     MEM_Info("===  PermMem::Archive  ===");
 
@@ -1082,25 +1093,27 @@ func void _PM_Archive() {
     BW_NextLine();
     BW_NextLine();
 
-    var int i; i = 0;
-    var int p; p = MEM_StackPos.position;
-    if(i < arrMax) {
-        var int ptr; ptr = _HT_Get(HandlesPointer, i);
-        var int inst; inst = _HT_Get(HandlesInstance, i);
+	
+	_HT_ForEach(HandlesPointer, _PM_Archive_HTSub);
+    // var int i; i = 0;
+    // var int p; p = MEM_StackPos.position;
+    // if(i < arrMax) {
+        // var int ptr; ptr = _HT_Get(HandlesPointer, i);
+        // var int inst; inst = _HT_Get(HandlesInstance, i);
 
-        if(ptr) {
-            PM_CurrHandle = i;//+1;
-            _PM_InstToSaveStruct(ptr, inst);
+        // if(ptr) {
+            // PM_CurrHandle = i;//+1;
+            // _PM_InstToSaveStruct(ptr, inst);
 
-            BW_Text(ConcatStrings("HNDL:", IntToString(i/*+1*/)));
-            BW_NextLine();
+            // BW_Text(ConcatStrings("HNDL:", IntToString(i/*+1*/)));
+            // BW_NextLine();
 
-            _PM_WriteSaveStruct();
-        };
+            // _PM_WriteSaveStruct();
+        // };
 
-        i += 1;
-        MEM_StackPos.position = p;
-    };
+        // i += 1;
+        // MEM_StackPos.position = p;
+    // };
 
     PM_CurrHandle = 1;
 
