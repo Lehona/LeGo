@@ -220,6 +220,10 @@ func void _PM_RemoveFromForeachTable(var int h) {
     };
 };
 
+func void _PM_CreateForeachTable_HTSub(var int key, var int val) {
+  _PM_AddToForeachTable(key);
+};
+
 func void _PM_CreateForeachTable() {
     if(_PM_foreachTable) {
         MEM_Free(_PM_foreachTable);
@@ -227,11 +231,7 @@ func void _PM_CreateForeachTable() {
     foreachHndl_ptr = MEM_GetFuncPtr(foreachHndl);
     _PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
     if(HandlesPointer) {
-        var int i; i = 0;
-        var int m; m = _HT_GetNumber(HandlesPointer);
-        repeat(i, m);
-            _PM_AddToForeachTable(i+1); // 1 bis m
-        end;
+      _HT_ForEach(HandlesPointer, _PM_CreateForeachTable_HTSub);
     };
 };
 
