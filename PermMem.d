@@ -1063,16 +1063,16 @@ func void _PM_WriteSaveStruct() {
     BW_NextLine();
 };
 
-var int _PM_HandleList;
+var int PM_HandleList;
 func void _PM_Archive_HTSub(var int key, var int val) {
-	if (!_PM_HandleList) {
-		/* _PM_HandleList = List_Create(key); */
+	if (!PM_HandleList) {
+		/* PM_HandleList = List_Create(key); */
 		key;
 		MEM_Call(List_Create);
-		_PM_HandleList = MEM_PopIntResult();
+		PM_HandleList = MEM_PopIntResult();
 	} else {
-		/* List_InsertSorted(_PM_HandleList, key, List_CmpAscending); */
-		_PM_HandleList; key; MEM_GetFuncID(List_CmpAscending);
+		/* List_InsertSorted(PM_HandleList, key, List_CmpAscending); */
+		PM_HandleList; key; MEM_GetFuncID(List_CmpAscending);
 		MEM_Call(List_InsertSorted);
 	};
 };
@@ -1110,11 +1110,11 @@ func void _PM_Archive() {
     BW_NextLine();
 
 	_HT_ForEach(HandlesPointer, _PM_Archive_HTSub);
-	/* List_ForF(_PM_HandleList, _PM_Archive_ListSub); */
-	_PM_HandleList; MEM_GetFuncID(_PM_Archive_ListSub);
+	/* List_ForF(PM_HandleList, _PM_Archive_ListSub); */
+	PM_HandleList; MEM_GetFuncID(_PM_Archive_ListSub);
 	MEM_Call(List_ForF);
 
-	_PM_HandleList = 0;
+	PM_HandleList = 0;
     PM_CurrHandle = 1;
 
     BW_Text("PermMem::End");

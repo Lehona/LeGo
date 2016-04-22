@@ -94,6 +94,21 @@ func int _HT_Get(var int ptr, var int key) {
 	return false;
 };
 
+func int _HT_Has(var int ptr, var int key) {
+	var zCArray arr; arr = _^(ptr);
+	var int h; h = hash(key) % (arr.numAlloc/4);
+	var int bucket; bucket = MEM_ReadIntArray(arr.array, h);
+	if (!bucket) { return false; };
+	var zCArray buck; buck = _^(bucket);
+	var int i;
+	repeat(i, buck.numInArray/2);
+		if (MEM_ArrayRead(bucket, i*2) == key) {
+			return true;
+		};
+	end;
+	return false;
+};
+
 func void _HT_Remove(var int ptr, var int key) {
 	var zCArray arr; arr = _^(ptr);
 	var int h; h = hash(key) % (arr.numAlloc/4);
@@ -116,6 +131,14 @@ func void _HT_Change(var int ptr, var int val, var int key) {
 	/* A very lazy implementation but I doubt this will be used much */
 	_HT_Remove(ptr, key);
 	_HT_Insert(ptr, val, key);
+};
+
+func void _HT_InsertOrChange(var int ptr, var int val, var int key) {
+	if (_HT_Has(ptr, key)) {
+		_HT_Change(ptr, val, key);
+	} else {
+		_HT_Insert(ptr, val, key);
+	};
 };
 
 func int _HT_GetNumber(var int ptr) {

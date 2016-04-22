@@ -29,12 +29,20 @@ func int HT_Get(var int hndl, var int key) {
 	return _HT_Get(getPtr(hndl), key);
 };
 
+func int HT_Has(var int hndl, var int key) {
+	return _HT_Has(getPtr(hndl), key);
+};
+
 func void HT_Remove(var int hndl, var int key) {
 	_HT_Remove(getPtr(hndl), key);
 };
 
 func void HT_Change(var int hndl, var int val, var int key) {
 	_HT_Change(getPtr(hndl), val, key);
+};
+
+func void HT_InsertOrChange(var int hndl, var int val, var int key) {
+	_HT_InsertOrChange(getPtr(hndl), val, key);
 };
 
 func int HT_GetNumber(var int hndl) {
