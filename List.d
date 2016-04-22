@@ -621,6 +621,15 @@ func int List_Compare(var int data1, var int data2, var func compare) { // True 
     data2;
     MEM_Call(compare);
 };
+
+func int List_CmpAscending(var int data1, var int data2) {
+	return data1 > data2;
+};
+
+func int List_CmpDescending(var int data1, var int data2) {
+	return data1 < data2;
+};
+
 func void List_InsertSorted(var int list, var int data, var func compare) {
     if(!list) {
         _List_ErrPtr("InsertSorted");

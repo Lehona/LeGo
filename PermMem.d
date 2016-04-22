@@ -220,6 +220,10 @@ func void _PM_RemoveFromForeachTable(var int h) {
     };
 };
 
+func void _PM_CreateForeachTable_HTSub(var int key, var int val) {
+  _PM_AddToForeachTable(key);
+};
+
 func void _PM_CreateForeachTable() {
     if(_PM_foreachTable) {
         MEM_Free(_PM_foreachTable);
@@ -227,11 +231,7 @@ func void _PM_CreateForeachTable() {
     foreachHndl_ptr = MEM_GetFuncPtr(foreachHndl);
     _PM_foreachTable = MEM_Alloc(currSymbolTableLength * 4);
     if(HandlesPointer) {
-        var int i; i = 0;
-        var int m; m = _HT_GetNumber(HandlesPointer);
-        repeat(i, m);
-            _PM_AddToForeachTable(i+1); // 1 bis m
-        end;
+      _HT_ForEach(HandlesPointer, _PM_CreateForeachTable_HTSub);
     };
 };
 
@@ -1063,10 +1063,26 @@ func void _PM_WriteSaveStruct() {
     BW_NextLine();
 };
 
-
+var int PM_HandleList;
 func void _PM_Archive_HTSub(var int key, var int val) {
-    PM_CurrHandle = key;
-    _PM_InstToSaveStruct(val, _HT_Get(HandlesInstance, key));
+	if (!PM_HandleList) {
+		/* PM_HandleList = List_Create(key); */
+		key;
+		MEM_Call(List_Create);
+		PM_HandleList = MEM_PopIntResult();
+	} else {
+		/* List_InsertSorted(PM_HandleList, key, List_CmpAscending); */
+		PM_HandleList; key; MEM_GetFuncID(List_CmpAscending);
+		MEM_Call(List_InsertSorted);
+	};
+};
+
+func void _PM_Archive_ListSub(var int lPtr) {
+	var zCList list; list = _^(lPtr);
+	var int key; key = list.data;
+	
+	PM_CurrHandle = key;
+    _PM_InstToSaveStruct(_HT_Get(HandlesPointer, key), _HT_Get(HandlesInstance, key));
 
     BW_Text(ConcatStrings("HNDL:", IntToString(key/*+1*/)));
     BW_NextLine();
@@ -1093,28 +1109,12 @@ func void _PM_Archive() {
     BW_NextLine();
     BW_NextLine();
 
-	
 	_HT_ForEach(HandlesPointer, _PM_Archive_HTSub);
-    // var int i; i = 0;
-    // var int p; p = MEM_StackPos.position;
-    // if(i < arrMax) {
-        // var int ptr; ptr = _HT_Get(HandlesPointer, i);
-        // var int inst; inst = _HT_Get(HandlesInstance, i);
+	/* List_ForF(PM_HandleList, _PM_Archive_ListSub); */
+	PM_HandleList; MEM_GetFuncID(_PM_Archive_ListSub);
+	MEM_Call(List_ForF);
 
-        // if(ptr) {
-            // PM_CurrHandle = i;//+1;
-            // _PM_InstToSaveStruct(ptr, inst);
-
-            // BW_Text(ConcatStrings("HNDL:", IntToString(i/*+1*/)));
-            // BW_NextLine();
-
-            // _PM_WriteSaveStruct();
-        // };
-
-        // i += 1;
-        // MEM_StackPos.position = p;
-    // };
-
+	PM_HandleList = 0;
     PM_CurrHandle = 1;
 
     BW_Text("PermMem::End");

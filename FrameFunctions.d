@@ -161,3 +161,98 @@ func int FrameFunctions(var int hndl) {
 };
 
 
+
+/***********************************\
+	The following code has been supplied by
+	Frank-95 (https://forum.worldofplayers.de/forum/members/148085-Frank-95)
+\***********************************/
+
+//========================================
+// Remove FF with the specified data
+//========================================
+
+var int _FF_Data;
+
+func int _FF_RemoveLData(var int hndl)
+{
+    if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol)
+    {
+        return continue;
+    };
+    
+    var FFItem itm; itm = get(hndl);
+    if(itm.data != _FF_Data)
+    {
+        return continue;
+    }
+    else
+    {
+        delete(hndl);
+        return break;
+    };
+};
+
+func void FF_RemoveData(var func function, var int data)
+{
+    _FF_Data = data;
+    _FF_Symbol = MEM_GetFuncPtr(function);
+    foreachHndl(FFItem@, _FF_RemoveLData);
+};
+
+//=======================================================
+// Check whether FF with the specified data is active
+//=======================================================
+
+
+func int _FF_ActiveData(var int hndl)
+{
+    if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol)
+    {
+        return continue;
+    };
+    
+    var FFItem itm; itm = get(hndl);
+    if(itm.data != _FF_Data)
+    {
+        return continue;
+    }
+    else
+    {
+        _FF_Symbol = 0;
+        return break;
+    };
+};
+
+func int FF_ActiveData(var func function, var int data)
+{
+    _FF_Data = data;
+    _FF_Symbol = MEM_GetFuncPtr(function);
+    foreachHndl(FFItem@, _FF_ActiveData);
+    return !_FF_Symbol;
+};
+
+//========================================
+// More FFdata functions
+//========================================
+
+func void FF_ApplyData(var func function, var int data)
+{
+    FF_ApplyExtData(function, 0, -1, data);
+};
+
+func void FF_ApplyOnceExtData(var func function, var int delay, var int cycles, var int data)
+{
+    if(FF_ActiveData(function,data))
+    {
+        return;
+    };
+    
+    FF_ApplyExtData(function, delay, cycles, data);
+};
+
+func void FF_ApplyOnceData(var func function, var int data)
+{
+    FF_ApplyOnceExtData(function, 0, -1, data);
+};
+
+
