@@ -5,6 +5,31 @@ class HT_Array {
 	}; instance HT@(HT_Array) {
 };
 
+func void HT_Array_Archiver(var HT_Array this) {    
+	PM_SaveInt("length", this.numAlloc); // Hate to do it this way, but that's how I implemented it back then :/
+	
+	var int ctr; ctr = 0;
+    var int k; k = 0;
+	repeat(k, this.numAlloc/4);
+		var int ptr; ptr = MEM_ReadInt(this.array+k*4);
+		if (!ptr) { continue; };
+		
+		PM_SaveClassPtr(IntToString(ctr), ptr, "zCArray");
+		ctr += 1;
+	end;
+	PM_SaveInt("subArrays", ctr);
+};
+
+func void HT_Array_Unarchiver(var HT_Array this) {
+	this.numAlloc = PM_Load("length");
+	this.array = MEM_Alloc(this.numAlloc);
+	
+	var int k; k = 0;
+	repeat(k, PM_Load("subArrays"));
+		MEM_WriteInt(this.array+k*4, PM_Load(IntToString(k)));
+	end;
+};
+
 func void HT_Array_delete(var int hndl) {
 	_HT_Destroy(getPtr(hndl));
 };
