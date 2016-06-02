@@ -7,6 +7,7 @@ class HT_Array {
 
 func void HT_Array_Archiver(var HT_Array this) {    
 	PM_SaveInt("length", this.numAlloc); // Hate to do it this way, but that's how I implemented it back then :/
+	PM_SaveInt("elements", this.numInArray);
 	
 	var int ctr; ctr = 0;
     var int k; k = 0;
@@ -15,6 +16,7 @@ func void HT_Array_Archiver(var HT_Array this) {
 		if (!ptr) { continue; };
 		
 		PM_SaveClassPtr(IntToString(ctr), ptr, "zCArray");
+		PM_SaveInt(ConcatStrings("pos", IntToString(ctr)), k);
 		ctr += 1;
 	end;
 	PM_SaveInt("subArrays", ctr);
@@ -22,11 +24,13 @@ func void HT_Array_Archiver(var HT_Array this) {
 
 func void HT_Array_Unarchiver(var HT_Array this) {
 	this.numAlloc = PM_Load("length");
+	this.numInArray = PM_Load("elements");
 	this.array = MEM_Alloc(this.numAlloc);
 	
 	var int k; k = 0;
 	repeat(k, PM_Load("subArrays"));
-		MEM_WriteInt(this.array+k*4, PM_Load(IntToString(k)));
+		var int pos; pos = PM_Load(ConcatStrings("pos", IntToString(k)));
+		MEM_WriteInt(this.array+pos*4, PM_Load(IntToString(k)));
 	end;
 };
 
