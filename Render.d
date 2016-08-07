@@ -18,9 +18,7 @@ func int Render_AddItemPrio(var int itemInst, var int x1, var int y1, var int x2
     itm.view = View_Create(x1, y1, x2, y2);
     itm.priority = priority;
     View_Open(itm.view);
-    MEMINT_GetMemHelper(); // Ich sichere mir jetzt Items im MEM_Helper von Ikarus - gute Idee??? // Nein, unbedingt beheben! TODO
-    CreateInvItem(MEM_Helper, itemInst);
-    itm.itmPtr = _@(item);
+    itm.itmPtr = Itm_GetPtr(itemInst);
     var zCList l; l = get(_render_list);
     if (l.data) {
         List_InsertSorted(getPtr(_render_list), h, _Render_Comparator);
@@ -91,7 +89,19 @@ func void _Render_Hook_Sub(var int list) {
     if (l.data) {
         itm = get(l.data);
         if (itm.itmPtr) {
+            SB_New();
+            SB("itmPtr: ");
+            SBi(itm.itmPtr);
+            SB(" WorldPtr: ");
+            SBi(_render_wld);
+            SB(" ViewHandle: ");
+            SBi(itm.view);
+            SB(" ViewPtr: ");
+            SBi(View_GetPtr(itm.view));
+            MEM_Info(SB_ToString());
+            SB_Destroy();
             oCItem_Render(itm.itmPtr, _render_wld, View_GetPtr(itm.view), floatNULL);
+
         } else if ((itm.view_open) && (itm.view)) {
             View_Render(itm.view);
         };
@@ -101,6 +111,7 @@ func void _Render_Hook_Sub(var int list) {
 // TODO: Neues Spiel -> Neues Spiel crasht noch.
 func void _Render_Hook() {
     if (!(getPtr(_render_list))) { return; };
+    if (MEM_Game.singleStep) { return; };
     List_ForF(getPtr(_render_list), _Render_Hook_Sub);
 };
 
@@ -117,22 +128,17 @@ func void _Render_RestorePointer_Sub(var int list) {
     if (l.data) {
         itm = get(l.data);
         if (itm.inst) {
-            if (Npc_HasItems(MEM_Helper, itm.inst)) {
-                Npc_RemoveInvItems(MEM_Helper, itm.inst, Npc_HasItems(MEM_Helper, itm.inst));
-            };
-            CreateInvItem(MEM_Helper, itm.inst);
-            itm.itmPtr = _@(item);
+           itm.itmPtr = Itm_GetPtr(itm.inst);
         };
     };
 };
 
 func void _Render_RestorePointer() {
-    MEMINT_GetMemHelper();
     List_ForF(getPtr(_render_list), _Render_RestorePointer_Sub);
 };
 
 func void _Render_RestorePointer_Listener(var int state) {
-    if (state == GAMESTATE_SAVING) {
+    if (state == GAMESTATE_SAVING || state == GAMESTATE_LOADED) {
         _Render_RestorePointer();
     };
 };

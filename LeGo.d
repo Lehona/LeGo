@@ -13,7 +13,7 @@
 |*                              auf Ikarus                               *|
 |*                                                                       *|
 \*************************************************************************/
-const string LeGo_Version = "LeGo 2.3.4";
+const string LeGo_Version = "LeGo 2.3.2";
 
 const int LeGo_PrintS         = 1<<0;  // Interface.d
 const int LeGo_HookEngine     = 1<<1;  // HookEngine.d
@@ -36,7 +36,9 @@ const int LeGo_Timer          = 1<<17; // Timer.d
 const int LeGo_EventHandler   = 1<<18; // EventHandler.d
 const int LeGo_Gamestate      = 1<<19; // Gamestate.d
 const int LeGo_Sprite         = 1<<20; // Sprite.d
-const int LeGo_Render          = 1<<21; // Render.d
+const int LeGo_Buffs          = 1<<21;
+const int LeGo_Render          = 1<<22; // Render.d
+
 
 const int LeGo_All            = (1<<22)-1; // Sämtliche Bibliotheken
 
@@ -51,6 +53,7 @@ var int _LeGo_Loaded;
 //========================================
 func void LeGo_InitFlags(var int f) {
     if(f & LeGo_Bloodsplats)    { f = f | LeGo_FrameFunctions | LeGo_HookEngine | LeGo_Random | LeGo_Anim8; };
+    if(f & LeGo_Buffs)          { f = f | LeGo_FrameFunctions | LeGo_PermMem | LeGo_View; };
     if(f & LeGo_Gamestate)      { f = f | LeGo_EventHandler | LeGo_Saves; };
     if(f & LeGo_Cursor)         { f = f | LeGo_Interface | LeGo_View; };
     if(f & LeGo_PrintS)         { f = f | LeGo_AI_Function | LeGo_Anim8 | LeGo_Interface; };
@@ -115,6 +118,10 @@ func void LeGo_InitAlways(var int f) {
 
         if (f & LeGo_Render) {
             _render_list = new(zCList@);
+        };
+
+        if (f & LeGo_Buffs) {
+                Bufflist_Init();
         };
 
     };
