@@ -1,23 +1,25 @@
 /***********************************\
                 NAMES
 \***********************************/
-
+var int Talent_Name;
 //========================================
 // Namen setzen
 //========================================
 func void SetName(var int npc, var string nname) {
-    var oCNpc slf; slf = Hlp_GetNpc(npc);
-    if(slf.aiscriptvars[AIV_Name]) {
+    var C_NPC slf; slf = Hlp_GetNpc(npc);
+	var oCNpc slf_int; slf_int = Hlp_GetNpc(npc); // Stupid Daedalus
+    if(TAL_GetValue(slf, Talent_Name)) {
         slf.name = nname;
     };
-    slf.name_1 = nname;
+    slf_int.name_1 = nname;
 };
 
 //========================================
 // Namen anzeigen
 //========================================
 func void ShowName(var int npc) {
-    var oCNpc slf; slf = Hlp_GetNpc(npc);
-    slf.aiscriptvars[AIV_Name] = 1;
-    slf.name = slf.name_1;
+    var C_NPC slf; slf = Hlp_GetNpc(npc);
+	var oCNpc slf_int; slf_int = Hlp_GetNpc(npc); // Stupid Daedalus
+    TAL_SetValue(slf, Talent_Name, 1);
+    slf_int.name = slf_int.name_1;
 };

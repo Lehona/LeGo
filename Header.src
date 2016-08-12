@@ -5,6 +5,7 @@
 EngineAdr.d
 Timer.d
 Userconst.d
+ItemHelper.d
 StringBuilder.d
 Locals.d
 BinaryMachines.d
@@ -16,12 +17,14 @@ EventHandler.d
 List.d
 Anim8.d
 FrameFunctions.d
+Talents.d
 Random.d
 AI_Function.d
 Interface.d
 View.d
 Cursor.d
 Bloodsplats.d
+Buffs.d
 Trialoge.d
 Names.d
 Bars.d

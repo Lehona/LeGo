@@ -14,6 +14,8 @@ const int Cursor_sX                                 = 9019720; //0x89A148
 const int Cursor_sY                                 = 9019724; //0x89A14C
 const int GetFileSize                               = 8079310; //0x7B47CE
 const int GetLastError                              = 8079394; //0x7B4822
+const int oCGame__changeLevel                       = 7107216; //0x6C7290 Hook: Saves
+const int oCGame__changeLevelEnd                    = 7109323; //0x6C7ACB Hook: Saves
 const int oCGame__Render                            = 7112352; //0x6C86A0 Hook: FrameFunctions
 const int oCGame__RenderX                           = 7112704; //0x6C8800 Hook: Quickslots
 const int oCGame__UpdateStatus                      = 7093113; //0x6C3B79 Hook: Focusnames
@@ -269,4 +271,3 @@ func void MEM_SetUseInstance(var int inst) {
 func int MEM_GetUseInstance() {
     return MEM_ReadInt(11232304);
 };
-

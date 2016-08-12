@@ -2,12 +2,29 @@
                 SAVES
 \***********************************/
 
+var int _LeGo_LevelChangeIsExecuted;
+var int _LeGo_LevelChangeCounter;
+
 func void BW_Savegame() {
 
 };
 
 func void BR_Savegame() {
 
+};
+
+
+func void _LeGo_ChangeLevelHookBegin() {
+    _LeGo_LevelChangeIsExecuted = TRUE;
+};
+
+func void _LeGo_ChangeLevelHookEnd() {
+    _LeGo_LevelChangeIsExecuted = FALSE;
+    _LeGo_LevelChangeCounter = 0;
+};
+
+func int _LeGo_IsLevelChange() {
+    return _LeGo_LevelChangeIsExecuted;
 };
 
 //========================================
