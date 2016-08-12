@@ -36,11 +36,12 @@ const int LeGo_Timer          = 1<<17; // Timer.d
 const int LeGo_EventHandler   = 1<<18; // EventHandler.d
 const int LeGo_Gamestate      = 1<<19; // Gamestate.d
 const int LeGo_Sprite         = 1<<20; // Sprite.d
-const int LeGo_Buffs          = 1<<21;
-const int LeGo_Render          = 1<<22; // Render.d
+const int LeGo_Names		  = 1<<21; // Names.d
+const int LeGo_Buffs          = 1<<22;
+const int LeGo_Render          = 1<<23; // Render.d
 
 
-const int LeGo_All            = (1<<21)-1; // Sämtliche Bibliotheken // No Experimental
+const int LeGo_All            = (1<<22)-1; // Sämtliche Bibliotheken // No Experimental
 
 //========================================
 // [intern] Variablen
@@ -66,6 +67,7 @@ func void LeGo_InitFlags(var int f) {
     if(f & LeGo_View)           { f = f | LeGo_PermMem; };
     if(f & LeGo_Interface)      { f = f | LeGo_PermMem; };
     if(f & LeGo_Sprite)         { f = f | LeGo_PermMem; };
+	if(f & LeGo_Names)			{ f = f | LeGo_PermMem; }; 
     if(f & LeGo_PermMem)        { f = f | LeGo_Saves; };
     if(f & LeGo_Saves)          { f = f | LeGo_HookEngine; };
     _LeGo_Flags = f;
@@ -187,6 +189,10 @@ func void LeGo_InitGamestart(var int f) {
     if (f & LeGo_Render) {
         _Render_Init();
     };
+	
+	if (f & LeGo_Names) {
+		Talent_Names = TAL_CreateTalent();
+	};
 
 };
 
