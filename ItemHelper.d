@@ -1,5 +1,4 @@
 const string ITEMHELPER_WAYPOINT = "TOT"; //Daedalus kann keine Konstanten als Wert von Konstanten nehmen... // Ikarus' Waypoint
-const int AIV_ID = 89;
 
 //--------------------------------------
 //  MEM_Helper

@@ -1,6 +1,6 @@
 var int _nrTalents;
 
-const int AIV_TALENT = 99;
+
 
 func int TAL_CreateTalent() {
 	_nrTalents += 1;
@@ -69,16 +69,8 @@ func int Npc_FindByID(var int ID) { // GetByID would probably be too similar to 
     ID_NpcPtr = -1;
     ID_Target = ID;
     
-    /* List_ForFS(MEM_World.voblist_npcs, Npc_FindByID_sub);
-        No LeGo -> No Lists, although they should be compatible with G1. */
-        
-    if (MEM_World.voblist_npcs) {
-        Npc_FindByID_sub(MEM_World.voblist_npcs);
-        var zCListSort l; l = _^(MEM_World.voblist_npcs);
-        while(l.next);
-            Npc_FindByID_sub(l.next);
-            l = _^(l.next);
-        end;
+	if (MEM_World.voblist_npcs) {
+		List_ForFS(MEM_World.voblist_npcs, Npc_FindByID_sub);
     };
     
     

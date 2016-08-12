@@ -5,6 +5,7 @@
 EngineAdr.d
 Timer.d
 Userconst.d
+ItemHelper.d
 StringBuilder.d
 Locals.d
 BinaryMachines.d

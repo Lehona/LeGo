@@ -110,9 +110,9 @@ const int    PF_WaitTime    = 3000;    // Zeit die gewartet wird, bis wieder aus
 const string PF_Font        = "FONT_OLD_10_WHITE.TGA"; //Verwendete Schriftart
 
 //========================================
-// Names
+// Talents
 //========================================
-const int AIV_Name = 89; // Genutzte AI-Var
+const int AIV_TALENT = 89; // Genutzte AI-Var
 
 //========================================
 // Dialoggestures
