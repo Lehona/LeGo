@@ -261,8 +261,7 @@ func void oCNpc_Equip(var int npcPtr, var int itmPtr) {
 //========================================
 // Aktuelle Instanz bearbeiten
 //========================================
-func void MEM_SetUseInstance(var int inst) {
-    var int ptr; ptr = MEM_ReadIntArray (currSymbolTableAddress, inst);
+func void MEM_SetUseInstance(var int ptr) {
     MemoryProtectionOverride(11232304, 10);
     MEM_WriteInt(11232304, ptr);
     MEM_WriteInt(11232308, MEM_ReadInt(ptr+28));

@@ -77,7 +77,15 @@ func void LeGo_InitFlags(var int f) {
 // [intern] Immer
 //========================================
 func void LeGo_InitAlways(var int f) {
-    
+    if (!_LeGo_Loaded) {
+		// Nur beim ersten Spielstart, sonst wird es sowieso aus dem Savegame geladen
+		if (f & LeGo_PermMem) {
+			_PM_Reset();
+			HandlesPointer = _HT_Create();
+			HandlesInstance = _HT_Create();
+			_PM_CreateForeachTable();
+		}; 
+	};
     if (f & LeGo_Saves) {
         if(_LeGo_IsLevelChange()) {
 
@@ -89,12 +97,6 @@ func void LeGo_InitAlways(var int f) {
             if(_LeGo_Flags & LeGo_Gamestate && (_LeGo_LevelChangeCounter == 2)) {
                 _Gamestate_Init(Gamestate_WorldChange);
             };            
-        };
-    };
-
-    if(f & LeGo_PermMem) {
-        if((_LeGo_Init)&&(!_LeGo_Loaded)) { // Aus einem Spiel heraus -> Neues Spiel
-            _PM_Reset();
         };
     };
 
@@ -110,7 +112,8 @@ func void LeGo_InitAlways(var int f) {
     };
 
     if(!_LeGo_Loaded) {
-        // Nur beim ersten Spielstart
+
+		
         if(f & LeGo_Gamestate) {
             _Gamestate_Init(Gamestate_NewGame);
         };
@@ -137,6 +140,10 @@ func void LeGo_InitAlways(var int f) {
         if (f & LeGo_Buffs) {
                 Bufflist_Init();
         };
+		
+		if (f & LeGo_Names) {
+			Talent_Names = TAL_CreateTalent();
+		};
 
     };
 
@@ -155,7 +162,10 @@ func void LeGo_InitAlways(var int f) {
 //========================================
 // [intern] Nur bei Spielstart
 //========================================
-func void LeGo_InitGamestart(var int f) {
+func void LeGo_InitGamestart(var int f) {	
+
+	/* ACHTUNG: Es steht kein new() zur Verfügung (aber create()) */
+	
     if(f & LeGo_Cursor) {
         HookEngineF(5062907, 5, _CURSOR_GETVAL);
     };
@@ -189,10 +199,6 @@ func void LeGo_InitGamestart(var int f) {
     if (f & LeGo_Render) {
         _Render_Init();
     };
-	
-	if (f & LeGo_Names) {
-		Talent_Names = TAL_CreateTalent();
-	};
 
 };
 
