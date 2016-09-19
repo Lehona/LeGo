@@ -233,7 +233,7 @@ func void ViewPtr_ResizePxl(var int ptr, var int x, var int y) {
     ViewPtr_Resize(ptr, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
 };
 func void View_ResizePxl(var int hndl, var int x, var int y) {
-    ViewPtr_ResizePxl(hndl, x, y);
+    ViewPtr_ResizePxl(getPtr(hndl), x, y);
 };
 
 //========================================

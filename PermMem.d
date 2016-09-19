@@ -337,6 +337,7 @@ func int new(var int inst) {
 	
 	nextHandle += 1;
     if (!HandlesPointer) {
+		MEM_InfoBox("This should never happen! If it does anyway, please report to Lehona on WorldOfGothic.");
         //Falls das Array nicht existiert neu anlegen.
         HandlesPointer = _HT_Create();
         HandlesInstance = _HT_Create();
@@ -1098,7 +1099,7 @@ func void _PM_Archive() {
     _PM_FreedSize = 0;    _PM_FreedNum    = 0;
 
     _PM_Mode = 1;
-
+	
     var int arrMax; arrMax = _HT_GetNumber(HandlesPointer);
 
     var int newArr; newArr = MEM_ArrayCreate();
@@ -1111,8 +1112,10 @@ func void _PM_Archive() {
 
 	_HT_ForEach(HandlesPointer, _PM_Archive_HTSub);
 	/* List_ForF(PM_HandleList, _PM_Archive_ListSub); */
-	PM_HandleList; MEM_GetFuncID(_PM_Archive_ListSub);
-	MEM_Call(List_ForF);
+	if (PM_HandleList) {
+		PM_HandleList; MEM_GetFuncID(_PM_Archive_ListSub);
+		MEM_Call(List_ForF);
+	};
 
 	PM_HandleList = 0;
     PM_CurrHandle = 1;

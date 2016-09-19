@@ -406,6 +406,7 @@ func void PrintScreen_Ext(var string txt, var int x, var int y, var string font,
     };
     Print_Ext(x, y, txt, font, COL_White, timeSec * 1000);
 };
+
 class PS_Param {
     var string txt;
     var int x;
@@ -422,12 +423,14 @@ func void AI_PrintScreen_Execute(var int h) {
 
 func void AI_PrintScreen_Ext(var string txt, var int x, var int y, var string font, var int timeSec) {
     var int h; h = New(PS_Param@);
+	PS_Param@ = get(h);
     PS_Param@.txt = txt;
     PS_Param@.x = x;
     PS_Param@.y = y;
     PS_Param@.font = font;
     PS_Param@.timeSec = timeSec;
-    AI_Function_I(self, AI_PrintScreen_Execute, h);
+	
+    AI_Function_I(hero, AI_PrintScreen_Execute, h);
 };
 func void Print_FixPS() {
     var int PS_Ext; PS_Ext = MEM_GetFuncOffset(PrintScreen_Ext);
