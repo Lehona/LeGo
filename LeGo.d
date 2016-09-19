@@ -13,7 +13,7 @@
 |*                              auf Ikarus                               *|
 |*                                                                       *|
 \*************************************************************************/
-const string LeGo_Version = "LeGo 2.3.5";
+const string LeGo_Version = "LeGo 2.3.6";
 
 const int LeGo_PrintS         = 1<<0;  // Interface.d
 const int LeGo_HookEngine     = 1<<1;  // HookEngine.d
@@ -37,7 +37,7 @@ const int LeGo_EventHandler   = 1<<18; // EventHandler.d
 const int LeGo_Gamestate      = 1<<19; // Gamestate.d
 const int LeGo_Sprite         = 1<<20; // Sprite.d
 const int LeGo_Names		  = 1<<21; // Names.d
-const int LeGo_Buffs          = 1<<22;
+const int LeGo_Buffs          = 1<<22; // Buffs.d
 const int LeGo_Render          = 1<<23; // Render.d
 
 
@@ -65,7 +65,8 @@ func void LeGo_InitFlags(var int f) {
     if(f & LeGo_Bars)           { f = f | LeGo_PermMem | LeGo_View; };
     if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
     if(f & LeGo_View)           { f = f | LeGo_PermMem; };
-    if(f & LeGo_Interface)      { f = f | LeGo_PermMem; };
+    if(f & LeGo_Interface)      { f = f | LeGo_PermMem | LeGo_AI_Function; };
+	if(f & LeGo_AI_Function)	{ f = f | LeGo_HookEngine; };
     if(f & LeGo_Sprite)         { f = f | LeGo_PermMem; };
 	if(f & LeGo_Names)			{ f = f | LeGo_PermMem; }; 
     if(f & LeGo_PermMem)        { f = f | LeGo_Saves; };
