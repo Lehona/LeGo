@@ -178,7 +178,7 @@ func int Print_ToDegree(var int angle) {
 //========================================
 
 instance zCViewTextPrint(zCViewText) {
-    _vtbl = 8643396; //0x83E344
+    _vtbl = zCViewText_vtbl;
     inPrintWin = 0;
     timer = 0;
     timed = 0;

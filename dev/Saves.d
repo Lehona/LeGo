@@ -60,14 +60,14 @@ func string _BIN_GetSavefilePath(var int slot) {
 //========================================
 func int _BR_GetSelectedSlot() {
     var CGameManager man; man = _^(MEM_ReadInt(MEMINT_gameMan_Pointer_address));
-    return MEM_ReadInt(man.menu_load_savegame + 3276);
+    return MEM_ReadInt(man.menu_load_savegame + menu_savegame_slot_offset);
 };
 
 //========================================
 // [intern] Ruft BW_Savegame auf
 //========================================
 func void _BW_SaveGame() {
-    var int ext; ext = MEM_ReadInt(EBP+60);
+    var int ext; ext = MEM_ReadInt(EBP+oCSavegameManager__SetAndWriteSavegame_bp_offset);
     if(_LeGo_Flags & LeGo_Gamestate) {
         _Gamestate_Init(Gamestate_Saving);
     };

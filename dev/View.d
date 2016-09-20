@@ -470,7 +470,6 @@ func void ViewPtr_AlignText(var int ptr, var int margin) {
 // View nach oben bewegen
 //========================================
 func void ViewPtr_Top(var int ptr) {
-    const int zCView_Top = 8021904; //007A6790
     Call__thiscall(ptr, zCView_Top);
 };
 func void View_Top(var int hndl) {
