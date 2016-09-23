@@ -120,53 +120,27 @@ func string View_GetTexture(var int hndl) {
     return ViewPtr_GetTexture(getPtr(hndl));
 };
 
-
-//========================================
-// View einfärben
-//========================================
-func void ViewPtr_SetColor(var int ptr, var int zColor) {
-    var zCView v; v = _^(ptr);
-    v.color = zColor;
-    v.alpha = (zColor >> zCOLOR_SHIFT_ALPHA) & zCOLOR_CHANNEL;
-    if((v.alpha != 255) && (v.alphafunc == 1)) {
-        v.alphafunc = 2;
-    };
-};
-func void View_SetColor(var int hndl, var int zColor) {
-    var zCView v; v = get(hndl);
-    v.color = zColor;
-    v.alpha = (zColor >> zCOLOR_SHIFT_ALPHA) & zCOLOR_CHANNEL;
-    if((v.alpha != 255) && (v.alphafunc == 1)) {
-        v.alphafunc = 2;
-    };
-};
-
-func int ViewPtr_GetColor(var int ptr) {
-    var zCView v; v = _^(ptr);
-    return v.color;
-};
-func int View_GetColor(var int hndl) {
-    var zCView v; v = get(hndl);
-    return v.color;
-};
-
 //========================================
 // Mark:
 // View set alpha
 //========================================
-func void View_SetAlpha(var int hndl,var int val) {
-	var zCView v; v = get (hndl);
+func void ViewPtr_SetAlpha(var int ptr, var int val) {
+	var zCView v; v = _^(ptr);
 	v.alpha = val;
 	if((v.alpha != 255) && (v.alphafunc == 1)) {
         v.alphafunc = 2;
     };
 };
+
+func void View_SetAlpha(var int hndl,var int val) {
+	ViewPtr_SetAlpha(getPtr(hndl), val);
+};
 //========================================
 // Mark: View set alpha 
 // (including all text within the view)
 //========================================
-func void View_SetAlphaExt(var int hndl,var int val) {
-	var zCView v; v = get (hndl);
+func void ViewPtr_SetAlphaAll(var int ptr, var int val) {
+	var zCView v; v = _^(ptr);
 	v.alpha = val;
 	if((v.alpha != 255) && (v.alphafunc == 1)) {
         v.alphafunc = 2;
@@ -176,11 +150,36 @@ func void View_SetAlphaExt(var int hndl,var int val) {
 		var zCList l;
 		while(list);
 			l = _^(list);
-			Print_SetAlphaPtr(l.data,val);
+			PrintPtr_SetAlpha(l.data,val);
 			list = l.next;
 		end;
 	};
 };
+
+func void View_SetAlphaAll(var int hndl, var int val) {
+	ViewPtr_SetAlphaAll(getPtr(hndl), val);
+};
+
+//========================================
+// View einfärben
+//========================================
+func void ViewPtr_SetColor(var int ptr, var int zColor) {
+    var zCView v; v = _^(ptr);
+    v.color = zColor;
+    ViewPtr_SetAlpha(ptr, (zColor >> zCOLOR_SHIFT_ALPHA) & zCOLOR_CHANNEL);
+};
+func void View_SetColor(var int hndl, var int zColor) {
+	ViewPtr_SetColor(getPtr(hndl), zColor);
+};
+
+func int ViewPtr_GetColor(var int ptr) {
+    var zCView v; v = _^(ptr);
+    return v.color;
+};
+func int View_GetColor(var int hndl) {
+    return ViewPtr_GetColor(getPtr(hndl));
+};
+
 
 //========================================
 // View anzeigen
