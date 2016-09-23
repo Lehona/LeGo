@@ -97,6 +97,25 @@ func void Print_DeleteText(var int hndl) {
 };
 
 //========================================
+// Mark: Print set alpha
+//========================================
+// pointer
+func void Print_SetAlphaPtr(var int ptr,var int a) {
+	if (!ptr) { return; };
+	var zCViewText txt; txt = MEM_PtrToInst(ptr);
+	txt.colored = 1;
+	txt.color = ChangeAlpha(txt.color,a);
+};
+// handle
+func void Print_SetAlpha(var int hndl,var int a) {
+	if (!Hlp_IsValidHandle(hndl)) { return; };
+	var zCViewText txt; txt = get(hndl);
+	txt.colored = 1;
+	txt.color = ChangeAlpha(txt.color,a);
+};
+
+
+//========================================
 // Screengröße (in Pixeln)
 //========================================
 var int Print_Ratio; //float
@@ -273,8 +292,30 @@ func string Print_LongestLine(var string text, var string font) {
     MEM_StackPos.position = pos;
 };
 
+func string Print_LongestLineExt(var string text, var string font, var string separator) {
+    var int cnt; cnt = STR_SplitCount(text, separator);
+    var int i; i = 0;
+    var int max; max = 0;
+    var int tmp; tmp = 0;
+
+    var int pos; pos = MEM_StackPos.position;
+        if (i >= cnt) {
+            return STR_Split(text, separator, i-1);
+        };
+        tmp = Print_GetStringWidth(STR_Split(text, separator, i), font);
+        if (tmp > max) {
+            max = tmp;
+        };
+    i+=1;
+    MEM_StackPos.position = pos;
+};
+
 func int Print_LongestLineLength(var string text, var string font) {
     return Print_GetStringWidth(Print_LongestLine(text, font), font);
+};
+
+func int Print_LongestLineLengthExt(var string text, var string font, var string separator) {
+    return Print_GetStringWidth(Print_LongestLineExt(text, font, separator), font);
 };
 
 

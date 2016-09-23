@@ -168,7 +168,7 @@ func void LeGo_InitGamestart(var int f) {
 	/* ACHTUNG: Es steht kein new() zur Verfügung (aber create()) */
 	
     if(f & LeGo_Cursor) {
-        HookEngineF(5062907, 5, _CURSOR_GETVAL);
+        HookEngineF(sub_4D3D90_X, 5, _CURSOR_GETVAL);
     };
 
     if(f & LeGo_Random) {
