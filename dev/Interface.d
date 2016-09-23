@@ -467,13 +467,16 @@ func void Print_FixPS() {
         Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
 
     PS.content = Call_Close();
-    var int AI_PS_Ext; AI_PS_Ext = MEM_GetFuncOffset(AI_PrintScreen_Ext);
-     PS = _^(MEM_ReadIntArray(contentSymbolTableAddress, MEM_GetFuncID(AI_PrintScreen)));
+	
+	if (MEMINT_SwitchG1G2(false, true)) {
+		var int AI_PS_Ext; AI_PS_Ext = MEM_GetFuncOffset(AI_PrintScreen_Ext);
+		PS = _^(MEM_GetParserSymbol ("AI_PRINTSCREEN"));
 
-    Call_Begin(0);
-        Call_IntParam(_@(AI_PS_Ext));
-        Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
+		Call_Begin(0);
+			Call_IntParam(_@(AI_PS_Ext));
+			Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
 
-    PS.content = Call_Close();
+		PS.content = Call_Close();
+	};
 };
 
