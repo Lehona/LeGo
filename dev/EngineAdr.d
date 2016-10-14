@@ -47,7 +47,7 @@ const int WriteFile                                 = 8079292; //0x7B47BC
 const int zCAICamera_StartDialogCam                 = 4923632; //0x4B20F0
 const int zCAICamera__current                       = 9235128; //0x8CEAB8
 const int zCAICamera__StartDialogCam                = 4923632; //0x4B20F0
-const int zCAICamera__StartDialogCam_oldInstr		= 275316586; 
+const int zCAICamera__StartDialogCam_oldInstr		= 275316586;
 const int zCFontMan__GetFont                        = 7898288; //0x7884B0
 const int zCFontMan__Load                           = 7897808; //0x7882D0
 const int zCFont__GetFontName                       = 7902368; //0x7894A0
@@ -74,7 +74,7 @@ const int zCView__Render                            = 8045072; //0x7AC210
 const int zCView__SetFontColor                      = 8034576; //0x7A9910
 const int zCView__SetSize                           = 8026016; //0x7A77A0
 const int zCView__zCView                            = 8017664; //0x7A5700
-const int zCView_Top 								= 8021904; //007A6790			
+const int zCView_Top 								= 8021904; //007A6790
 const int zCWorld__zCWorld                          = 6421056; //0x61FA40
 const int zFontMan                                  =11221460; //0xAB39D4
 const int zParser__CallFunc                         = 7940592; //0x7929F0
@@ -92,6 +92,8 @@ const int _sinf 									= 8123910; //0x7BF606
 const int _acosf 									= 8123794; //0x7BF592
 const int menu_savegame_slot_offset					= 3276;
 const int sub_4D3D90_X								= 5062907; //0x4D40FB // ???
+const int zCConsole__Register                       = 7875296; //0x782AE0
+const int zCConsoleOutputOverwriteAddr              = 7142904; //0x6CFDF8 Hook: ConsoleCommands
 
 
 //========================================
