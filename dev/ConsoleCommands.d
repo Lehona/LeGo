@@ -8,17 +8,36 @@
 class CCItem {
     var int fncID;
     var string cmd;
+    var string desc;
 };
 instance CCItem@(CCItem);
+
+//=============================================================
+// Register auto-completion (needs to be done every game start)
+//=============================================================
+func void CC_AutoComplete(var string commandPrefix, var string description) {
+    var int descPtr; descPtr = _@s(description);
+    var int comPtr; comPtr = _@s(commandPrefix);
+    const int call = 0;
+    if (CALL_Begin(call)) {
+        CALL_PtrParam(_@(descPtr));
+        CALL_PtrParam(_@(comPtr));
+        CALL__thiscall(_@(zcon_address), zCConsole__Register);
+        call = CALL_End();
+    };
+};
 
 func void CCItem_Archiver(var CCItem this) {
     PM_SaveFuncPtr("fncID", this.fncID);
     PM_SaveString("cmd", this.cmd);
+    PM_SaveString("desc", this.desc);
 };
 
 func void CCItem_Unarchiver(var CCItem this) {
     this.fncID = PM_LoadFuncPtr("fncID");
     this.cmd = PM_LoadString("cmd");
+    this.desc = PM_LoadString("desc");
+    CC_AutoComplete(this.cmd, this.desc);
 };
 
 var int _CC_Symbol;
@@ -51,20 +70,13 @@ func void CC_Register(var func function, var string commandPrefix, var string de
     };
     commandPrefix = STR_Upper(commandPrefix);
     // Register auto-completion
-    var int descPtr; descPtr = _@s(description);
-    var int comPtr; comPtr = _@s(commandPrefix);
-    const int call = 0;
-    if (CALL_Begin(call)) {
-        CALL_PtrParam(_@(descPtr));
-        CALL_PtrParam(_@(comPtr));
-        CALL__thiscall(_@(zcon_address), zCConsole__Register);
-        call = CALL_End();
-    };
+    CC_AutoComplete(commandPrefix, description);
     // Add function
     var int hndl; hndl = new(CCItem@);
     var CCItem itm; itm = get(hndl);
     itm.fncID = MEM_GetFuncPtr(function);
     itm.cmd = commandPrefix;
+    itm.desc = description;
 };
 
 //========================================
