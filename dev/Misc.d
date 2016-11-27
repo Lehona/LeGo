@@ -27,7 +27,7 @@ func int distance2D(var int x1, var int x2, var int y1, var int y2) {
 };
 
 func int sin(var int angle) {
-	const int _sinf = 8123910; //0x7BF606
+	
 	const int call = 0;
 	var int ret;
 	if (Call_Begin(call)) {
@@ -42,7 +42,6 @@ func int sin(var int angle) {
 };
 
 func int acos(var int cosine) {
-	const int _acosf = 8123794; //0x7BF592
 	const int call = 0;
 	var int ret;
 	if (Call_Begin(call)) {

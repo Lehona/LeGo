@@ -54,7 +54,7 @@ func void Cursor_Show() {
 func void SetMouseEnabled(var int bEnabled) {
     CALL_IntParam(!!bEnabled /*Nur zur Sicherheit*/);
     CALL_IntParam(2);
-    CALL__thiscall(MEM_ReadInt(9246288/* zCInput * zInput */), 5067008);
+    CALL__thiscall(MEM_ReadInt(zCInput_zinput), zCInput_Win32__SetDeviceEnabled);
 };
 
 //========================================

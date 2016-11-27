@@ -97,6 +97,23 @@ func void Print_DeleteText(var int hndl) {
 };
 
 //========================================
+// Mark: Print set alpha
+//========================================
+// pointer
+func void PrintPtr_SetAlpha(var int ptr, var int a) {
+	if (!ptr) { return; };
+	var zCViewText txt; txt = MEM_PtrToInst(ptr);
+	txt.colored = 1;
+	txt.color = ChangeAlpha(txt.color,a);
+};
+// handle
+func void Print_SetAlpha(var int hndl,var int a) {
+	if (!Hlp_IsValidHandle(hndl)) { return; };
+	PrintPtr_SetAlpha(getPtr(hndl), a);
+};
+
+
+//========================================
 // Screengröße (in Pixeln)
 //========================================
 var int Print_Ratio; //float
@@ -178,7 +195,7 @@ func int Print_ToDegree(var int angle) {
 //========================================
 
 instance zCViewTextPrint(zCViewText) {
-    _vtbl = 8643396; //0x83E344
+    _vtbl = zCViewText_vtbl;
     inPrintWin = 0;
     timer = 0;
     timed = 0;
@@ -255,17 +272,17 @@ func int Print_ExtPxl(var int x, var int y, var string text, var string font, va
 // Textfeld
 //========================================
 
-func string Print_LongestLine(var string text, var string font) {
-    var int cnt; cnt = STR_SplitCount(text, Print_LineSeperator);
+func string Print_LongestLineExt(var string text, var string font, var string separator) {
+    var int cnt; cnt = STR_SplitCount(text, separator);
     var int i; i = 0;
     var int max; max = 0;
     var int tmp; tmp = 0;
 
     var int pos; pos = MEM_StackPos.position;
         if (i >= cnt) {
-            return STR_Split(text, Print_LineSeperator, i-1);
+            return STR_Split(text, separator, i-1);
         };
-        tmp = Print_GetStringWidth(STR_Split(text, Print_LineSeperator, i), font);
+        tmp = Print_GetStringWidth(STR_Split(text, separator, i), font);
         if (tmp > max) {
             max = tmp;
         };
@@ -273,8 +290,17 @@ func string Print_LongestLine(var string text, var string font) {
     MEM_StackPos.position = pos;
 };
 
+func string Print_LongestLine(var string text, var string font) {
+	Print_LongestLineExt(text, font, Print_LineSeperator);	
+};
+
+
+func int Print_LongestLineLengthExt(var string text, var string font, var string separator) {
+    return Print_GetStringWidth(Print_LongestLineExt(text, font, separator), font);
+};
+
 func int Print_LongestLineLength(var string text, var string font) {
-    return Print_GetStringWidth(Print_LongestLine(text, font), font);
+    return Print_LongestLineLengthExt(text, font, Print_LineSeperator);
 };
 
 
@@ -441,13 +467,16 @@ func void Print_FixPS() {
         Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
 
     PS.content = Call_Close();
-    var int AI_PS_Ext; AI_PS_Ext = MEM_GetFuncOffset(AI_PrintScreen_Ext);
-     PS = _^(MEM_ReadIntArray(contentSymbolTableAddress, MEM_GetFuncID(AI_PrintScreen)));
+	
+	if (MEMINT_SwitchG1G2(false, true)) {
+		var int AI_PS_Ext; AI_PS_Ext = MEM_GetFuncOffset(AI_PrintScreen_Ext);
+		PS = _^(MEM_GetParserSymbol ("AI_PRINTSCREEN"));
 
-    Call_Begin(0);
-        Call_IntParam(_@(AI_PS_Ext));
-        Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
+		Call_Begin(0);
+			Call_IntParam(_@(AI_PS_Ext));
+			Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
 
-    PS.content = Call_Close();
+		PS.content = Call_Close();
+	};
 };
 

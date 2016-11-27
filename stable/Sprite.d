@@ -47,7 +47,7 @@ func void zRND_D3D_DrawLine(var int x0, var int y0, var int x1, var int y1, var 
 };
 
 func int zRND_D3D_GetTotalTextureMem() {
-    return MEM_ReadInt(zrenderer_adr + 1208);
+    return MEM_ReadInt(zrenderer_adr + zRND_D3D_TexMemory_offset);
 };
 
 func void zRND_D3D_SetAlphaBlendFunc(var int zTRnd_AlphaBlendFunc) {
@@ -81,7 +81,7 @@ func void zRND_XD3D_SetRenderState(var int state, var int mode) {
         CALL_IntParam(_@(mode));
         CALL_IntParam(_@(state));
 
-        CALL__thiscall(zrenderer_adr, 6573808);
+        CALL__thiscall(zrenderer_adr, zCRnd_D3D__XD3D_SetRenderState);
 
         call = CALL_End();
     };

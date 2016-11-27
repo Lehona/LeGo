@@ -120,6 +120,45 @@ func string View_GetTexture(var int hndl) {
     return ViewPtr_GetTexture(getPtr(hndl));
 };
 
+//========================================
+// Mark:
+// View set alpha
+//========================================
+func void ViewPtr_SetAlpha(var int ptr, var int val) {
+	var zCView v; v = _^(ptr);
+	v.alpha = val;
+	if((v.alpha != 255) && (v.alphafunc == 1)) {
+        v.alphafunc = 2;
+    };
+};
+
+func void View_SetAlpha(var int hndl,var int val) {
+	ViewPtr_SetAlpha(getPtr(hndl), val);
+};
+//========================================
+// Mark: View set alpha 
+// (including all text within the view)
+//========================================
+func void ViewPtr_SetAlphaAll(var int ptr, var int val) {
+	var zCView v; v = _^(ptr);
+	v.alpha = val;
+	if((v.alpha != 255) && (v.alphafunc == 1)) {
+        v.alphafunc = 2;
+    };
+	if (v.textLines_next) { 
+		var int list; list = v.textLines_next;
+		var zCList l;
+		while(list);
+			l = _^(list);
+			PrintPtr_SetAlpha(l.data,val);
+			list = l.next;
+		end;
+	};
+};
+
+func void View_SetAlphaAll(var int hndl, var int val) {
+	ViewPtr_SetAlphaAll(getPtr(hndl), val);
+};
 
 //========================================
 // View einfärben
@@ -127,18 +166,10 @@ func string View_GetTexture(var int hndl) {
 func void ViewPtr_SetColor(var int ptr, var int zColor) {
     var zCView v; v = _^(ptr);
     v.color = zColor;
-    v.alpha = (zColor >> zCOLOR_SHIFT_ALPHA) & zCOLOR_CHANNEL;
-    if((v.alpha != 255) && (v.alphafunc == 1)) {
-        v.alphafunc = 2;
-    };
+    ViewPtr_SetAlpha(ptr, (zColor >> zCOLOR_SHIFT_ALPHA) & zCOLOR_CHANNEL);
 };
 func void View_SetColor(var int hndl, var int zColor) {
-    var zCView v; v = get(hndl);
-    v.color = zColor;
-    v.alpha = (zColor >> zCOLOR_SHIFT_ALPHA) & zCOLOR_CHANNEL;
-    if((v.alpha != 255) && (v.alphafunc == 1)) {
-        v.alphafunc = 2;
-    };
+	ViewPtr_SetColor(getPtr(hndl), zColor);
 };
 
 func int ViewPtr_GetColor(var int ptr) {
@@ -146,9 +177,9 @@ func int ViewPtr_GetColor(var int ptr) {
     return v.color;
 };
 func int View_GetColor(var int hndl) {
-    var zCView v; v = get(hndl);
-    return v.color;
+    return ViewPtr_GetColor(getPtr(hndl));
 };
+
 
 //========================================
 // View anzeigen
@@ -470,7 +501,6 @@ func void ViewPtr_AlignText(var int ptr, var int margin) {
 // View nach oben bewegen
 //========================================
 func void ViewPtr_Top(var int ptr) {
-    const int zCView_Top = 8021904; //007A6790
     Call__thiscall(ptr, zCView_Top);
 };
 func void View_Top(var int hndl) {
@@ -482,7 +512,10 @@ func void zCView_Archiver(var zCView this) {
     PM_SaveInt("_vtbl", this._vtbl);
     PM_SaveInt("_zCInputCallBack_vtbl", this._zCInputCallBack_vtbl);
 
-    PM_SaveInt("m_bFillZ", this.m_bFillZ);
+    if (MEMINT_SwitchG1G2(false, true)) {
+        /* Gothic 1 kennt die Eigenschaft m_bFillZ nicht, daher die Pointerarithmetik hier */
+        PM_SaveInt("m_bFillZ", MEM_ReadInt(_@(this)+8));
+    };
     PM_SaveInt("next", this.next);
 
     PM_SaveInt("ViewID", this.viewID);
@@ -563,7 +596,10 @@ func void zCView_Unarchiver(var zCView this) {
     this._vtbl = PM_LoadInt("_vtbl");
     this._zCInputCallBack_vtbl = PM_LoadInt("_zCInputCallBack_vtbl");
 
-    this.m_bFillZ = PM_LoadInt("m_bFillZ");
+    if (MEMINT_SwitchG1G2(false, true)) {
+        /* Gothic 1 kennt die Eigenschaft m_bFillZ nicht, daher die Pointerarithmetik hier */
+        MEM_WriteInt(_@(this)+8, PM_LoadInt("m_bFillZ"));
+    };
     // this.next = PM_LoadInt("next"); // Darf ich nicht überschreiben, habs der Übersicht halber aber hier gelassen
 
     this.viewID = PM_LoadInt("ViewID");

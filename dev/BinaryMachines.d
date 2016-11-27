@@ -263,7 +263,7 @@ func int BR_OpenFile(var string file) {
     var int len; len = WIN_GetFileSize(_bin_open, 0);
 
     if(len > _bin_clen) {
-        MEM_Free(_bin_ccnt);
+		if (_bin_ccnt) { MEM_Free(_bin_ccnt); };
         _bin_ccnt = MEM_Alloc(len);
         _bin_clen = len;
     };

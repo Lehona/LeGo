@@ -86,7 +86,7 @@ func void _B_HeroDamage() {
     var int currDam; currDam = Hero_LastHP - hero.attribute[ATR_Hitpoints];
     if(currDam) {
         Bloodsplat(currDam);
-        Wld_StopEffect("HERO_HURT");
+        //Wld_StopEffect("HERO_HURT"); // Doesn't exist in G1 and seems to make no difference?
         Wld_PlayEffect("HERO_HURT", hero, hero, 0, 0, 0, 0);
     };
 };
