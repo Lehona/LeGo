@@ -17,6 +17,7 @@ EventHandler.d
 List.d
 Anim8.d
 FrameFunctions.d
+ConsoleCommands.d
 Talents.d
 Random.d
 AI_Function.d

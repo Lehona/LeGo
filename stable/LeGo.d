@@ -13,7 +13,7 @@
 |*                              auf Ikarus                               *|
 |*                                                                       *|
 \*************************************************************************/
-const string LeGo_Version = "LeGo 2.3.6";
+const string LeGo_Version = "LeGo 2.4.0";
 
 const int LeGo_PrintS         = 1<<0;  // Interface.d
 const int LeGo_HookEngine     = 1<<1;  // HookEngine.d
@@ -37,11 +37,12 @@ const int LeGo_EventHandler   = 1<<18; // EventHandler.d
 const int LeGo_Gamestate      = 1<<19; // Gamestate.d
 const int LeGo_Sprite         = 1<<20; // Sprite.d
 const int LeGo_Names		  = 1<<21; // Names.d
-const int LeGo_Buffs          = 1<<22; // Buffs.d
-const int LeGo_Render          = 1<<23; // Render.d
+const int LeGo_ConsoleCommands = 1<<22; // ConsoleCommands.d
+const int LeGo_Buffs          = 1<<23; // Buffs.d
+const int LeGo_Render          = 1<<24; // Render.d
 
 
-const int LeGo_All            = (1<<22)-1; // Sämtliche Bibliotheken // No Experimental
+const int LeGo_All            = (1<<23)-1; // Sämtliche Bibliotheken // No Experimental
 
 //========================================
 // [intern] Variablen
@@ -61,6 +62,7 @@ func void LeGo_InitFlags(var int f) {
     if(f & LeGo_PrintS)         { f = f | LeGo_AI_Function | LeGo_Anim8 | LeGo_Interface; };
     if(f & LeGo_Anim8)          { f = f | LeGo_PermMem | LeGo_FrameFunctions | LeGo_Timer; };
     if(f & LeGo_Buttons)        { f = f | LeGo_PermMem | LeGo_View | LeGo_FrameFunctions; };
+    if(f & LeGo_ConsoleCommands){ f = f | LeGo_PermMem | LeGo_HookEngine; };
     if(f & LeGo_FrameFunctions) { f = f | LeGo_PermMem | LeGo_HookEngine | LeGo_Timer; };
     if(f & LeGo_Bars)           { f = f | LeGo_PermMem | LeGo_View; };
     if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
@@ -68,7 +70,7 @@ func void LeGo_InitFlags(var int f) {
     if(f & LeGo_Interface)      { f = f | LeGo_PermMem | LeGo_AI_Function; };
 	if(f & LeGo_AI_Function)	{ f = f | LeGo_HookEngine; };
     if(f & LeGo_Sprite)         { f = f | LeGo_PermMem; };
-	if(f & LeGo_Names)			{ f = f | LeGo_PermMem; }; 
+	if(f & LeGo_Names)			{ f = f | LeGo_PermMem; };
     if(f & LeGo_PermMem)        { f = f | LeGo_Saves; };
     if(f & LeGo_Saves)          { f = f | LeGo_HookEngine; };
     _LeGo_Flags = f;
@@ -85,7 +87,7 @@ func void LeGo_InitAlways(var int f) {
 			HandlesPointer = _HT_Create();
 			HandlesInstance = _HT_Create();
 			_PM_CreateForeachTable();
-		}; 
+		};
 	};
     if (f & LeGo_Saves) {
         if(_LeGo_IsLevelChange()) {
@@ -97,7 +99,7 @@ func void LeGo_InitAlways(var int f) {
             // for avoiding duplicate user function calls (e.g. in startup)
             if(_LeGo_Flags & LeGo_Gamestate && (_LeGo_LevelChangeCounter == 2)) {
                 _Gamestate_Init(Gamestate_WorldChange);
-            };            
+            };
         };
     };
 
@@ -114,7 +116,7 @@ func void LeGo_InitAlways(var int f) {
 
     if(!_LeGo_Loaded) {
 
-		
+
         if(f & LeGo_Gamestate) {
             _Gamestate_Init(Gamestate_NewGame);
         };
@@ -141,8 +143,8 @@ func void LeGo_InitAlways(var int f) {
         if (f & LeGo_Buffs) {
                 Bufflist_Init();
         };
-		
-		if (f & LeGo_Names) {
+
+        if (f & LeGo_Names) {
 			Talent_Names = TAL_CreateTalent();
 		};
 
@@ -163,12 +165,12 @@ func void LeGo_InitAlways(var int f) {
 //========================================
 // [intern] Nur bei Spielstart
 //========================================
-func void LeGo_InitGamestart(var int f) {	
+func void LeGo_InitGamestart(var int f) {
 
 	/* ACHTUNG: Es steht kein new() zur Verfügung (aber create()) */
-	
+
     if(f & LeGo_Cursor) {
-        HookEngineF(5062907, 5, _CURSOR_GETVAL);
+        HookEngineF(sub_4D3D90_X, 5, _CURSOR_GETVAL);
     };
 
     if(f & LeGo_Random) {
@@ -185,6 +187,10 @@ func void LeGo_InitGamestart(var int f) {
 
     if(f & LeGo_FrameFunctions) {
         HookEngineF(oCGame__Render, 7, _FF_HOOK);
+    };
+
+    if(f & LeGo_ConsoleCommands) {
+        HookEngineF(zCConsoleOutputOverwriteAddr, 9, _CC_HOOK);
     };
 
     if(f & LeGo_Saves) {
