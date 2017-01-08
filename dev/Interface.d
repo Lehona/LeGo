@@ -125,8 +125,9 @@ func void _Print_Ratio() {
 
 var int Print_Screen[2];
 func void Print_GetScreenSize() {
-    Print_Screen[PS_X] = STR_ToInt(MEM_GetGothOpt("VIDEO", "zVidResFullscreenX"));
-    Print_Screen[PS_Y] = STR_ToInt(MEM_GetGothOpt("VIDEO", "zVidResFullscreenY"));
+    var zCView screen; screen = _^(MEM_Game._zCSession_viewport);
+    Print_Screen[PS_X] = screen.psizex;
+    Print_Screen[PS_Y] = screen.psizey;
     _Print_Ratio();
 };
 
