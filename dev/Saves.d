@@ -43,7 +43,7 @@ func string _BIN_GetSavefilePath(var int slot) {
     var string path;
 	var string cmd;
 	if (MEMINT_SwitchG1G2(false, true)) {
-	/* G2 */
+		/* G2 */
         cmd = MEM_GetCommandLine();
     };
     var string _BIN_ini;

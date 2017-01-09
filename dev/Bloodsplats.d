@@ -87,7 +87,10 @@ func void _B_HeroDamage() {
     if(currDam) {
         Bloodsplat(currDam);
         //Wld_StopEffect("HERO_HURT"); // Doesn't exist in G1 and seems to make no difference?
-        Wld_PlayEffect("HERO_HURT", hero, hero, 0, 0, 0, 0);
+		if (MEMINT_SwitchG1G2(false, true)) {
+			/* hate to do this, but G1 doesnt have this effect, also, am lazy to create it */
+			Wld_PlayEffect("HERO_HURT", hero, hero, 0, 0, 0, 0);
+		};
     };
 };
 

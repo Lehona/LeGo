@@ -343,7 +343,7 @@ func void View_DeleteText(var int hndl) {
 //========================================
 func void ViewPtr_AddText(var int ptr, var int x, var int y, var string text, var string font) {
     var zCView v; v = _^(ptr);
-    var int field; field = Print_TextField(x, y, text, font, Print_ToVirtual(Print_GetFontHeight(font), v.pposy+v.psizey));
+    var int field; field = Print_TextField(x, y, text, font, Print_ToVirtual(Print_GetFontHeight(font), v.psizey));
     if(v.textLines_next) {
         List_Concat(v.textLines_next, field);
     }
