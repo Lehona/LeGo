@@ -64,7 +64,9 @@ func int Print_CreateTextPtrColored(var string text, var string font, var int co
     txt.font = Print_GetFontPtr(font);
     txt.text = text;
     txt.color = color;
-    txt.colored = 1;
+	if (!color == -1) {
+		txt.colored = 1;
+	};
     return ptr;
 };
 
@@ -104,14 +106,13 @@ func void PrintPtr_SetAlpha(var int ptr, var int a) {
 	if (!ptr) { return; };
 	var zCViewText txt; txt = MEM_PtrToInst(ptr);
 	txt.colored = 1;
-	txt.color = ChangeAlpha(txt.color,a);
+	txt.color = ChangeAlpha(txt.color, a);
 };
 // handle
-func void Print_SetAlpha(var int hndl,var int a) {
+func void Print_SetAlpha(var int hndl, var int a) {
 	if (!Hlp_IsValidHandle(hndl)) { return; };
 	PrintPtr_SetAlpha(getPtr(hndl), a);
 };
-
 
 //========================================
 // Screengröße (in Pixeln)
@@ -295,7 +296,6 @@ func string Print_LongestLine(var string text, var string font) {
 	Print_LongestLineExt(text, font, Print_LineSeperator);	
 };
 
-
 func int Print_LongestLineLengthExt(var string text, var string font, var string separator) {
     return Print_GetStringWidth(Print_LongestLineExt(text, font, separator), font);
 };
@@ -304,11 +304,10 @@ func int Print_LongestLineLength(var string text, var string font) {
     return Print_LongestLineLengthExt(text, font, Print_LineSeperator);
 };
 
-
-func int Print_TextField(var int x, var int y, var string text, var string font, var int height) {
+func int Print_TextFieldColored(var int x, var int y, var string text, var string font, var int height, var int color) {
     var int cnt; cnt = STR_SplitCount(text, Print_LineSeperator);
     var int i; i = 1;
-    var int ptr; ptr = Print_CreateTextPtr(STR_Split(text, Print_LineSeperator, 0), font);
+    var int ptr; ptr = Print_CreateTextPtrColored(STR_Split(text, Print_LineSeperator, 0), font, color);
     var zCViewText txt; txt = _^(ptr);
     txt.posx = x;
     txt.posy = y;
@@ -318,7 +317,7 @@ func int Print_TextField(var int x, var int y, var string text, var string font,
     if (i >= cnt) {
         return list;
     };
-        ptr = Print_CreateTextPtr(STR_Split(text, Print_LineSeperator, i), font);
+        ptr = Print_CreateTextPtrColored(STR_Split(text, Print_LineSeperator, i), font, color);
         txt = _^(ptr);
         txt.posx = x;
         txt.posy = y+(height*i);
@@ -327,6 +326,10 @@ func int Print_TextField(var int x, var int y, var string text, var string font,
         i+=1;
 
     MEM_StackPos.position = pos;
+};
+
+func int Print_TextField(var int x, var int y, var string text, var string font, var int height) {
+	return Print_TextFieldColored(x, y, text, font, height, -1);
 };
 
 func int Print_TextFieldPxl(var int x, var int y, var string text, var string font) {
