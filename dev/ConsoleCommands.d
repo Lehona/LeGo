@@ -99,7 +99,8 @@ func int _CC_RemoveL(var int hndl) {
 // [internal] Engine hook
 //========================================
 func void _CC_Hook() {
-    _CC_command = MEM_ReadString(MEM_ReadInt(ESP+1064)); // esp+424h+4h
+    var int stackOffset; stackOffset = MEMINT_SwitchG1G2(/*2ach*/ 684, /*424h*/ 1060);
+    _CC_command = MEM_ReadString(MEM_ReadInt(ESP+stackOffset+4));
     foreachHndl(CCItem@, ConsoleCommand);
 };
 func int ConsoleCommand(var int hndl) {
