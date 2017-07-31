@@ -120,6 +120,11 @@ const int zCModel__GetAniIDFromAniName              = 4713552; // .text:0047EC50
 
 
 //========================================
+// Missing Item flag
+//========================================
+const int ITEM_ACTIVE = 1 << 30; // Not defined in Gothic 1. Necessary for EquipWeapon()
+
+//========================================
 // Globale Flagvariable
 //========================================
 const int _LeGo_Flags = 0;
