@@ -126,6 +126,10 @@ func void _Print_Ratio() {
 
 var int Print_Screen[2];
 func void Print_GetScreenSize() {
+    if (!_@(MEM_Game)) {
+        // Initialize if called during level change (e.g. by PrintScreen_Ext(), caused by log entry)
+        MEM_InitGlobalInst();
+    };
     var zCView screen; screen = _^(MEM_Game._zCSession_viewport);
     Print_Screen[PS_X] = screen.psizex;
     Print_Screen[PS_Y] = screen.psizey;
@@ -227,6 +231,12 @@ func void zCViewTextPrint_UnArchiver(var zCViewText this) {
 
 
 func int Print_Ext(var int x, var int y, var string text, var string font, var int color, var int time) {
+    if (!_@(MEM_Game)) || (!_@(MEM_StackPos)) {
+        // Initialize if called during level change (e.g. by PrintScreen_Ext(), caused by log entry)
+        MEM_InitLabels();
+        MEM_InitGlobalInst();
+    };
+
     if (time == -1) {
         var int h; h = new(zCViewTextPrint);
         var zCViewText txt; txt = get(h);
@@ -293,7 +303,7 @@ func string Print_LongestLineExt(var string text, var string font, var string se
 };
 
 func string Print_LongestLine(var string text, var string font) {
-	Print_LongestLineExt(text, font, Print_LineSeperator);	
+	Print_LongestLineExt(text, font, Print_LineSeperator);
 };
 
 func int Print_LongestLineLengthExt(var string text, var string font, var string separator) {
@@ -459,7 +469,7 @@ func void AI_PrintScreen_Ext(var string txt, var int x, var int y, var string fo
     PS_Param@.y = y;
     PS_Param@.font = font;
     PS_Param@.timeSec = timeSec;
-	
+
     AI_Function_I(hero, AI_PrintScreen_Execute, h);
 };
 func void Print_FixPS() {
@@ -471,7 +481,7 @@ func void Print_FixPS() {
         Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
 
     PS.content = Call_Close();
-	
+
 	if (MEMINT_SwitchG1G2(false, true)) {
 		var int AI_PS_Ext; AI_PS_Ext = MEM_GetFuncOffset(AI_PrintScreen_Ext);
 		PS = _^(MEM_GetParserSymbol ("AI_PRINTSCREEN"));
