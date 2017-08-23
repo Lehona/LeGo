@@ -92,12 +92,12 @@ func void LeGo_InitAlways(var int f) {
     if (f & LeGo_Saves) {
         if(_LeGo_IsLevelChange()) {
 
-            // During level change, LeGo_InitAlways is called twice!
+            // During level change, LeGo_InitAlways is called twice on very first transistion!
             _LeGo_LevelChangeCounter += 1;
 
-            // update gamestate status after the last call of _LeGo_IsLevelChange
-            // for avoiding duplicate user function calls (e.g. in startup)
-            if(_LeGo_Flags & LeGo_Gamestate && (_LeGo_LevelChangeCounter == 2)) {
+            // update gamestate status at the first call of _LeGo_IsLevelChange
+            // because it is only called once for consecutive level changes
+            if(_LeGo_Flags & LeGo_Gamestate && (_LeGo_LevelChangeCounter == 1)) {
                 _Gamestate_Init(Gamestate_WorldChange);
             };
         };
