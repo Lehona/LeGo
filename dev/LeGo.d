@@ -219,6 +219,13 @@ func void LeGo_Init(var int flags) {
     };
 
     MEM_InitAll();
+
+    // In Gothic 1 LeGo_Init is called twice on new game: prevent calling LeGo_InitAlways a second time
+    if (_LeGo_Loaded == -1) {
+        _LeGo_Loaded = 1;
+        return;
+    };
+
     MEM_Info(ConcatStrings(LeGo_Version, " wird initialisiert."));
 
     LeGo_InitFlags(flags);
@@ -227,7 +234,13 @@ func void LeGo_Init(var int flags) {
     };
     LeGo_InitAlways(_LeGo_Flags);
     _LeGo_Init = 1;
-    _LeGo_Loaded = 1;
+
+    // For Gothic 1 mark _LeGo_Loaded with -1 to prevent second call during new game
+    if (GOTHIC_BASE_VERSION == 1) && (!_LeGo_Loaded) {
+        _LeGo_Loaded = -1;
+    } else {
+        _LeGo_Loaded = 1;
+    };
 
     MEM_Info(ConcatStrings(LeGo_Version, " wurde erfolgreich initialisiert."));
 };
