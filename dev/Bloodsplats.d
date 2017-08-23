@@ -86,9 +86,12 @@ func void _B_HeroDamage() {
     var int currDam; currDam = Hero_LastHP - hero.attribute[ATR_Hitpoints];
     if(currDam) {
         Bloodsplat(currDam);
-        //Wld_StopEffect("HERO_HURT"); // Doesn't exist in G1 and seems to make no difference?
-		if (MEMINT_SwitchG1G2(false, true)) {
-			/* hate to do this, but G1 doesnt have this effect, also, am lazy to create it */
+        if (GOTHIC_BASE_VERSION == 2) {
+            // Call by string for Gothic 1 parsing compatibility
+            MEM_PushStringParam("HERO_HURT");
+            MEM_CallByString("WLD_STOPEFFECT");
+
+            // The effect flickers under Gothic 1
 			Wld_PlayEffect("HERO_HURT", hero, hero, 0, 0, 0, 0);
 		};
     };
@@ -98,6 +101,7 @@ func void _B_HeroDamage() {
 // [intern] FF Loop
 //========================================
 func void _Bloodsplats_Loop() {
-    Npc_PercEnable(pc_hero, PERC_ASSESSDAMAGE, _B_HeroDamage); //Deaktiviert sich manchmal grundlos, deshalb lieber reinkloppen
+    // PC_Hero is empty on level change, use hero instead
+    Npc_PercEnable(hero, PERC_ASSESSDAMAGE, _B_HeroDamage); //Deaktiviert sich manchmal grundlos, deshalb lieber reinkloppen
     Hero_LastHP = hero.attribute[ATR_Hitpoints];
 };
