@@ -129,9 +129,18 @@ func int _FF_RemoveL(var int hndl) {
 func void _FF_Hook() {
 	if(!Hlp_IsValidNpc(hero)) { return; };
 
-    MEM_PushIntParam(FFItem@);
-    MEM_GetFuncID(FrameFunctions);
-    MEM_StackPos.position = foreachHndl_ptr;
+    /* It may happen that a frame function calls a hooked engine function. This second hook will overwrite the register
+     * variables (ECX, EDI, EAX). Because these will be moved back at the end of every hook, regardless whether they
+     * have been modified, they need to be backed up here, otherwise the FF hook crashes the game. */
+    var int ecxBak; ecxBak = ECX;
+    var int ediBak; ediBak = EDI;
+    var int eaxBak; eaxBak = EAX;
+
+    foreachHndl(FFItem@, FrameFunctions);
+
+    ECX = ecxBak;
+    EDI = ediBak;
+    EAX = eaxBak;
 };
 func int FrameFunctions(var int hndl) {
     var FFItem itm; itm = get(hndl);
