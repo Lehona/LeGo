@@ -4,115 +4,191 @@
 
 
 //-------------------
-// OPCODES
-//-------------------
-// /* 1 Byte */
-const int ASMINT_OP_CompareEAX  = 61;    //0x3D
-const int ASMINT_OP_JZ_Byte     = 116;   //0x74
-const int ASMINT_OP_popEAX      = 88;    //0x58
-// /* 2 Byte */
-const int ASMINT_OP_addMemToESP = 9475;  //0x2503
-const int ASMINT_OP_movESItoEAX = 61577; //0xF089
-const int ASMINT_OP_movEAXtoEDI = 51081; //0xC789
-
-//-------------------
-// Registervariablen
+// Register variables
 //-------------------
 var int EAX;
 var int ECX;
-var int ESP;
+var int EDX;
 var int EBX;
+var int ESP;
 var int EBP;
-var int EDI;
 var int ESI;
+var int EDI;
 
 
 //========================================
-// Engine hooken
+// Hook controller
+//========================================
+func void _Hook(var int evtHAddr, // ESP-36
+                var int _edi,     // ESP-32 // Function parameters in order of popad (reverse order of pushad)
+                var int _esi,     // ESP-28
+                var int _ebp,     // ESP-24
+                var int _esp,     // ESP-20
+                var int _ebx,     // ESP-16
+                var int _edx,     // ESP-12
+                var int _ecx,     // ESP-8
+                var int _eax) {   // ESP-4
+    // Local backup for recursive hooks
+    locals();
+
+    // Secure register variables locally for recursive hooks
+    var int eaxBak; eaxBak = EAX;
+    var int ecxBak; ecxBak = ECX;
+    var int edxBak; edxBak = EDX;
+    var int ebxBak; ebxBak = EBX;
+    var int espBak; espBak = ESP;
+    var int ebpBak; ebpBak = EBP;
+    var int esiBak; esiBak = ESI;
+    var int ediBak; ediBak = EDI;
+
+    // Get address of yINSTANCE_HELP by symbol index 0
+    const int instHlpAddr = 0;
+    if (!instHlpAddr) {
+        instHlpAddr = MEM_GetSymbolByIndex(0)+zCParSymbol_offset_offset;
+    };
+
+    // Also secure global instances
+    var int selfBak;  selfBak  = _@(self);
+    var int otherBak; otherBak = _@(other);
+    var int itemBak;  itemBak  = _@(item);
+    var int iHlpBak;  iHlpBak  = MEM_ReadInt(instHlpAddr); // Is the correct way to do this?
+    var int instBak;  instBak  = MEM_GetUseInstance();
+
+    // Update register variables
+    EAX = _eax;
+    ECX = _ecx;
+    EDX = _edx;
+    EBX = _ebx;
+    ESP = _esp;
+    EBP = _ebp;
+    ESI = _esi;
+    EDI = _edi;
+
+    // Iterate over all registered event handler functions
+    var zCArray a; a = _^(evtHAddr);
+    repeat(i, a.numInArray); var int i;
+        // Remember data stack pointer
+        var int sPtr; sPtr = MEM_Parser.datastack_sptr;
+
+        // Add a stack buffer for naughty functions that pop off of the data stack illegally
+        repeat(j, 10); var int j;
+            MEM_PushIntParam(0);
+        end;
+
+        // Call the function
+        MEM_CallByID(MEM_ReadIntArray(a.array, i));
+
+        // Reset the data stack pointer (remove buffer and anything left on the stack)
+        MEM_Parser.datastack_sptr = sPtr;
+
+        // Restore global instances in between function calls
+        MEM_AssignInstSuppressNullWarning = TRUE;
+        self  = _^(selfBak);
+        other = _^(otherBak);
+        item  = _^(itemBak);
+        MEM_WriteInt(instHlpAddr, iHlpBak);
+        MEM_SetUseInstance(instBak);
+        MEM_AssignInstSuppressNullWarning = FALSE;
+
+        // Some registers should be kept read-only in between function calls
+        ESP = _esp; // Stack pointer is read-only
+        EBP = _ebp; // Base pointer is read-only
+        EBX = _ebx;
+        EDX = _edx;
+        ESI = _esi;
+    end;
+
+    // Update modifiable registers
+    MEM_WriteInt(ESP-32, EDI);
+    // MEM_WriteInt(ESP-28, ESI); // Not updated in "old" HookEngine, but why not exactly?
+    // MEM_WriteInt(ESP-16, EBX);
+    // MEM_WriteInt(ESP-12, EDX);
+    MEM_WriteInt(ESP-8,  ECX);
+    MEM_WriteInt(ESP-4,  EAX);
+
+    // Restore register variables for recursive hooks
+    EDI = ediBak;
+    ESI = esiBak;
+    EBP = ebpBak;
+    ESP = espBak;
+    EBX = ebxBak;
+    EDX = edxBak;
+    ECX = ecxBak;
+    EAX = eaxBak;
+};
+
+
+//========================================
+// Engine hook
 //========================================
 func void HookEngineI(var int address, var int oldInstr, var int function) {
 
-    var int SymbID;   // Symbolindex von 'function'
-    var int ptr;      // Pointer auf den Zwischenspeicher der alten Anweisung
-    var int relAdr;   // Relative Addresse zum neuen Assemblercode, ausgehend von 'address'
+    const int hooktbl = 0;  // Hash table for hooks
+    var int SymbID;         // Symbol index of 'function'
+    var int ptr;            // Pointer to temporary memory of the old instruction
+    var int relAdr;         // Relative address from 'address' to new assembly code
 
-    // ----- Sicherheitsabfragen -----
-    if(oldInstr < 5) {
-        PrintDebug("HOOKENGINE: oldInstr ist zu kurz. Es werden mindestens 5 Bytes erwartet.");
+    // ----- Safety checks -----
+    if (oldInstr < 5) {
+        PrintDebug("HOOKENGINE: oldInstr is too small. The minimun required length is 5 bytes.");
         return;
     };
 
     SymbID = function;
-    if(SymbID == -1) {
-        PrintDebug("HOOKENGINE: Die gegebene Daedalusfunktion kann nicht gefunden werden.");
+    if (SymbID == -1) {
+        PrintDebug("HOOKENGINE: The provided deadalus function was not found.");
         return;
     };
 
+    // ----- Treat possibly protected memory -----
     MemoryProtectionOverride (address, oldInstr+3);
-    // ----- Eventuell geschützen Speicher behandeln -----
 
-    if (MEM_ReadByte(address) == 233) { // Hook schon vorhanden
-        HookEngineI(MEM_ReadInt(address+1)+address+5+96, oldInstr, function);
+    // ----- Find event handler in hash table -----
+    if (!hooktbl) {
+        hooktbl = _HT_Create();
+    };
+
+    // ----- Hook already present -----
+    if (_HT_Has(hooktbl, address)) {
+        // Add deadalus function to event handler once
+        MEM_PushIntParam(_HT_Get(hooktbl, address));
+        MEM_PushIntParam(SymbID);
+        MEM_Call(EventPtr_AddOnceI); // EventPtr_AddOnceI(_HT_Get(hooktbl, address), SymbID);
         return;
     };
 
-    // ----- Die alte Anweisung sichern -----
+    // ----- Create event and add function -----
+    MEM_Call(EventPtr_Create);
+    var int ev; ev = MEM_PopIntResult(); // var int ev; ev = Event_Create();
+
+    MEM_PushIntParam(ev);
+    MEM_PushIntParam(SymbID);
+    MEM_Call(EventPtr_AddI); // EventPtr_AddI(ev, SymbID);
+
+    _HT_Insert(hooktbl, ev, address);
+
+    // ----- Backup old instruction -----
     ptr = MEM_Alloc(oldInstr);
     MEM_CopyBytes(address, ptr, oldInstr);
 
-    // ----- Einen neuen Stream für den Assemblercode anlegen -----
-    ASM_Open(200 + oldInstr); // Play it safe.
+    // ----- Allocate new stream for assembly code -----
+    ASM_Open(25 + oldInstr + 6 + 1); // Asm code + oldInstr + retn + 1
 
-    // ----- Jump aus der Enginefunktion in den neuen Code einfügen -----
+    // ----- Add jump from engine function to new code -----
     relAdr = ASMINT_CurrRun-address-5;
     MEM_WriteInt(address + 0, 233);
     MEM_WriteInt(address + 1, relAdr);
 
-    // ----- Neuen Assemblercode verfassen -----
+    // ----- Write new assembly code -----
 
-    // Alle Register sichern
-
-    // EAX in Daedalus Variable sichern
-    ASM_2(ASMINT_OP_movEAXToMem);
-    ASM_4(_@(EAX));
-    ASM_1(ASMINT_OP_pusha);
-
-    // ECX in Daedalus Variable sichern
-    ASM_2(ASMINT_OP_movECXtoEAX);
-    ASM_2(ASMINT_OP_movEAXToMem);
-    ASM_4(_@(ECX));
-
-    // ESP in Daedalus Variable sichern
-    ASM_2(ASMINT_OP_movESPtoEAX);
-    ASM_2(ASMINT_OP_addImToEAX);
-    ASM_1(4*8);                  // Wegen pushad [Danke an Sektenspinner]
-    ASM_2(ASMINT_OP_movEAXToMem);
-    ASM_4(_@(ESP));
-
-    // EBX in Daedalus Variable sichern
-    ASM_2(ASMINT_OP_movEBXtoEAX);
-    ASM_2(ASMINT_OP_movEAXtoMem);
-    ASM_4(_@(EBX));
-
-    // EBP in Daedalus Variable sichern
-    ASM_2(ASMINT_OP_movEBPtoEAX);
-    ASM_2(ASMINT_OP_movEAXtoMem);
-    ASM_4(_@(EBP));
-
-    // EDI in Daedalus Variable sichern
-    ASM_2(ASMINT_OP_movEDItoEAX);
-    ASM_2(ASMINT_OP_movEAXtoMem);
-    ASM_4(_@(EDI));
-	
-    // ESI in Daedalus Variable sichern	
-	ASM_2(ASMINT_OP_movESItoEAX);
-	ASM_2(ASMINT_OP_movEAXtoMem);
-	ASM_4(_@(ESI));
-
-    // --- Daedalusfunktion aufrufen ---
+    // Call deadalus hook function
+    ASM_1(ASMINT_OP_pusha); // ESP -= 32 (8*4)
 
     ASM_1(ASMINT_OP_pushIm);
-    ASM_4(SymbID);
+    ASM_4(ev);
+
+    ASM_1(ASMINT_OP_pushIm);
+    ASM_4(MEM_GetFuncID(_Hook));
 
     ASM_1(ASMINT_OP_pushIm);
     ASM_4(parser);
@@ -121,37 +197,23 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     ASM_4(zParser__CallFunc-ASM_Here()-4);
 
     ASM_2(ASMINT_OP_addImToESP);
-    ASM_1(8);
+    ASM_1(12); // 3*4: parser, _Hook, address
 
-    ASM_1(ASMINT_OP_popa);
+    ASM_1(ASMINT_OP_popa); // Pop altered registers
 
-    ASM_1(ASMINT_OP_movMemToEAX);
-    ASM_4(_@(ECX));
-    ASM_2(ASMINT_OP_movEAXtoECX);
-		
-	ASM_1(ASMINT_OP_movMemToEax);
-	ASM_4(_@(EDI));
-	ASM_2(ASMINT_OP_movEAXtoEDI);
-
-    ASM_1(ASMINT_OP_movMemToEAX);
-    ASM_4(_@(EAX));
-
-
-
-    // Alte Anweisung wieder einfügen
+    // Append old instruction
     MEM_CopyBytes(ptr, ASMINT_Cursor, oldInstr);
     MEM_Free(ptr);
 
     ASMINT_Cursor += oldInstr;
 
-    // Zur Enginefunktion zurückkehren
+    // Return to engine function
     ASM_1(ASMINT_OP_pushIm);
     ASM_4(address + oldInstr);
     ASM_1(ASMINT_OP_retn);
 
     var int i; i = ASM_Close();
 };
-
 func void HookEngineF(var int address, var int oldInstr, var func function) {
     HookEngineI(address, oldInstr, MEM_GetFuncID(function));
 };
