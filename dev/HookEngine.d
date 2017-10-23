@@ -3,9 +3,9 @@
 \***********************************/
 
 
-//-------------------
+//---------------------
 // Register variables
-//-------------------
+//---------------------
 var int EAX;
 var int ECX;
 var int EDX;
@@ -15,9 +15,13 @@ var int EBP;
 var int ESI;
 var int EDI;
 
+//---------------------
+// Overwrite instances
+//---------------------
+var int HookOverwriteInstances; // self, other, item
 
 //========================================
-// Hook controller
+// [intern] Hook controller
 //========================================
 func void _Hook(var int evtHAddr, // ESP-36
                 var int _edi,     // ESP-32 // Function parameters in order of popad (reverse order of pushad)
@@ -28,6 +32,10 @@ func void _Hook(var int evtHAddr, // ESP-36
                 var int _edx,     // ESP-12
                 var int _ecx,     // ESP-8
                 var int _eax) {   // ESP-4
+
+    // Backup use-instance before anything else. Temporary variable for now, because it's done before locals()
+    var int _instBak_temp; _instBak_temp = MEM_GetUseInstance();
+
     // Local backup for recursive hooks
     locals();
 
@@ -51,8 +59,8 @@ func void _Hook(var int evtHAddr, // ESP-36
     var int selfBak;  selfBak  = _@(self);
     var int otherBak; otherBak = _@(other);
     var int itemBak;  itemBak  = _@(item);
-    var int iHlpBak;  iHlpBak  = MEM_ReadInt(instHlpAddr); // Is the correct way to do this?
-    var int instBak;  instBak  = MEM_GetUseInstance();
+    var int iHlpBak;  iHlpBak  = MEM_ReadInt(instHlpAddr);
+    var int instBak;  instBak  = _instBak_temp;
 
     // Update register variables
     EAX = _eax;
@@ -63,6 +71,9 @@ func void _Hook(var int evtHAddr, // ESP-36
     EBP = _ebp;
     ESI = _esi;
     EDI = _edi;
+
+    // Do not overwrite the global instances by default
+    HookOverwriteInstances = FALSE;
 
     // Iterate over all registered event handler functions
     var zCArray a; a = _^(evtHAddr);
@@ -82,27 +93,26 @@ func void _Hook(var int evtHAddr, // ESP-36
         MEM_Parser.datastack_sptr = sPtr;
 
         // Restore global instances in between function calls
-        MEM_AssignInstSuppressNullWarning = TRUE;
-        self  = _^(selfBak);
-        other = _^(otherBak);
-        item  = _^(itemBak);
+        if (!HookOverwriteInstances) {
+            MEM_AssignInstSuppressNullWarning = TRUE;
+            self  = _^(selfBak);
+            other = _^(otherBak);
+            item  = _^(itemBak);
+            MEM_AssignInstSuppressNullWarning = FALSE;
+        };
         MEM_WriteInt(instHlpAddr, iHlpBak);
         MEM_SetUseInstance(instBak);
-        MEM_AssignInstSuppressNullWarning = FALSE;
 
-        // Some registers should be kept read-only in between function calls
+        // Stack registers should be kept read-only in between function calls
         ESP = _esp; // Stack pointer is read-only
         EBP = _ebp; // Base pointer is read-only
-        EBX = _ebx;
-        EDX = _edx;
-        ESI = _esi;
     end;
 
-    // Update modifiable registers
+    // Update modifiable registers on stack (ESP points to the position before pushad)
     MEM_WriteInt(ESP-32, EDI);
-    // MEM_WriteInt(ESP-28, ESI); // Not updated in "old" HookEngine, but why not exactly?
-    // MEM_WriteInt(ESP-16, EBX);
-    // MEM_WriteInt(ESP-12, EDX);
+    MEM_WriteInt(ESP-28, ESI);
+    MEM_WriteInt(ESP-16, EBX);
+    MEM_WriteInt(ESP-12, EDX);
     MEM_WriteInt(ESP-8,  ECX);
     MEM_WriteInt(ESP-4,  EAX);
 
@@ -115,6 +125,9 @@ func void _Hook(var int evtHAddr, // ESP-36
     EDX = edxBak;
     ECX = ecxBak;
     EAX = eaxBak;
+
+    // Just to be safe: restore again at the very end of the function
+    MEM_SetUseInstance(instBak);
 };
 
 

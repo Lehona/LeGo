@@ -283,10 +283,15 @@ func void oCNpc_Equip(var int npcPtr, var int itmPtr) {
 //========================================
 // Aktuelle Instanz bearbeiten
 //========================================
-func void MEM_SetUseInstance(var int ptr) {
+func void MEM_SetUseInstance(var int inst) {
     MemoryProtectionOverride(11232304, 10);
-    MEM_WriteInt(11232304, ptr);
-    MEM_WriteInt(11232308, MEM_ReadInt(ptr+28));
+    if (inst) {
+        MEM_WriteInt(11232304, inst);
+        MEM_WriteInt(11232308, MEM_ReadInt(inst+zCParSymbol_offset_offset));
+    } else {
+        MEM_WriteInt(11232304, 0);
+        MEM_WriteInt(11232308, 0);
+    };
 };
 
 func int MEM_GetUseInstance() {
