@@ -48,10 +48,10 @@ const int ReadFile                                  = 7905244; //
 const int screen                                    = 9298364; //0x8DE1BC
 const int sysGetTimePtr                             = 5204320; //
 const int WriteFile                                 = 7712354; //
-const int zCAICamera_StartDialogCam                 = 4889792; //
-const int zCAICamera__current                       = 8823248; //
-const int zCAICamera__StartDialogCam                = 4889792; //
-
+const int zCAICamera_StartDialogCam                 = 4889792; //0x4A9CC0
+const int zCAICamera__current                       = 8823248; //0x86A1D0
+const int zCAICamera__StartDialogCam                = 4889792; //0x4A9CC0
+const int zCAICamera__StartDialogCam_oldInstr       = 1785266026;
 const int zCFontMan__GetFont                        = 7205408; //
 const int zCFontMan__Load                           = 7204928; //
 const int zCFont__GetFontName                       = 7209408; //
