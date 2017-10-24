@@ -97,8 +97,6 @@ func void zCViewText_Delete(var zCViewText txt) {
     var int offs; offs = List_Contains(list, _@(txt));
     if (offs > 1) {
         List_Delete(list, offs);
-    } else {
-        MEM_Error(ConcatStrings(IntToString(offs), ". Print not found?!"));
     };
 };
 
