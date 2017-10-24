@@ -106,7 +106,13 @@ var int TRIA_Self;                // Pointer auf self
 var string TRIA_Camera;           // Läuft eine Kamerafahrt?
 
 func void ZS_TRIA() {};
-func int ZS_TRIA_Loop() { return LOOP_CONTINUE; };
+func int ZS_TRIA_Loop() {
+    if (InfoManager_hasFinished()) { // Im Zustand bleiben bis Dialog fertig
+        return LOOP_END;
+    } else {
+        return LOOP_CONTINUE;
+    };
+};
 
 //========================================
 // Npcs aufeinander warten lassen
