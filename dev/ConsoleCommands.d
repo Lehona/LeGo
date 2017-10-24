@@ -65,12 +65,28 @@ func int _CC_Active(var int hndl) {
 //========================================
 func void CC_Register(var func function, var string commandPrefix, var string description) {
     // Only add if not already present
-    if(CC_Active(function)) {
+    if (CC_Active(function)) {
         return;
     };
-    commandPrefix = STR_Upper(commandPrefix);
+
+    // Check validity of function signature
+    var int symID; symID = MEM_GetFuncID(function);
+    var zCPar_Symbol symb; symb = _^(MEM_GetSymbolByIndex(symID));
+    if ((symb.bitfield & zCPar_Symbol_bitfield_ele) != 1) || (symb.offset != (zPAR_TYPE_STRING >> 12)) {
+        MEM_Error(ConcatStrings("CONSOLECOMMANDS: Function has to have one parameter and needs to return a string: ",
+           symb.name));
+        return;
+    };
+    symb = _^(symb.next);
+    if ((symb.bitfield & zCPar_Symbol_bitfield_type) != zPAR_TYPE_STRING) {
+        MEM_Error(ConcatStrings("CONSOLECOMMANDS: Function parameter needs to be a string: ", symb.name));
+        return;
+    };
+
     // Register auto-completion
+    commandPrefix = STR_Upper(commandPrefix);
     CC_AutoComplete(commandPrefix, description);
+
     // Add function
     var int hndl; hndl = new(CCItem@);
     var CCItem itm; itm = get(hndl);
