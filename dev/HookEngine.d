@@ -131,19 +131,24 @@ func void _Hook(var int evtHAddr, // ESP-36
 };
 
 
+//-------------------------
+// Hash table of all hooks
+//-------------------------
+const int _Hook_htbl = 0; 
+
+
 //========================================
 // Engine hook
 //========================================
 func void HookEngineI(var int address, var int oldInstr, var int function) {
 
-    const int hooktbl = 0;  // Hash table for hooks
     var int SymbID;         // Symbol index of 'function'
     var int ptr;            // Pointer to temporary memory of the old instruction
     var int relAdr;         // Relative address from 'address' to new assembly code
 
     // ----- Safety checks -----
     if (oldInstr < 5) {
-        PrintDebug("HOOKENGINE: oldInstr is too small. The minimun required length is 5 bytes.");
+        PrintDebug("HOOKENGINE: oldInstr is too small. The minimum required length is 5 bytes.");
         return;
     };
 
@@ -153,24 +158,21 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
         return;
     };
 
-    // ----- Treat possibly protected memory -----
-    MemoryProtectionOverride (address, oldInstr+3);
-
     // ----- Find event handler in hash table -----
-    if (!hooktbl) {
-        hooktbl = _HT_Create();
+    if (!_Hook_htbl) {
+        _Hook_htbl = _HT_Create();
     };
 
     // ----- Hook already present -----
-    if (_HT_Has(hooktbl, address)) {
-        // Add deadalus function to event handler once
-        MEM_PushIntParam(_HT_Get(hooktbl, address));
+    if (_HT_Has(_Hook_htbl, address)) {
+        // Add deadalus function (new listener) to event handler once
+        MEM_PushIntParam(_HT_Get(_Hook_htbl, address));
         MEM_PushIntParam(SymbID);
-        MEM_Call(EventPtr_AddOnceI); // EventPtr_AddOnceI(_HT_Get(hooktbl, address), SymbID);
+        MEM_Call(EventPtr_AddOnceI); // EventPtr_AddOnceI(_HT_Get(_Hook_htbl, address), SymbID);
         return;
     };
 
-    // ----- Create event and add function -----
+    // ----- Create event and add function as listener -----
     MEM_Call(EventPtr_Create);
     var int ev; ev = MEM_PopIntResult(); // var int ev; ev = Event_Create();
 
@@ -178,7 +180,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     MEM_PushIntParam(SymbID);
     MEM_Call(EventPtr_AddI); // EventPtr_AddI(ev, SymbID);
 
-    _HT_Insert(hooktbl, ev, address);
+    _HT_Insert(_Hook_htbl, ev, address);
 
     // ----- Backup old instruction -----
     ptr = MEM_Alloc(oldInstr);
@@ -187,10 +189,13 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     // ----- Allocate new stream for assembly code -----
     ASM_Open(25 + oldInstr + 6 + 1); // Asm code + oldInstr + retn + 1
 
+    // ----- Treat possibly protected memory -----
+    MemoryProtectionOverride(address, oldInstr+3);
+
     // ----- Add jump from engine function to new code -----
     relAdr = ASMINT_CurrRun-address-5;
-    MEM_WriteInt(address + 0, 233);
-    MEM_WriteInt(address + 1, relAdr);
+    MEM_WriteByte(address + 0, 233);
+    MEM_WriteInt (address + 1, relAdr);
 
     // ----- Write new assembly code -----
 
@@ -214,7 +219,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
 
     ASM_1(ASMINT_OP_popa); // Pop altered registers
 
-    // Append old instruction
+    // Append original instruction
     MEM_CopyBytes(ptr, ASMINT_Cursor, oldInstr);
     MEM_Free(ptr);
 
@@ -232,4 +237,83 @@ func void HookEngineF(var int address, var int oldInstr, var func function) {
 };
 func void HookEngine(var int address, var int oldInstr, var string function) {
     HookEngineI(address, oldInstr, MEM_FindParserSymbol(STR_Upper(function)));
+};
+
+
+//========================================
+// Check if function hooks engine
+//========================================
+func int IsHookI(var int address, var int function) {
+    if (!_Hook_htbl) {
+        return FALSE;
+    };
+
+    if (!_HT_Has(_Hook_htbl, address)) {
+        return FALSE;
+    };
+
+    var int ev; ev = _HT_Get(_Hook_htbl, address);
+    var int SymbID; SymbID = function;
+
+    // Check if listener exists
+    MEM_PushIntParam(ev);
+    MEM_PushIntParam(SymbID);
+    MEM_Call(EventPtr_HasI); // EventPtr_HasI(ev, SymbID)
+    return MEM_PopIntResult(); // This line is redundant (left here for readability)
+};
+func int IsHookF(var int address, var func function) {
+    return IsHookI(address, MEM_GetFuncID(function));
+};
+func int IsHook(var int address, var string function) {
+    return IsHookI(address, MEM_FindParserSymbol(STR_Upper(function)));
+};
+
+
+//========================================
+// Remove listener (and engine hook)
+//========================================
+func void RemoveHookI(var int address, var int oldInstr, var int function) {
+    if (!IsHookI(address, function)) {
+        return;
+    };
+
+    var int ev; ev = _HT_Get(_Hook_htbl, address);
+    var int SymbID; SymbID = function;
+
+    // Remove listener
+    MEM_PushIntParam(ev);
+    MEM_PushIntParam(SymbID);
+    MEM_Call(EventPtr_RemoveI); // EventPtr_RemoveI(ev, SymbID)
+
+    // Is event empty now?
+    MEM_PushIntParam(ev);
+    MEM_Call(EventPtr_Empty); // EventPtr_Empty(ev);
+    if (MEM_PopIntResult()) && (oldInstr >= 5) {
+        /* If RemoveHookI is called with oldInstr == 0, the hook (ASM jump) remains.
+         * This is good for adding and removing a listener/hook frequently.
+         */
+
+        // Delete event
+        MEM_PushIntParam(ev);
+        MEM_Call(EventPtr_Delete); // EventPtr_Delete(ev);
+
+        // Remove hook from hash table
+        _HT_Remove(_Hook_htbl, address);
+
+        // Remove engine hook
+        var int newCodeAddr; newCodeAddr = MEM_ReadInt(address+1)+address+5;
+        var int rvtCodeAddr; rvtCodeAddr = newCodeAddr+25; // Original code
+
+        // Replace jump with original instruction
+        MEM_CopyBytes(rvtCodeAddr, address, oldInstr);
+
+        // Free previously allocated space in memory (does this work as expected?)
+        MEM_Free(newCodeAddr);
+    };
+};
+func void RemoveHookF(var int address, var int oldInstr, var func function) {
+    RemoveHookI(address, oldInstr, MEM_GetFuncID(function));
+};
+func void RemoveHook(var int address, var int oldInstr, var string function) {
+    RemoveHookI(address, oldInstr, MEM_FindParserSymbol(STR_Upper(function)));
 };

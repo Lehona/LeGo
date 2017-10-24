@@ -49,6 +49,29 @@ func void Event_Delete(var int h) {
 };
 
 //========================================
+// Hat das Event Listener?
+//========================================
+func int EventPtr_Empty(var int ptr) {
+    return (MEM_ArraySize(ptr) <= 0);
+};
+func int Event_Empty(var int h) {
+    return EventPtr_Empty(getPtr(h));
+};
+
+//========================================
+// Event auf Listener prüfen
+//========================================
+func int EventPtr_HasI(var int ptr, var int id) {
+    return (MEM_ArrayIndexOf(ptr, id) >= 0);
+};
+func int EventPtr_Has(var int ptr, var func handler) {
+    return EventPtr_HasI(ptr, MEM_GetFuncID(handler));
+};
+func int Event_Has(var int h, var func handler) {
+    return EventPtr_HasI(getPtr(h), MEM_GetFuncID(handler));
+};
+
+//========================================
 // Listener hinzufügen
 //========================================
 func void EventPtr_AddI(var int ptr, var int id) {
@@ -65,8 +88,8 @@ func void Event_Add(var int h, var func handler) {
 // Listener einmalig hinzufügen
 //========================================
 func void EventPtr_AddOnceI(var int ptr, var int id) {
-    if (MEM_ArrayIndexOf(ptr, id) == -1) {
-        MEM_ArrayInsert(ptr, id);
+    if (EventPtr_HasI(ptr, id)) {
+        EventPtr_AddI(ptr, id);
     };
 };
 func void EventPtr_AddOnce(var int h, var func handler) {
