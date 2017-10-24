@@ -86,15 +86,8 @@ func int Print_GetTextPtr(var int hndl) {
 //========================================
 func void Print_DeleteText(var int hndl) {
     if (!Hlp_IsValidHandle(hndl)) { return; };
-    var zCView v; v = _^(MEM_Game.array_view[0]);
-    var int list; list = _@(v.textLines_data);
-    var int offs; offs = List_Contains(list, getPtr(hndl));
-    if(offs > 1) {
-        List_Delete(list, offs);
-    }
-    else {
-        MEM_Error(ConcatStrings(IntToString(offs), ". Print not found?!"));
-    };
+    var zCViewText txt; txt = Print_GetText(hndl);
+    zCViewText_Delete(txt);
     delete(hndl);
 };
 

@@ -89,7 +89,17 @@ func void zCViewText_Unarchiver(var zCViewText this) {
 
 func void zCViewText_Delete(var zCViewText txt) {
 	txt.timer = 0;
-    txt.timed = 1; 
+    txt.timed = 1;
+
+    // Taken from Print_DeleteText()
+    var zCView v; v = _^(MEM_Game.array_view[0]);
+    var int list; list = _@(v.textLines_data);
+    var int offs; offs = List_Contains(list, _@(txt));
+    if (offs > 1) {
+        List_Delete(list, offs);
+    } else {
+        MEM_Error(ConcatStrings(IntToString(offs), ". Print not found?!"));
+    };
 };
 
 

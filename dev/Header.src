@@ -12,9 +12,9 @@ BinaryMachines.d
 _Hashtable.d
 HookEngine.d
 PermMem.d
+List.d
 PermMem_Structs.d
 EventHandler.d
-List.d
 Anim8.d
 FrameFunctions.d
 ConsoleCommands.d
