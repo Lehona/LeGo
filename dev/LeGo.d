@@ -169,6 +169,11 @@ func void LeGo_InitGamestart(var int f) {
 
 	/* ACHTUNG: Es steht kein new() zur Verfügung (aber create()) */
 
+    // Fix bug in Ikarus for displaying error boxes (Ikarus 1.2 line 4660 is missing writing permission)
+    if(GOTHIC_BASE_VERSION == 1) {
+        MemoryProtectionOverride(/*0x4F55C2*/ 5199298, 1);
+    };
+
     if(f & LeGo_Cursor) {
         HookEngineF(sub_4D3D90_X, 5, _CURSOR_GETVAL);
     };
