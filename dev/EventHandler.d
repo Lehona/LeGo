@@ -88,7 +88,7 @@ func void Event_Add(var int h, var func handler) {
 // Listener einmalig hinzufügen
 //========================================
 func void EventPtr_AddOnceI(var int ptr, var int id) {
-    if (EventPtr_HasI(ptr, id)) {
+    if (!EventPtr_HasI(ptr, id)) {
         EventPtr_AddI(ptr, id);
     };
 };
