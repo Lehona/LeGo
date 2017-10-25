@@ -77,7 +77,7 @@ func void CC_Register(var func function, var string commandPrefix, var string de
            symb.name));
         return;
     };
-    symb = _^(symb.next);
+    symb = _^(MEM_GetSymbolByIndex(symID+1));
     if ((symb.bitfield & zCPar_Symbol_bitfield_type) != zPAR_TYPE_STRING) {
         MEM_Error(ConcatStrings("CONSOLECOMMANDS: Function parameter needs to be a string: ", symb.name));
         return;
