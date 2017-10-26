@@ -62,7 +62,7 @@ func void LeGo_InitFlags(var int f) {
     if(f & LeGo_PrintS)         { f = f | LeGo_AI_Function | LeGo_Anim8 | LeGo_Interface; };
     if(f & LeGo_Anim8)          { f = f | LeGo_PermMem | LeGo_FrameFunctions | LeGo_Timer; };
     if(f & LeGo_Buttons)        { f = f | LeGo_PermMem | LeGo_View | LeGo_FrameFunctions; };
-    if(f & LeGo_ConsoleCommands){ f = f | LeGo_PermMem | LeGo_HookEngine; };
+    if(f & LeGo_ConsoleCommands){ f = f | LeGo_HookEngine; };
     if(f & LeGo_FrameFunctions) { f = f | LeGo_PermMem | LeGo_HookEngine | LeGo_Timer; };
     if(f & LeGo_Bars)           { f = f | LeGo_PermMem | LeGo_View; };
     if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
