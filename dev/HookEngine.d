@@ -72,6 +72,12 @@ func void _Hook(var int evtHAddr, // ESP-36
     ESI = _esi;
     EDI = _edi;
 
+    // Check whether Ikarus is initialized for hooks that happen during level change
+    if (!_@(MEM_Parser)) {
+        MEM_InitLabels();
+        MEM_InitGlobalInst();
+    };
+
     // Do not overwrite the global instances by default
     HookOverwriteInstances = FALSE;
 
