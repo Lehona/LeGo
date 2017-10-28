@@ -95,11 +95,17 @@ const int _atan2f                                   = 7757480; //
 const int _sinf                                     = 7757586; //
 const int _acosf                                    = 7757470; //
 const int menu_savegame_slot_offset                 = 3276;
-const int sub_4D3D90_X                              = 5013602; //0x4C8062
+const int sub_4D3D90_X                              = 5013602; //0x4C8062 Hook: Cursor
 const int zCConsole__Register                       = 7182656; //0x6D9940
 const int zCConsoleOutputOverwriteAddr              = 6573691; //0x644E7B Hook: ConsoleCommands
 const int zcon_address                              = 9291168; //0x8DC5A0
-const int zCOption__ParmValue                       = 4586784; // 0X45FD20
+const int zCOption__ParmValue                       = 4586784; //0X45FD20
+const int zCWorld__AdvanceClock                     = 6257280; //0x5F7A80 Hook: Draw3D
+const int zlineCache                                = 8844672; //0x86F580
+const int zCLineCache__Line3D                       = 5224976; //0x4FBA10
+const int zTBSphere3D__Draw                         = 5440832; //0x530540
+const int zTBBox3D__Draw                            = 5447312; //0x531E90
+const int zCOBBox3D__Draw                           = 5451040; //0x532D20
 
 // mark56 | not used
 // inv

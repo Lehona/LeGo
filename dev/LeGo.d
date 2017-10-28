@@ -15,31 +15,32 @@
 \*************************************************************************/
 const string LeGo_Version = "LeGo 2.3.7";
 
-const int LeGo_PrintS         = 1<<0;  // Interface.d
-const int LeGo_HookEngine     = 1<<1;  // HookEngine.d
-const int LeGo_AI_Function    = 1<<2;  // AI_Function.d
-const int LeGo_Trialoge       = 1<<3;  // Trialoge.d
-const int LeGo_Dialoggestures = 1<<4;  // Dialoggestures.d
-const int LeGo_FrameFunctions = 1<<5;  // FrameFunctions.d
-const int LeGo_Cursor         = 1<<6;  // Cursor.d
-const int LeGo_Focusnames     = 1<<7;  // Focusnames.d
-const int LeGo_Random         = 1<<8;  // Random.d
-const int LeGo_Bloodsplats    = 1<<9;  // Bloodsplats.d
-const int LeGo_Saves          = 1<<10;  // Saves.d
-const int LeGo_PermMem        = 1<<11;  // PermMemory.d
-const int LeGo_Anim8          = 1<<12;  // Anim8.d
-const int LeGo_View           = 1<<13; // View.d
-const int LeGo_Interface      = 1<<14; // Interface.d
-const int LeGo_Bars           = 1<<15; // Bars.d
-const int LeGo_Buttons        = 1<<16; // Buttons.d
-const int LeGo_Timer          = 1<<17; // Timer.d
-const int LeGo_EventHandler   = 1<<18; // EventHandler.d
-const int LeGo_Gamestate      = 1<<19; // Gamestate.d
-const int LeGo_Sprite         = 1<<20; // Sprite.d
-const int LeGo_Names		  = 1<<21; // Names.d
+const int LeGo_PrintS          = 1<<0;  // Interface.d
+const int LeGo_HookEngine      = 1<<1;  // HookEngine.d
+const int LeGo_AI_Function     = 1<<2;  // AI_Function.d
+const int LeGo_Trialoge        = 1<<3;  // Trialoge.d
+const int LeGo_Dialoggestures  = 1<<4;  // Dialoggestures.d
+const int LeGo_FrameFunctions  = 1<<5;  // FrameFunctions.d
+const int LeGo_Cursor          = 1<<6;  // Cursor.d
+const int LeGo_Focusnames      = 1<<7;  // Focusnames.d
+const int LeGo_Random          = 1<<8;  // Random.d
+const int LeGo_Bloodsplats     = 1<<9;  // Bloodsplats.d
+const int LeGo_Saves           = 1<<10; // Saves.d
+const int LeGo_PermMem         = 1<<11; // PermMemory.d
+const int LeGo_Anim8           = 1<<12; // Anim8.d
+const int LeGo_View            = 1<<13; // View.d
+const int LeGo_Interface       = 1<<14; // Interface.d
+const int LeGo_Bars            = 1<<15; // Bars.d
+const int LeGo_Buttons         = 1<<16; // Buttons.d
+const int LeGo_Timer           = 1<<17; // Timer.d
+const int LeGo_EventHandler    = 1<<18; // EventHandler.d
+const int LeGo_Gamestate       = 1<<19; // Gamestate.d
+const int LeGo_Sprite          = 1<<20; // Sprite.d
+const int LeGo_Names           = 1<<21; // Names.d
 const int LeGo_ConsoleCommands = 1<<22; // ConsoleCommands.d
-const int LeGo_Buffs          = 1<<23; // Buffs.d
+const int LeGo_Buffs           = 1<<23; // Buffs.d
 const int LeGo_Render          = 1<<24; // Render.d
+const int LeGo_Draw3D          = 1<<25; // Draw3D.d
 
 
 const int LeGo_All            = (1<<23)-1; // Sämtliche Bibliotheken // No Experimental
@@ -64,6 +65,7 @@ func void LeGo_InitFlags(var int f) {
     if(f & LeGo_Buttons)        { f = f | LeGo_PermMem | LeGo_View | LeGo_FrameFunctions; };
     if(f & LeGo_ConsoleCommands){ f = f | LeGo_HookEngine; };
     if(f & LeGo_FrameFunctions) { f = f | LeGo_PermMem | LeGo_HookEngine | LeGo_Timer; };
+    if(f & LeGo_Draw3D)         { f = f | LeGo_PermMem | LeGo_HookEngine; };
     if(f & LeGo_Bars)           { f = f | LeGo_PermMem | LeGo_View; };
     if(f & LeGo_EventHandler)   { f = f | LeGo_PermMem; };
     if(f & LeGo_View)           { f = f | LeGo_PermMem; };
@@ -202,6 +204,10 @@ func void LeGo_InitGamestart(var int f) {
         HookEngineF(oCGame__changeLevel, 7, _LeGo_ChangeLevelHookBegin);
         HookEngineF(oCGame__changeLevelEnd, 7, _LeGo_ChangeLevelHookEnd);
         HookEngineF(oCSavegameManager__SetAndWriteSavegame, 5, _BW_SAVEGAME);
+    };
+
+    if(f & LeGo_Draw3D) {
+        HookEngineF(zCWorld__AdvanceClock, 10, _DrawHook);
     };
 
     if(f & LeGo_Sprite) {

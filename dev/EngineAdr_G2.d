@@ -94,10 +94,16 @@ const int _atan2f                                   = 8123804; //0x7BF59C
 const int _sinf                                     = 8123910; //0x7BF606
 const int _acosf                                    = 8123794; //0x7BF592
 const int menu_savegame_slot_offset                 = 3276;
-const int sub_4D3D90_X                              = 5062907; //0x4D40FB // ???
+const int sub_4D3D90_X                              = 5062907; //0x4D40FB Hook: Cursor
 const int zCConsole__Register                       = 7875296; //0x782AE0
 const int zCConsoleOutputOverwriteAddr              = 7142904; //0x6CFDF8 Hook: ConsoleCommands
-const int zCOption__ParmValue                       = 4586784; // 0X45FD20 // G1 
+const int zCOption__ParmValue                       = 4586784; //0X45FD20 // G1 
+const int zCWorld__AdvanceClock                     = 6447328; //0x6260E0 Hook: Draw3D
+const int zlineCache                                = 9257720; //0x8D42F8
+const int zCLineCache__Line3D                       = 5289040; //0x50B450
+const int zTBSphere3D__Draw                         = 5521904; //0x5441F0
+const int zTBBox3D__Draw                            = 5529312; //0x545EE0
+const int zCOBBox3D__Draw                           = 5533040; //0x546D70
 
 //========================================
 // Globale Flagvariable
