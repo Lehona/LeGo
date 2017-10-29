@@ -299,12 +299,18 @@ func void RemoveHookI(var int address, var int oldInstr, var int function) {
          * This is good for adding and removing a listener/hook frequently.
          */
 
+        // Remove hook from hash table
+        _HT_Remove(_Hook_htbl, address);
+
         // Delete event
         MEM_PushIntParam(ev);
         MEM_Call(EventPtr_Delete); // EventPtr_Delete(ev);
 
-        // Remove hook from hash table
-        _HT_Remove(_Hook_htbl, address);
+        // Check integrity of opcode at address (expecting jump)
+        if (MEM_ReadByte(address) != /*E9*/ 233) {
+            MEM_Error("HOOKENGINE: Hook was invalidated by overwritten opcode");
+            return;
+        };
 
         // Remove engine hook
         var int newCodeAddr; newCodeAddr = MEM_ReadInt(address+1)+address+5;
