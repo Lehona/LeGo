@@ -247,14 +247,26 @@ func void HookEngine(var int address, var int oldInstr, var string function) {
 
 
 //========================================
-// Check if function hooks engine
+// Check if address is hooked
 //========================================
-func int IsHookI(var int address, var int function) {
+func int IsHooked(var int address) {
     if (!_Hook_htbl) {
         return FALSE;
     };
 
-    if (!_HT_Has(_Hook_htbl, address)) {
+    if (_HT_Has(_Hook_htbl, address)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    };
+};
+
+
+//========================================
+// Check if function hooks engine
+//========================================
+func int IsHookI(var int address, var int function) {
+    if (!IsHooked(address)) {
         return FALSE;
     };
 
