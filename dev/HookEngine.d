@@ -341,3 +341,53 @@ func void RemoveHookF(var int address, var int oldInstr, var func function) {
 func void RemoveHook(var int address, var int oldInstr, var string function) {
     RemoveHookI(address, oldInstr, MEM_FindParserSymbol(STR_Upper(function)));
 };
+
+
+//========================================
+// Replace Engine Function
+//========================================
+func void ReplaceEngineFuncI(var int funcAddr, var int thiscall_numParams, var int replaceFunc) {
+    // Check if already hooked
+    if (IsHooked(funcAddr)) {
+        if (!IsHookI(funcAddr, replaceFunc)) {
+            MEM_Error("Cannot replace/disable engine function: Address already hooked");
+        };
+        return;
+    };
+
+    // Write return at beginning of function
+    MemoryProtectionOverride(funcAddr, 3);
+    if (thiscall_numParams) {
+        MEM_WriteByte(funcAddr,   /*C2*/ 194); // retn
+        MEM_WriteByte(funcAddr+1, thiscall_numParams*4);
+        MEM_WriteByte(funcAddr+2, 0);
+    } else {
+        MEM_WriteByte(funcAddr, ASMINT_OP_retn);
+    };
+
+    // Hook on top of return instruction
+    if (replaceFunc != /*NOFUNC*/ -1) {
+        HookEngineI(funcAddr, 5, replaceFunc);
+    };
+};
+func void ReplaceEngineFuncF(var int funcAddr, var int thiscall_numParams, var func replaceFunc) {
+    ReplaceEngineFuncI(funcAddr, thiscall_numParams, MEM_GetFuncID(replaceFunc));
+};
+func void ReplaceEngineFunc(var int funcAddr, var int thiscall_numParams, var string replaceFunc) {
+    ReplaceEngineFuncI(funcAddr, thiscall_numParams, MEM_FindParserSymbol(STR_Upper(replaceFunc)));
+};
+
+// Simple replace functions for return values
+func void Hook_ReturnFalse() {
+    EAX = FALSE;
+};
+func void Hook_ReturnTrue() {
+    EAX = TRUE;
+};
+
+//========================================
+// Disable Engine Function
+//========================================
+func void DisableEngineFunc(var int funcAddr, var int thiscall_numParams) {
+    ReplaceEngineFuncI(funcAddr, thiscall_numParams, -1);
+};
