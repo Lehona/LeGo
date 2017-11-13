@@ -140,7 +140,7 @@ func void _Hook(var int evtHAddr, // ESP-36
 //-------------------------
 // Hash table of all hooks
 //-------------------------
-const int _Hook_htbl = 0; 
+const int _Hook_htbl = 0;
 
 
 //========================================
@@ -200,7 +200,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
 
     // ----- Add jump from engine function to new code -----
     relAdr = ASMINT_CurrRun-address-5;
-    MEM_WriteByte(address + 0, 233);
+    MEM_WriteByte(address + 0, ASMINT_OP_jmp);
     MEM_WriteInt (address + 1, relAdr);
 
     // ----- Write new assembly code -----
@@ -254,11 +254,7 @@ func int IsHooked(var int address) {
         return FALSE;
     };
 
-    if (_HT_Has(_Hook_htbl, address)) {
-        return TRUE;
-    } else {
-        return FALSE;
-    };
+    return _HT_Has(_Hook_htbl, address);
 };
 
 
@@ -319,7 +315,7 @@ func void RemoveHookI(var int address, var int oldInstr, var int function) {
         MEM_Call(EventPtr_Delete); // EventPtr_Delete(ev);
 
         // Check integrity of opcode at address (expecting jump)
-        if (MEM_ReadByte(address) != /*E9*/ 233) {
+        if (MEM_ReadByte(address) != ASMINT_OP_jmp) {
             MEM_Error("HOOKENGINE: Hook was invalidated by overwritten opcode");
             return;
         };
