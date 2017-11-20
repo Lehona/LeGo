@@ -69,7 +69,7 @@ func void CC_AutoComplete(var string commandPrefix, var string description) {
     if (CALL_Begin(call)) {
         CALL_PtrParam(_@(descPtr));
         CALL_PtrParam(_@(comPtr));
-        CALL__thiscall(_@(zcon_address), zCConsole__Register);
+        CALL__thiscall(_@(zcon_address_lego), zCConsole__Register);
         call = CALL_End();
     };
 };

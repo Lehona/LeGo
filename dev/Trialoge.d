@@ -31,7 +31,7 @@ func void EquipWeapon (var C_NPC slf, var int ItemInst) {
         return;
     };
 
-    if (item.flags & ITEM_ACTIVE)
+    if (item.flags & ITEM_ACTIVE_LEGO)
     && (!EquipWeapon_TogglesEquip) {
         /* calling EquipWeapon would unequip the weapon. */
         MEM_Info ("EquipWeapon: This weapon is already equipped. Ignoring request.");

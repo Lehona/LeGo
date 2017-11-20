@@ -1,3 +1,6 @@
+var int YouHaveToDeleteOneOfTheEngineAdrFilesInTheLeGoDirectory;
+
+
 /***********************************\
        ADRESSEN DER ENGINECALLS
 \***********************************/
@@ -98,7 +101,7 @@ const int menu_savegame_slot_offset                 = 3276;
 const int sub_4D3D90_X                              = 5013602; //0x4C8062 Hook: Cursor
 const int zCConsole__Register                       = 7182656; //0x6D9940
 const int zCConsoleOutputOverwriteAddr              = 6573691; //0x644E7B Hook: ConsoleCommands
-const int zcon_address                              = 9291168; //0x8DC5A0
+const int zcon_address_lego                         = 9291168; //0x8DC5A0 // zcon_address is defined in Ikarus but only for Gothic2!
 const int zCOption__ParmValue                       = 4586784; //0X45FD20
 const int zCWorld__AdvanceClock                     = 6257280; //0x5F7A80 Hook: Draw3D
 const int zlineCache                                = 8844672; //0x86F580
@@ -128,7 +131,7 @@ const int zCModel__GetAniIDFromAniName              = 4713552; // .text:0047EC50
 //========================================
 // Missing Item flag
 //========================================
-const int ITEM_ACTIVE = 1 << 30; // Not defined in Gothic 1. Necessary for EquipWeapon()
+const int ITEM_ACTIVE_LEGO = 1 << 30; // Not defined in Gothic 1. Necessary for EquipWeapon()
 
 //========================================
 // Globale Flagvariable

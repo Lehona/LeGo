@@ -14,6 +14,7 @@ HookEngine.d
 PermMem.d
 List.d
 PermMem_Structs.d
+Queue.d
 EventHandler.d
 Anim8.d
 FrameFunctions.d

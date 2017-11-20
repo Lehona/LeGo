@@ -1,3 +1,6 @@
+var int YouHaveToDeleteOneOfTheEngineAdrFilesInTheLeGoDirectory;
+
+
 /***********************************\
        ADRESSEN DER ENGINECALLS
 \***********************************/
@@ -104,11 +107,17 @@ const int zCLineCache__Line3D                       = 5289040; //0x50B450
 const int zTBSphere3D__Draw                         = 5521904; //0x5441F0
 const int zTBBox3D__Draw                            = 5529312; //0x545EE0
 const int zCOBBox3D__Draw                           = 5533040; //0x546D70
+const int zcon_address_lego							= 11221088; //0xAB3860 //zcon_address is defined in Ikarus but only for Gothic2!
 
 //========================================
 // Globale Flagvariable
 //========================================
 const int _LeGo_Flags = 0;
+
+//========================================
+// Missing Item flag
+//========================================
+const int ITEM_ACTIVE_LEGO = 1 << 30; // Not defined in Gothic 1. Necessary for EquipWeapon()
 
 //========================================
 // Namen einer Textur holen
