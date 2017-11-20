@@ -1617,7 +1617,9 @@ func int _PM_Load(var string objName, var int type, var int ptr) {
         if(!ptr) {
             var _PM_SaveObject_Arr oa; oa = MEM_PtrToInst(obj);
             if(type == _PM_IntArr) {
-                ptr = MEM_Alloc(oa.elements * 4);
+				if (oa.elements > 0) {
+					ptr = MEM_Alloc(oa.elements * 4);
+				};
             }
             else {
                 ptr = MEM_Alloc(oa.elements * 20);

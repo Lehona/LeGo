@@ -38,12 +38,14 @@ func void A8Head_UnArchiver(var A8Head this) {
     this.queue = PM_Load("queue");
 };
 
-func void A8Head_Delete(var A8Head h) {
+func void A8Head_Empty(var A8Head h) {
     if(!h.queue) { return; };
-    List_For(h.queue, "A8Head_DeleteSub");
+    List_ForF(h.queue, A8Head_EmptySub);
     List_Destroy(h.queue);
     h.queue = 0;
-    };func void A8Head_DeleteSub(var int node) {
+};
+	
+func void A8Head_EmptySub(var int node) {
     if(Hlp_IsValidHandle(MEM_ReadInt(node))) {
         delete(MEM_ReadInt(node));
     };
@@ -126,7 +128,7 @@ func void _Anim8_SetVelo(var A8Head h, var A8Command c) {
 func void _Anim8_Ext(var int hndl, var int targetVal, var int timeSpan, var int interpol, var int UseQueue) {
     var A8Head h; h = get(hndl);
     if(!UseQueue) {
-        A8Head_Delete(h);
+        A8Head_Empty(h);
     };
     if(!h.queue) {
         h.queue = List_Create(0);
@@ -137,7 +139,7 @@ func void _Anim8_Ext(var int hndl, var int targetVal, var int timeSpan, var int 
     if(!h.flt) {
         c.target = mkf(c.target);
     };
-    if(h.value == c.target) { interpol = A8_Wait; };
+      //if((h.value == c.target) && (!UseQueue)) { interpol = A8_Wait; }; // This seemed to be useless and responsible for a bug
     c.startVal = h.value;
     c.startTime = Timer();
     c.timeSpan = mkf(timeSpan);

@@ -129,9 +129,7 @@ func int _FF_RemoveL(var int hndl) {
 func void _FF_Hook() {
 	if(!Hlp_IsValidNpc(hero)) { return; };
 
-    MEM_PushIntParam(FFItem@);
-    MEM_GetFuncID(FrameFunctions);
-    MEM_StackPos.position = foreachHndl_ptr;
+    foreachHndl(FFItem@, FrameFunctions);
 };
 func int FrameFunctions(var int hndl) {
     var FFItem itm; itm = get(hndl);
