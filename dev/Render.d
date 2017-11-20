@@ -151,6 +151,12 @@ func void _Render_Init() {
     // Welt zum Rendern
     _render_wld = create(oWorld@);
     CALL__thiscall(_render_wld, zCWorld__zCWorld);
-    var oWorld w; w = MEM_PtrToInst(_render_wld);
-    w.m_bIsInventoryWorld = 1;
+
+	/* G2 only, using offset due to G1G2 compatibility
+   var oWorld w; w = MEM_PtrToInst(_render_wld);
+	w.m_bIsInventoryWorld = 1; */
+	if (MEMINT_SwitchG1G2(false, true)) {
+		MEM_WriteInt (_render_wld+136, 1);
+	};
+    
 };

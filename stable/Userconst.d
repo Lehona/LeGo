@@ -112,7 +112,7 @@ const string PF_Font        = "FONT_OLD_10_WHITE.TGA"; //Verwendete Schriftart
 //========================================
 // Talents
 //========================================
-const int AIV_TALENT = 89; // Genutzte AI-Var
+const int AIV_TALENT = AIV_TALENT_INDEX; // Genutzte AI-Var
 
 //========================================
 // Dialoggestures

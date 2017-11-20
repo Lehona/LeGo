@@ -27,18 +27,41 @@ func int _LeGo_IsLevelChange() {
     return _LeGo_LevelChangeIsExecuted;
 };
 
+/* Some magic made by Chicken */
+func string GetParmValue(var string str) {
+	CALL_zStringPtrParam(str);
+	CALl_RetValIszString();
+	CALL__thisCall(MEM_ReadInt(zoptions_Pointer_Address), 4586784);
+	
+	return CALL_RetValAszString();
+};
+
 //========================================
 // [intern] Gibt Pfad zur Speicherdatei zurück
 //========================================
 func string _BIN_GetSavefilePath(var int slot) {
     var string path;
-    var string cmd; cmd = MEM_GetCommandLine(); 
+	var string cmd;
+	if (MEMINT_SwitchG1G2(false, true)) {
+		/* G2 */
+        cmd = MEM_GetCommandLine();
+    };
     var string _BIN_ini;
+	
     if(!STR_len(_BIN_ini)) {
-		var int start; start = STR_IndexOf(cmd, "-GAME:");
-        _BIN_ini = STR_SubStr(cmd, start+6, STR_Len(cmd)-start-6);
+		if (MEMINT_SwitchG1G2(false, true)) {
+			/* G2 */
+			var int start; start = STR_IndexOf(cmd, "-GAME:");
+        	_BIN_ini = STR_SubStr(cmd, start+6, STR_Len(cmd)-start-6);
+		} else {
+			/* G1 */
+			_BIN_ini = GetParmValue("GAME"); // Yea, I've lost a lot of time and patience to resolve crash during saving the game. 
+		};
         _BIN_ini = STR_Split(_BIN_ini, ".", 0);
     };
+
+	MEM_Info(ConcatStrings(":_Bin_ini:",_BIN_ini));
+	
     if(Hlp_StrCmp(_BIN_ini, "GOTHICGAME") || (Hlp_StrCmp(_BIN_ini, ""))) {
         path = "saves";
     }
@@ -53,6 +76,8 @@ func string _BIN_GetSavefilePath(var int slot) {
         path = ConcatStrings(path, "/quicksave");
     };
     path = ConcatStrings(path, "/SCRPTSAVE.SAV");
+
+	MEM_Info(ConcatStrings(":path:",path));
     return path;
 };
 
@@ -61,7 +86,9 @@ func string _BIN_GetSavefilePath(var int slot) {
 //========================================
 func int _BR_GetSelectedSlot() {
     var CGameManager man; man = _^(MEM_ReadInt(MEMINT_gameMan_Pointer_address));
-    return MEM_ReadInt(man.menu_load_savegame + menu_savegame_slot_offset);
+	var int slot; slot = MEM_ReadInt(man.menu_load_savegame + menu_savegame_slot_offset);
+	MEM_Info(ConcatStrings(":slot:",IntToString(slot)));
+    return slot;
 };
 
 //========================================

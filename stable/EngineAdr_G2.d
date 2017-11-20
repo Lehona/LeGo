@@ -1,7 +1,13 @@
+var int YouHaveToDeleteOneOfTheEngineAdrFilesInTheLeGoDirectory;
+
+
 /***********************************\
        ADRESSEN DER ENGINECALLS
 \***********************************/
-
+//========================================
+// Talents Aivar field
+//========================================
+const int AIV_TALENT_INDEX = 89;
 //========================================
 // Alle (?) genutzen Engineadressen
 //========================================
@@ -35,8 +41,8 @@ const int oCNpc__PutInSlot                          = 7642288; //0x749CB0
 const int oCNpc__RemoveFromSlot                     = 7643760; //0x74A270
 const int oCNpc__UnequipItem                        = 7546560; //0x7326C0 Hook: Shields
 const int oCNpc__UseItem                            = 7584784; //0x73BC10
-const int oCNpc__StartDialogAniX 					= 7700155; // 0x757EBB
-const int oCNpc__StartDialogAniY					= 7700162; // 0x757EC2
+const int oCNpc__StartDialogAniX                    = 7700155; // 0x757EBB
+const int oCNpc__StartDialogAniY                    = 7700162; // 0x757EC2
 const int oCSavegameManager__SetAndWriteSavegame    = 4428037; //0x439105 Hook: Saves
 const int oCSavegameManager__SetAndWriteSavegame_bp_offset = 60;
 const int parser                                    =11223232; //0xAB40C0
@@ -47,15 +53,15 @@ const int WriteFile                                 = 8079292; //0x7B47BC
 const int zCAICamera_StartDialogCam                 = 4923632; //0x4B20F0
 const int zCAICamera__current                       = 9235128; //0x8CEAB8
 const int zCAICamera__StartDialogCam                = 4923632; //0x4B20F0
-const int zCAICamera__StartDialogCam_oldInstr		= 275316586;
+const int zCAICamera__StartDialogCam_oldInstr       = 275316586;
 const int zCFontMan__GetFont                        = 7898288; //0x7884B0
 const int zCFontMan__Load                           = 7897808; //0x7882D0
 const int zCFont__GetFontName                       = 7902368; //0x7894A0
 const int zCFont__GetFontX                          = 7902448; //0x7894F0
 const int zCFont__GetFontY                          = 7902432; //0x7894E0
-const int zCViewText_vtbl							= 8643396; //0x83E344
-const int zCInput_zinput							= 9246288; //0x8D1650
-const int zCInput_Win32__SetDeviceEnabled			= 5067008; //0x4D5100
+const int zCViewText_vtbl                           = 8643396; //0x83E344
+const int zCInput_zinput                            = 9246288; //0x8D1650
+const int zCInput_Win32__SetDeviceEnabled           = 5067008; //0x4D5100
 const int zCInput_Win32__GetMouseButtonPressedLeft  = 5068688; //0x4D5790
 const int zCInput_Win32__GetMouseButtonPressedMid   = 5068704; //0x4D57A0
 const int zCInput_Win32__GetMouseButtonPressedRight = 5068720; //0x4D57B0
@@ -74,7 +80,7 @@ const int zCView__Render                            = 8045072; //0x7AC210
 const int zCView__SetFontColor                      = 8034576; //0x7A9910
 const int zCView__SetSize                           = 8026016; //0x7A77A0
 const int zCView__zCView                            = 8017664; //0x7A5700
-const int zCView_Top 								= 8021904; //007A6790
+const int zCView_Top                                = 8021904; //007A6790
 const int zCWorld__zCWorld                          = 6421056; //0x61FA40
 const int zFontMan                                  =11221460; //0xAB39D4
 const int zParser__CallFunc                         = 7940592; //0x7929F0
@@ -83,23 +89,35 @@ const int zRND_D3D__DrawLine                        = 6609120; //0x64D8E0
 const int zRND_D3D__DrawPolySimple                  = 6597680; //0x64AC30
 const int zRND_D3D__EndFrame                        = 6610720; //0X64DF20 Hook: Sprite
 const int zRND_D3D__SetAlphaBlendFunc               = 6628880; //0x652610
-const int zCRnd_D3D__XD3D_SetRenderState			= 6573808; //0x644EF0
-const int zRND_D3D_TexMemory_offset					= 1208;
+const int zCRnd_D3D__XD3D_SetRenderState            = 6573808; //0x644EF0
+const int zRND_D3D_TexMemory_offset                 = 1208;
 const int zSinCosApprox                             = 6269632; //0x5FAAC0
-const int T_DIALOGGESTURE_							= 9148264; //0x8B9768
-const int _atan2f									= 8123804; //0x7BF59C
-const int _sinf 									= 8123910; //0x7BF606
-const int _acosf 									= 8123794; //0x7BF592
-const int menu_savegame_slot_offset					= 3276;
-const int sub_4D3D90_X								= 5062907; //0x4D40FB // ???
+const int T_DIALOGGESTURE_                          = 9148264; //0x8B9768
+const int _atan2f                                   = 8123804; //0x7BF59C
+const int _sinf                                     = 8123910; //0x7BF606
+const int _acosf                                    = 8123794; //0x7BF592
+const int menu_savegame_slot_offset                 = 3276;
+const int sub_4D3D90_X                              = 5062907; //0x4D40FB Hook: Cursor
 const int zCConsole__Register                       = 7875296; //0x782AE0
 const int zCConsoleOutputOverwriteAddr              = 7142904; //0x6CFDF8 Hook: ConsoleCommands
-
+const int zCOption__ParmValue                       = 4586784; //0X45FD20 // G1 
+const int zCWorld__AdvanceClock                     = 6447328; //0x6260E0 Hook: Draw3D
+const int zlineCache                                = 9257720; //0x8D42F8
+const int zCLineCache__Line3D                       = 5289040; //0x50B450
+const int zTBSphere3D__Draw                         = 5521904; //0x5441F0
+const int zTBBox3D__Draw                            = 5529312; //0x545EE0
+const int zCOBBox3D__Draw                           = 5533040; //0x546D70
+const int zcon_address_lego							= 11221088; //0xAB3860 //zcon_address is defined in Ikarus but only for Gothic2!
 
 //========================================
 // Globale Flagvariable
 //========================================
 const int _LeGo_Flags = 0;
+
+//========================================
+// Missing Item flag
+//========================================
+const int ITEM_ACTIVE_LEGO = 1 << 30; // Not defined in Gothic 1. Necessary for EquipWeapon()
 
 //========================================
 // Namen einer Textur holen
@@ -280,10 +298,15 @@ func void oCNpc_Equip(var int npcPtr, var int itmPtr) {
 //========================================
 // Aktuelle Instanz bearbeiten
 //========================================
-func void MEM_SetUseInstance(var int ptr) {
+func void MEM_SetUseInstance(var int inst) {
     MemoryProtectionOverride(11232304, 10);
-    MEM_WriteInt(11232304, ptr);
-    MEM_WriteInt(11232308, MEM_ReadInt(ptr+28));
+    if (inst) {
+        MEM_WriteInt(11232304, inst);
+        MEM_WriteInt(11232308, MEM_ReadInt(inst+zCParSymbol_offset_offset));
+    } else {
+        MEM_WriteInt(11232304, 0);
+        MEM_WriteInt(11232308, 0);
+    };
 };
 
 func int MEM_GetUseInstance() {

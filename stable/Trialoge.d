@@ -31,7 +31,7 @@ func void EquipWeapon (var C_NPC slf, var int ItemInst) {
         return;
     };
 
-    if (item.flags & ITEM_ACTIVE)
+    if (item.flags & ITEM_ACTIVE_LEGO)
     && (!EquipWeapon_TogglesEquip) {
         /* calling EquipWeapon would unequip the weapon. */
         MEM_Info ("EquipWeapon: This weapon is already equipped. Ignoring request.");
@@ -91,7 +91,7 @@ func void DiaCAM_Disable() {
 //========================================
 func void DiaCAM_Enable() {
     MemoryProtectionOverride(zCAICamera__StartDialogCam, 4);
-    MEM_WriteInt(zCAICamera__StartDialogCam, 275316586);
+    MEM_WriteInt(zCAICamera__StartDialogCam, zCAICamera__StartDialogCam_oldInstr);
 };
 
 
@@ -106,7 +106,13 @@ var int TRIA_Self;                // Pointer auf self
 var string TRIA_Camera;           // Läuft eine Kamerafahrt?
 
 func void ZS_TRIA() {};
-func int ZS_TRIA_Loop() { return LOOP_CONTINUE; };
+func int ZS_TRIA_Loop() {
+    if (InfoManager_hasFinished()) { // Im Zustand bleiben bis Dialog fertig
+        return LOOP_END;
+    } else {
+        return LOOP_CONTINUE;
+    };
+};
 
 //========================================
 // Npcs aufeinander warten lassen
@@ -152,16 +158,18 @@ class _TRIA_fltWrapper {
 func void _TRIA_Copy(var int n0, var int n1) {
     var c_npc np0; np0 = MEM_PtrToInst(n0);
     var c_npc np1; np1 = MEM_PtrToInst(n1);
+    var oCNpc onp0; onp0 = MEM_PtrToInst(n0);
+    var oCNpc onp1; onp1 = MEM_PtrToInst(n1);
     var int a0; a0 = Npc_GetArmor(np0);
     var int a1; a1 = Npc_GetArmor(np1);
-    var _TRIA_fltWrapper fn0; fn0 = MEM_PtrToInst(n0+1968);
-    var _TRIA_fltWrapper fn1; fn1 = MEM_PtrToInst(n1+1968);
-    MEM_SwapBytes(n0+60,   n1+60,   64);      // trafo
-    MEM_SwapBytes(n0+292,  n1+292,  604-292); // name, voice..
-    MEM_SwapBytes(n0+1884, n1+1884, 20);      // bitfield
-    MEM_SwapBytes(n0+1908, n1+1908, 76);      // visuals
-	MEM_SwapBytes(n0+260,  n1+260,  20);
-	MEM_SwapBytes(n0+204,  n1+204,   4);
+    var _TRIA_fltWrapper fn0; fn0 = MEM_PtrToInst(_@(onp0.model_scale));
+    var _TRIA_fltWrapper fn1; fn1 = MEM_PtrToInst(_@(onp1.model_scale));
+    MEM_SwapBytes(n0+60,                       n1+60,                      64);                          // trafo
+    MEM_SwapBytes(n0+MEM_NpcName_Offset,       n1+MEM_NpcName_Offset,      MEMINT_SwitchG1G2(272, 312)); // name, voice
+    MEM_SwapBytes(_@(onp0.bitfield),           _@(onp1.bitfield),          20);                          // bitfield
+    MEM_SwapBytes(_@s(onp0.mds_name),          _@s(onp1.mds_name),         76);                          // visuals
+	MEM_SwapBytes(_@(onp0._zCVob_bitfield),    _@(onp1._zCVob_bitfield),   20);                          // vob bitfield
+	MEM_SwapBytes(_@(onp0._zCVob_visualAlpha), _@(onp1._zCVob_visualAlpha), 4);
     Mdl_SetModelScale(np0, fn0.f0, fn0.f1, fn0.f2);
     Mdl_SetModelScale(np1, fn1.f0, fn1.f1, fn1.f2);
     Mdl_SetModelFatness(np0, fn0.f3);

@@ -64,7 +64,9 @@ func int Print_CreateTextPtrColored(var string text, var string font, var int co
     txt.font = Print_GetFontPtr(font);
     txt.text = text;
     txt.color = color;
-    txt.colored = 1;
+	if (!color == -1) {
+		txt.colored = 1;
+	};
     return ptr;
 };
 
@@ -84,15 +86,8 @@ func int Print_GetTextPtr(var int hndl) {
 //========================================
 func void Print_DeleteText(var int hndl) {
     if (!Hlp_IsValidHandle(hndl)) { return; };
-    var zCView v; v = _^(MEM_Game.array_view[0]);
-    var int list; list = _@(v.textLines_data);
-    var int offs; offs = List_Contains(list, getPtr(hndl));
-    if(offs > 1) {
-        List_Delete(list, offs);
-    }
-    else {
-        MEM_Error(ConcatStrings(IntToString(offs), ". Print not found?!"));
-    };
+    var zCViewText txt; txt = Print_GetText(hndl);
+    zCViewText_Delete(txt);
     delete(hndl);
 };
 
@@ -104,14 +99,13 @@ func void PrintPtr_SetAlpha(var int ptr, var int a) {
 	if (!ptr) { return; };
 	var zCViewText txt; txt = MEM_PtrToInst(ptr);
 	txt.colored = 1;
-	txt.color = ChangeAlpha(txt.color,a);
+	txt.color = ChangeAlpha(txt.color, a);
 };
 // handle
-func void Print_SetAlpha(var int hndl,var int a) {
+func void Print_SetAlpha(var int hndl, var int a) {
 	if (!Hlp_IsValidHandle(hndl)) { return; };
 	PrintPtr_SetAlpha(getPtr(hndl), a);
 };
-
 
 //========================================
 // Screengröße (in Pixeln)
@@ -125,8 +119,13 @@ func void _Print_Ratio() {
 
 var int Print_Screen[2];
 func void Print_GetScreenSize() {
-    Print_Screen[PS_X] = STR_ToInt(MEM_GetGothOpt("VIDEO", "zVidResFullscreenX"));
-    Print_Screen[PS_Y] = STR_ToInt(MEM_GetGothOpt("VIDEO", "zVidResFullscreenY"));
+    if (!_@(MEM_Game)) {
+        // Initialize if called during level change (e.g. by PrintScreen_Ext(), caused by log entry)
+        MEM_InitGlobalInst();
+    };
+    var zCView screen; screen = _^(MEM_Game._zCSession_viewport);
+    Print_Screen[PS_X] = screen.psizex;
+    Print_Screen[PS_Y] = screen.psizey;
     _Print_Ratio();
 };
 
@@ -225,6 +224,12 @@ func void zCViewTextPrint_UnArchiver(var zCViewText this) {
 
 
 func int Print_Ext(var int x, var int y, var string text, var string font, var int color, var int time) {
+    if (!_@(MEM_Game)) || (!_@(MEM_StackPos)) {
+        // Initialize if called during level change (e.g. by PrintScreen_Ext(), caused by log entry)
+        MEM_InitLabels();
+        MEM_InitGlobalInst();
+    };
+
     if (time == -1) {
         var int h; h = new(zCViewTextPrint);
         var zCViewText txt; txt = get(h);
@@ -291,9 +296,8 @@ func string Print_LongestLineExt(var string text, var string font, var string se
 };
 
 func string Print_LongestLine(var string text, var string font) {
-	Print_LongestLineExt(text, font, Print_LineSeperator);	
+	Print_LongestLineExt(text, font, Print_LineSeperator);
 };
-
 
 func int Print_LongestLineLengthExt(var string text, var string font, var string separator) {
     return Print_GetStringWidth(Print_LongestLineExt(text, font, separator), font);
@@ -303,11 +307,10 @@ func int Print_LongestLineLength(var string text, var string font) {
     return Print_LongestLineLengthExt(text, font, Print_LineSeperator);
 };
 
-
-func int Print_TextField(var int x, var int y, var string text, var string font, var int height) {
+func int Print_TextFieldColored(var int x, var int y, var string text, var string font, var int height, var int color) {
     var int cnt; cnt = STR_SplitCount(text, Print_LineSeperator);
     var int i; i = 1;
-    var int ptr; ptr = Print_CreateTextPtr(STR_Split(text, Print_LineSeperator, 0), font);
+    var int ptr; ptr = Print_CreateTextPtrColored(STR_Split(text, Print_LineSeperator, 0), font, color);
     var zCViewText txt; txt = _^(ptr);
     txt.posx = x;
     txt.posy = y;
@@ -317,7 +320,7 @@ func int Print_TextField(var int x, var int y, var string text, var string font,
     if (i >= cnt) {
         return list;
     };
-        ptr = Print_CreateTextPtr(STR_Split(text, Print_LineSeperator, i), font);
+        ptr = Print_CreateTextPtrColored(STR_Split(text, Print_LineSeperator, i), font, color);
         txt = _^(ptr);
         txt.posx = x;
         txt.posy = y+(height*i);
@@ -326,6 +329,10 @@ func int Print_TextField(var int x, var int y, var string text, var string font,
         i+=1;
 
     MEM_StackPos.position = pos;
+};
+
+func int Print_TextField(var int x, var int y, var string text, var string font, var int height) {
+	return Print_TextFieldColored(x, y, text, font, height, -1);
 };
 
 func int Print_TextFieldPxl(var int x, var int y, var string text, var string font) {
@@ -455,7 +462,7 @@ func void AI_PrintScreen_Ext(var string txt, var int x, var int y, var string fo
     PS_Param@.y = y;
     PS_Param@.font = font;
     PS_Param@.timeSec = timeSec;
-	
+
     AI_Function_I(hero, AI_PrintScreen_Execute, h);
 };
 func void Print_FixPS() {
@@ -467,7 +474,7 @@ func void Print_FixPS() {
         Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
 
     PS.content = Call_Close();
-	
+
 	if (MEMINT_SwitchG1G2(false, true)) {
 		var int AI_PS_Ext; AI_PS_Ext = MEM_GetFuncOffset(AI_PrintScreen_Ext);
 		PS = _^(MEM_GetParserSymbol ("AI_PRINTSCREEN"));

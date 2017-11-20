@@ -2,19 +2,20 @@
 // LeGo //
 //////////
 
-EngineAdr.d
+EngineAdr*.d
 Timer.d
 Userconst.d
 ItemHelper.d
 StringBuilder.d
 Locals.d
 BinaryMachines.d
-HookEngine.d
 _Hashtable.d
+HookEngine.d
 PermMem.d
-PermMem_Structs.d
-EventHandler.d
 List.d
+PermMem_Structs.d
+Queue.d
+EventHandler.d
 Anim8.d
 FrameFunctions.d
 ConsoleCommands.d
@@ -34,6 +35,7 @@ Dialoggestures.d
 Focusnames.d
 Gamestate.d
 Render.d
+Draw3D.d
 Saves.d
 Int64.d
 Sprite.d

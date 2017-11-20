@@ -60,8 +60,8 @@ func void _DIAG_SetAni(var string AniName) {
     MemoryProtectionOverride(T_DIALOGGESTURE_, 16);
     AniName = STR_Upper(AniName);
     var zString ani; ani = MEM_PtrToInst(STR_GetAddress(AniName));
-    if(ani.len < 1 || ani.len > 15) {
-        MEM_Error("DIAG_SetAni: Length of AniName has to be between 0 and 16");
+    if(ani.len < 1 || ani.len > 17) {
+        MEM_Error("DIAG_SetAni: Length of AniName has to be between 0 and 18");
     };
     MEM_CopyBytes(ani.ptr, T_DIALOGGESTURE_, ani.len+1); // +1 für \0
 };
