@@ -58,8 +58,6 @@ func string _BIN_GetSavefilePath(var int slot) {
 
     path = ConcatStrings(path, "/SCRPTSAVE.SAV");
 
-    MEM_Info(path);
-
     return path;
 };
 
