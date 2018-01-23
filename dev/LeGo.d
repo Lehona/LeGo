@@ -204,7 +204,7 @@ func void LeGo_InitGamestart(var int f) {
         HookEngineF(oCGame__changeLevel, 7, _LeGo_ChangeLevelHookBegin);
         HookEngineF(oCGame__changeLevelEnd, 7, _LeGo_ChangeLevelHookEnd);
         HookEngineF(oCSavegameManager__SetAndWriteSavegame, 5, _BW_SAVEGAME);
-        HookEngineF(CGameManager__Write_Savegame, 7, _BR_SetSelectedSlot);
+        HookEngineF(CGameManager__Read_Savegame, 7, _BR_SetSelectedSlot);
     };
 
     if(f & LeGo_Draw3D) {

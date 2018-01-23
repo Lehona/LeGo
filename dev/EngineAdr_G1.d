@@ -12,8 +12,7 @@ const int AIV_TALENT_INDEX = 49;
 // Alle (?) genutzen Engineadressen
 //========================================
 const int CGameManager__ApplySomeSettings           = 4351936; //
-const int CGameManager__Read_Savegame               = 4361077; //
-const int CGameManager__Write_Savegame              = 4360080; //0x428790 Hook: Saves
+const int CGameManager__Read_Savegame               = 4361040; //0x428B50 Hook: Saves
 const int CloseHandle                               = 7712294; //
 const int CreateFileA                               = 7712348; //
 const int Cursor_Ptr                                = 8834220; //0x86CCAC
