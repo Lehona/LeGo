@@ -56,7 +56,7 @@ func void DIAG_SetMinMax(var int min, var int max) {
 //========================================
 func void _DIAG_SetAni(var string AniName) {
     _DIAG_Patch();
-    
+
     MemoryProtectionOverride(T_DIALOGGESTURE_, 16);
     AniName = STR_Upper(AniName);
     var zString ani; ani = MEM_PtrToInst(STR_GetAddress(AniName));
@@ -91,7 +91,7 @@ func void DIAG(var string AniName, var int Min, var int Max) {
 func void DIAG_Reset() {
     AI_WaitTillEnd(self, other);
     AI_WaitTillEnd(other, self);
-    AI_Function_SI(other, _DIAG, "T_DIALOGGESTURES_", -1);
+    AI_Function_SI(other, _DIAG, "T_DIALOGGESTURE_", -1);
     AI_WaitTillEnd(self, other);
 };
 
@@ -99,7 +99,7 @@ func void DIAG_Reset() {
 // [intern]
 //========================================
 func void _DIAG(var string AniName, var int ptr) {
-    if(!STR_Compare(AniName, "T_DIALOGGESTURES_")) {
+    if(!STR_Compare(AniName, "T_DIALOGGESTURE_")) {
         DIAG_SetMinMax(1, 20);
         _DIAG_SetAni(AniName);
         return;
@@ -108,7 +108,3 @@ func void _DIAG(var string AniName, var int ptr) {
     MEM_Free(ptr);
     DIAG_SetAni(AniName);
 };
-
-
-
-
