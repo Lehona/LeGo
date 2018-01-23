@@ -44,7 +44,7 @@ func void A8Head_Empty(var A8Head h) {
     List_Destroy(h.queue);
     h.queue = 0;
 };
-	
+
 func void A8Head_EmptySub(var int node) {
     if(Hlp_IsValidHandle(MEM_ReadInt(node))) {
         delete(MEM_ReadInt(node));
@@ -311,7 +311,7 @@ func int Anim8_Empty(var int hndl) {
     };
     var A8Head h; h = get(hndl);
     if(!h.queue) { return 1; };
-    return List_HasLength(h.queue, 2);
+    return !List_HasLength(h.queue, 2);
 };
 
 //========================================
