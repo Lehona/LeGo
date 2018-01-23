@@ -13,6 +13,7 @@ const int AIV_TALENT_INDEX = 49;
 //========================================
 const int CGameManager__ApplySomeSettings           = 4351936; //
 const int CGameManager__Read_Savegame               = 4361077; //
+const int CGameManager__Write_Savegame              = 4360080; //0x428790 Hook: Saves
 const int CloseHandle                               = 7712294; //
 const int CreateFileA                               = 7712348; //
 const int Cursor_Ptr                                = 8834220; //0x86CCAC
@@ -102,6 +103,7 @@ const int sub_4D3D90_X                              = 5013602; //0x4C8062 Hook: 
 const int zCConsole__Register                       = 7182656; //0x6D9940
 const int zCConsoleOutputOverwriteAddr              = 6573691; //0x644E7B Hook: ConsoleCommands
 const int zcon_address_lego                         = 9291168; //0x8DC5A0 // zcon_address is defined in Ikarus but only for Gothic2!
+const int zCOptions_dir_string_offset               = 120;     //0x78     // The class zCOption is defined incorrectly in Ikarus for Gothic1!
 const int zCOption__ParmValue                       = 4586784; //0X45FD20
 const int zCWorld__AdvanceClock                     = 6257280; //0x5F7A80 Hook: Draw3D
 const int zlineCache                                = 8844672; //0x86F580

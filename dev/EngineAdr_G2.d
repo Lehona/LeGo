@@ -13,6 +13,7 @@ const int AIV_TALENT_INDEX = 89;
 //========================================
 const int CGameManager__ApplySomeSettings           = 4355760; //0x4276B0
 const int CGameManager__Read_Savegame               = 4366438; //0x42A066
+const int CGameManager__Write_Savegame              = 4367056; //0x42A2D0 Hook: Saves
 const int CloseHandle                               = 8079190; //0x7B4756
 const int CreateFileA                               = 8079286; //0x7B47B6
 const int Cursor_Ptr                                = 9246300; //0x8D165C
@@ -100,7 +101,8 @@ const int menu_savegame_slot_offset                 = 3276;
 const int sub_4D3D90_X                              = 5062907; //0x4D40FB Hook: Cursor
 const int zCConsole__Register                       = 7875296; //0x782AE0
 const int zCConsoleOutputOverwriteAddr              = 7142904; //0x6CFDF8 Hook: ConsoleCommands
-const int zCOption__ParmValue                       = 4586784; //0X45FD20 // G1 
+const int zCOption__ParmValue                       = 4608896; //0x465380
+const int zCOptions_dir_string_offset               = 124;     //0x7C     // The class zCOption is defined incorrectly in Ikarus for Gothic1!
 const int zCWorld__AdvanceClock                     = 6447328; //0x6260E0 Hook: Draw3D
 const int zlineCache                                = 9257720; //0x8D42F8
 const int zCLineCache__Line3D                       = 5289040; //0x50B450
