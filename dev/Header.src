@@ -11,6 +11,7 @@ Locals.d
 BinaryMachines.d
 _Hashtable.d
 HookEngine.d
+HookDaedalus.d
 PermMem.d
 List.d
 PermMem_Structs.d
