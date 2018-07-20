@@ -139,10 +139,10 @@ func int Buff_Apply(var c_npc npc, var int buff) {
 
 		if (!b.tickMS) { b.tickMS = b.durationMS+1; /* Increase by one so tickCount is zero */ };
 
-		FF_ApplyExtData(_Buff_Dispatcher, b.tickMS, -1, bh);
+		FF_ApplyExtDataGT(_Buff_Dispatcher, b.tickMS, -1, bh);
 		
 
-		if (Npc_IsPlayer(npc)) {
+		if (Npc_IsPlayer(npc) && Buffs_DisplayForHero) {
 				/* Add this buff to the hero's bufflist, for display */
 				BuffList_Add(bh);
 		};
@@ -198,3 +198,14 @@ func int Buff_GetNpc(var int bh) {
 };
 
 
+func void _Buff_RemoveAll_Sub(var int buffh) {
+	var lCBuff buff; buff = get(buffh);
+	if (buff.targetID == Buff_NpcID) {
+		Buff_Remove(buffh);
+	};
+};
+
+func void Buff_RemoveAll(var c_npc n, var int buffInstance) {
+	Buff_NpcID = Npc_GetId(n);
+	ForeachHndl(buffInstance, _Buff_RemoveAll_Sub);
+};

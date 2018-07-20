@@ -107,6 +107,7 @@ func void LeGo_InitAlways(var int f) {
 
     if(f & LeGo_Timer) {
         _Timer_Init();
+		_TimerGT_Init();
     };
 
     if(_LeGo_Loaded && !_LeGo_IsLevelChange()) {

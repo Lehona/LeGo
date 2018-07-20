@@ -12,6 +12,7 @@ class FFItem {
     var int cycles;
 	var int data;
 	var int hasData;
+	var int gametime;
 };
 instance FFItem@(FFItem);
 
@@ -23,6 +24,7 @@ func void FFItem_Archiver(var FFItem this) {
         PM_SaveInt("cycles", this.cycles);
     };
 	if (this.hasData) { PM_SaveInt("data", this.data); };
+	if (this.gametime) { PM_SaveInt("gametime", this.gametime); };
 };
 
 func void FFItem_Unarchiver(var FFItem this) {
@@ -39,6 +41,10 @@ func void FFItem_Unarchiver(var FFItem this) {
 		this.data = PM_Load("data");
 		this.hasData = 1;
 	};
+	
+	if (PM_Exists("gametime")) {
+		this.gametime = PM_Load("gametime");
+	};
 };
 
 var int _FF_Symbol;
@@ -46,24 +52,37 @@ var int _FF_Symbol;
 //========================================
 // Funktion hinzufügen
 //========================================
-func void FF_ApplyExtData(var func function, var int delay, var int cycles, var int data) {
+
+func void _FF_Create(var func function, var int delay, var int cycles, var int hasData, var int data, var int gametime) {
 	var int hndl; hndl = new(FFItem@);
     var FFItem itm; itm = get(hndl);
     itm.fncID = MEM_GetFuncPtr(function);
     itm.cycles = cycles;
     itm.delay = delay;
-    itm.next = Timer() + itm.delay;
 	itm.data = data;
-	itm.hasData = 1;
+	itm.hasData = hasData;
+	itm.gametime = gametime;
+	if (gametime) {
+		itm.next = TimerGT() + itm.delay;
+	} else {
+		itm.next = Timer() + itm.delay;
+	};
+};
+
+func void FF_ApplyExtData(var func function, var int delay, var int cycles, var int data) {
+	_FF_Create(function, delay, cycles, true, data, false); 
 };
 
 func void FF_ApplyExt(var func function, var int delay, var int cycles) {
-    var int hndl; hndl = new(FFItem@);
-    var FFItem itm; itm = get(hndl);
-    itm.fncID = MEM_GetFuncPtr(function);
-    itm.cycles = cycles;
-    itm.delay = delay;
-    itm.next = Timer() + itm.delay;
+	_FF_Create(function, delay, cycles, false, 0, false); 
+};
+
+func void FF_ApplyExtDataGT(var func function, var int delay, var int cycles, var int data) {
+	_FF_Create(function, delay, cycles, true, data, true); 
+};
+
+func void FF_ApplyExtGT(var func function, var int delay, var int cycles) {
+	_FF_Create(function, delay, cycles, false, 0, true); 
 };
 
 //========================================
@@ -90,10 +109,21 @@ func void FF_Apply(var func function) {
     FF_ApplyExt(function, 0, -1);
 };
 
+func void FF_ApplyGT(var func function) {
+	FF_ApplyExtGT(function, 0, -1);
+};
+
 //========================================
 // Funktion einmalig hinzufügen
 //========================================
 func void FF_ApplyOnceExt(var func function, var int delay, var int cycles) {
+    if(FF_Active(function)) {
+        return;
+    };
+    FF_ApplyExt(function, delay, cycles);
+};
+
+func void FF_ApplyOnceExtGT(var func function, var int delay, var int cycles) {
     if(FF_Active(function)) {
         return;
     };
@@ -131,13 +161,23 @@ func void _FF_Hook() {
 
     foreachHndl(FFItem@, FrameFunctions);
 };
+
+
 func int FrameFunctions(var int hndl) {
     var FFItem itm; itm = get(hndl);
 
+	var int timer;
     var int t; t = Timer();
+	var int tgt; tgt = TimerGT();
 
+	if (itm.gametime) {
+		timer = tgt;
+	} else {
+		timer = t;
+	};
+	
     MEM_Label(0);
-    if(t >= itm.next) {
+    if(timer >= itm.next) {
 		if (itm.hasData) {
 			itm.data;
 		};
@@ -154,6 +194,7 @@ func int FrameFunctions(var int hndl) {
             MEM_Goto(0);
         };
     };
+
 
     return rContinue;
 };

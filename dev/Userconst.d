@@ -91,6 +91,11 @@ const int BLOODSPLAT_DAM = 7;  // Schadensmultiplikator bzgl. der Texturgröße ( 
 const string Cursor_Texture   = "CURSOR.TGA"; // Genutzte Textur, LeGo stellt eine "CURSOR.TGA" bereit
 
 //========================================
+// Buffs
+//========================================
+const int Buffs_DisplayForHero = 1;
+
+//========================================
 // Interface
 //========================================
 const string Print_LineSeperator = "~"; // Sollte man lieber nicht ändern

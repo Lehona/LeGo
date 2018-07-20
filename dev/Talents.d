@@ -66,7 +66,7 @@ func void Npc_FindByID_sub(var int node) {
 };
 
 func int Npc_FindByID(var int ID) { // GetByID would probably be too similar to GetID
-    ID_NpcPtr = -1;
+    ID_NpcPtr = 0;
     ID_Target = ID;
     
 	if (MEM_World.voblist_npcs) {
