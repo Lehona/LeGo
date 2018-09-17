@@ -39,7 +39,7 @@ func void TAL_SetValue(var c_npc npc, var int talent, var int value) {
 func int TAL_GetValue(var c_npc npc, var int talent) {
 	if (!Hlp_IsValidNpc(npc)) { return -1; };
 	if (!npc.aivar[AIV_TALENT]) {
-		npc.aivar[AIV_TALENT] = _TAL_CreateArray();
+		return 0;
 	};
 	_TAL_CheckSize(npc.aivar[AIV_TALENT]);
 	MEM_ArrayRead(getPtr(npc.aivar[AIV_TALENT]), talent);
