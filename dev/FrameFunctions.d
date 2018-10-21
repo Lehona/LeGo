@@ -41,7 +41,7 @@ func void FFItem_Unarchiver(var FFItem this) {
 		this.data = PM_Load("data");
 		this.hasData = 1;
 	};
-	
+
 	if (PM_Exists("gametime")) {
 		this.gametime = PM_Load("gametime");
 	};
@@ -70,19 +70,19 @@ func void _FF_Create(var func function, var int delay, var int cycles, var int h
 };
 
 func void FF_ApplyExtData(var func function, var int delay, var int cycles, var int data) {
-	_FF_Create(function, delay, cycles, true, data, false); 
+	_FF_Create(function, delay, cycles, true, data, false);
 };
 
 func void FF_ApplyExt(var func function, var int delay, var int cycles) {
-	_FF_Create(function, delay, cycles, false, 0, false); 
+	_FF_Create(function, delay, cycles, false, 0, false);
 };
 
 func void FF_ApplyExtDataGT(var func function, var int delay, var int cycles, var int data) {
-	_FF_Create(function, delay, cycles, true, data, true); 
+	_FF_Create(function, delay, cycles, true, data, true);
 };
 
 func void FF_ApplyExtGT(var func function, var int delay, var int cycles) {
-	_FF_Create(function, delay, cycles, false, 0, true); 
+	_FF_Create(function, delay, cycles, false, 0, true);
 };
 
 //========================================
@@ -127,7 +127,7 @@ func void FF_ApplyOnceExtGT(var func function, var int delay, var int cycles) {
     if(FF_Active(function)) {
         return;
     };
-    FF_ApplyExt(function, delay, cycles);
+    FF_ApplyExtGT(function, delay, cycles);
 };
 
 //========================================
@@ -175,7 +175,7 @@ func int FrameFunctions(var int hndl) {
 	} else {
 		timer = t;
 	};
-	
+
     MEM_Label(0);
     if(timer >= itm.next) {
 		if (itm.hasData) {
@@ -218,7 +218,7 @@ func int _FF_RemoveLData(var int hndl)
     {
         return continue;
     };
-    
+
     var FFItem itm; itm = get(hndl);
     if(itm.data != _FF_Data)
     {
@@ -249,7 +249,7 @@ func int _FF_ActiveData(var int hndl)
     {
         return continue;
     };
-    
+
     var FFItem itm; itm = get(hndl);
     if(itm.data != _FF_Data)
     {
@@ -285,7 +285,7 @@ func void FF_ApplyOnceExtData(var func function, var int delay, var int cycles, 
     {
         return;
     };
-    
+
     FF_ApplyExtData(function, delay, cycles, data);
 };
 
