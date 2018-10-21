@@ -34,8 +34,8 @@ func void HT_Array_Unarchiver(var HT_Array this) {
 	end;
 };
 
-func void HT_Array_delete(var int hndl) {
-	_HT_Destroy(getPtr(hndl));
+func void HT_Array_delete(var HT_Array ht) {
+	_HT_Destroy(_@(ht));
 };
 
 func int HT_CreateSized(var int size) {
