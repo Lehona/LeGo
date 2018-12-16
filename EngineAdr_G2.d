@@ -1,6 +1,3 @@
-var int YouHaveToDeleteOneOfTheEngineAdrFilesInTheLeGoDirectory;
-
-
 /***********************************\
        ADRESSEN DER ENGINECALLS
 \***********************************/
