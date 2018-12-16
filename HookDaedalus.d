@@ -8,27 +8,65 @@
 const int _DH_htbl = 0;
 
 //========================================
+// Check if function is used as hook
+//========================================
+func int IsHookD(var int funcID) {
+    if (!_DH_htbl) {
+        return FALSE;
+    };
+
+    return _HT_Has(_DH_htbl, funcID);
+};
+
+//========================================
 // Daedalus function hook
 //========================================
-func void HookDaedalusFunc(var func hooked, var func hooker) {
+func void HookDaedalusFunc(var func hooked, var func hook) {
     // Working with symbol indices is save here, because they are not stored in game saves
-    var int hookeeID; hookeeID = MEM_GetFuncID(hooked);
-    var int hookerID; hookerID = MEM_GetFuncID(hooker);
+    var int hookID; hookID = MEM_GetFuncID(hook);
 
     // Create hash table persistent only over current session (not stored in game saves)
     if (!_DH_htbl) {
         _DH_htbl = _HT_Create();
     };
 
-    /* There cannot be a warning/error, because of reinitialization. Also it cannot be checked whether a different
-    function was hooked before, because symb.content will have been overwritten with symb_er.content itself.
-    Responsibility lies with the caller! */
-    if (!_HT_Has(_DH_htbl, hookerID)) {
-        var zCPar_Symbol symb; symb = _^(MEM_GetSymbolByIndex(hookeeID));
-        var zCPar_Symbol symb_er; symb_er = _^(MEM_GetSymbolByIndex(hookerID));
+    // Handle reinitialization: Prevent re-hooking with already used hook function
+    // A function can be hooked any number of times - but each function can only be used once to hook
+    if (!IsHookD(hookID)) {
+        var int targetPtr; targetPtr = MEM_GetFuncPtr(hooked);
+        var int targetOff; targetOff = MEM_GetFuncOffset(hooked);
 
-        _HT_Insert(_DH_htbl, symb.content, hookerID);
-        symb.content = symb_er.content;
+        // Read code stack at beginning of hooked function
+        var int numBytes; numBytes = 0;
+        while(numBytes < 5);
+            var int tok; tok = MEM_ReadByte(targetPtr+numBytes);
+            if (tok == zPAR_TOK_CALL)
+            || (tok == zPAR_TOK_CALLEXTERN)
+            || (tok == zPAR_TOK_PUSHINT)
+            || (tok == zPAR_TOK_PUSHVAR)
+            || (tok == zPAR_TOK_PUSHINST)
+            || (tok == zPAR_TOK_JUMP)
+            || (tok == zPAR_TOK_JUMPF)
+            || (tok == zPAR_TOK_SETINSTANCE) {
+                numBytes += 5;
+            } else {
+                numBytes += 1;
+                if (tok == zPAR_TOK_RET) && (numBytes < 5) {
+                    MEM_Error("HOOKDAEDALUS: Function too short to be hooked!");
+                    return;
+                };
+            };
+        end;
+
+        // Secure byte code to be overwritten by jump
+        var int codeToRun; codeToRun = MEM_Alloc(numBytes+5);
+        MEM_CopyBytes(targetPtr, codeToRun, numBytes);
+        MEM_WriteByte(codeToRun+numBytes, zPAR_TOK_JUMP);
+        MEM_WriteInt(codeToRun+numBytes+1, targetOff+numBytes);
+
+        // Store original byte code + jump back
+        _HT_Insert(_DH_htbl, codeToRun, hookID);
+        MEM_ReplaceFunc(hooked, hook);
     };
 };
 
@@ -39,21 +77,21 @@ func void ContinueCall() {
     var int fromID; fromID = MEM_GetFuncIDByOffset(MEM_GetCallerStackPos());
 
     // Consistency check
-    if (!_HT_Has(_DH_htbl, fromID)) {
+    if (!IsHookD(fromID)) {
         MEM_Error("HOOKDAEDALUS: Invalid use of ContinueCall.");
         return;
     };
 
     var int to; to = _HT_Get(_DH_htbl, fromID);
-    MEM_CallByOffset(to);
+    MEM_CallByPtr(to);
 };
 
-func void passArgumentI(var int i) {
+func void PassArgumentI(var int i) {
     MEM_PushIntParam(i);
 };
-func void passArgumentS(var string s) {
+func void PassArgumentS(var string s) {
     MEM_PushStringParam(s);
 };
-func void passArgumentN(var int n) {
+func void PassArgumentN(var int n) {
     MEM_PushInstParam(n);
 };
