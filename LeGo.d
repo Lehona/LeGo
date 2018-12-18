@@ -157,12 +157,6 @@ func void LeGo_InitAlways(var int f) {
         _Render_RestorePointer();
         GameState_AddListener(_Render_RestorePointer_Listener);
     };
-
-    if(f & LeGo_Interface) {
-        // TODO: Check whether this is working!
-        // TODO: Check whether log entries are invisible sometimes
-        Print_fixPS();
-    };
 };
 
 //========================================
@@ -220,6 +214,9 @@ func void LeGo_InitGamestart(var int f) {
         _Render_Init();
     };
 
+    if(f & LeGo_Interface) {
+        Print_fixPS();
+    };
 };
 
 //========================================
