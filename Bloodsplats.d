@@ -6,6 +6,7 @@
 // [intern] Variablen
 //========================================
 var int Hero_LastHP; //Wird in Bloodsplats_Loop gesetzt.
+var int _B_HeroDamagePercFunc;
 
 //========================================
 // Spritzer auf den Bildschirm
@@ -80,6 +81,24 @@ func void Bloodsplats_Rage() {
 };
 
 //========================================
+// oCNpc::GetPerceptionFunc wrapper
+//========================================
+func int Npc_GetPercFunc(var C_Npc npc, var int type) {
+    var int npcPtr; npcPtr = _@(npc);
+
+    const int call = 0;
+    if (CALL_Begin(call)) {
+        CALL_IntParam(_@(type));
+        CALL_PutRetValTo(_@(funcID));
+        CALL__thiscall(_@(npcPtr), oCNpc__GetPerceptionFunc);
+        call = CALL_End();
+    };
+
+    var int funcID;
+    return +funcID;
+};
+
+//========================================
 // [intern] Perception für den Helden
 //========================================
 func void _B_HeroDamage() {
@@ -95,12 +114,22 @@ func void _B_HeroDamage() {
 			Wld_PlayEffect("HERO_HURT", hero, hero, 0, 0, 0, 0);
 		};
     };
+
+    if (_B_HeroDamagePercFunc > -1) {
+        MEM_CallByID(_B_HeroDamagePercFunc);
+    };
 };
 
 //========================================
 // [intern] FF Loop
 //========================================
 func void _Bloodsplats_Loop() {
+    // Preserve possible previous function
+    var int funcID; funcID = Npc_GetPercFunc(hero, PERC_ASSESSDAMAGE);
+    if (funcID != MEM_GetFuncID(_B_HeroDamage)) {
+        _B_HeroDamagePercFunc = funcID;
+    };
+
     // PC_Hero is empty on level change, use hero instead
     Npc_PercEnable(hero, PERC_ASSESSDAMAGE, _B_HeroDamage); //Deaktiviert sich manchmal grundlos, deshalb lieber reinkloppen
     Hero_LastHP = hero.attribute[ATR_Hitpoints];

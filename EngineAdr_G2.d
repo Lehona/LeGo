@@ -40,6 +40,7 @@ const int oCNpc__UnequipItem                        = 7546560; //0x7326C0 Hook: 
 const int oCNpc__UseItem                            = 7584784; //0x73BC10
 const int oCNpc__StartDialogAniX                    = 7700155; // 0x757EBB
 const int oCNpc__StartDialogAniY                    = 7700162; // 0x757EC2
+const int oCNpc__GetPerceptionFunc                  = 7726080; //0x75E400
 const int oCSavegameManager__SetAndWriteSavegame    = 4428037; //0x439105 Hook: Saves
 const int oCSavegameManager__SetAndWriteSavegame_bp_offset = 60;
 const int parser                                    =11223232; //0xAB40C0

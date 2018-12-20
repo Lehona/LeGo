@@ -41,6 +41,7 @@ const int oCNpc__UnequipItem                        = 6880192; // Hook: Shields
 //const int oCNpc__UseItem                            = 7584784; //0x73BC10
 const int oCNpc__StartDialogAniX                    = 7021070; //
 const int oCNpc__StartDialogAniY                    = 7021077; //
+const int oCNpc__GetPerceptionFunc                  = 7043808; //0x6B7AE0
 const int oCSavegameManager__SetAndWriteSavegame    = 4414389; // Hook: Saves
 const int oCSavegameManager__SetAndWriteSavegame_bp_offset = 60;
 const int parser                                    = ContentParserAddress; //
