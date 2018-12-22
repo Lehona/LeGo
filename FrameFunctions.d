@@ -182,6 +182,13 @@ func int FrameFunctions(var int hndl) {
 			itm.data;
 		};
         MEM_CallByPtr(itm.fncID);
+
+        // If a FrameFunction removes itself while its delay is small enough s.t. MEM_Goto(0) would be called below,
+        // the game crashes, as MEM_CallByID calls an invalid symbol address.
+        if (!Hlp_IsValidHandle(hndl)) {
+            return rContinue;
+        };
+
         if(itm.cycles != -1) {
             itm.cycles -= 1;
             if(itm.cycles <= 0) {
