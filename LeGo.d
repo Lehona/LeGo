@@ -153,7 +153,7 @@ func void LeGo_InitAlways(var int f) {
         };
 
         if(f & LeGo_Anim8) {
-            FF_Apply(_Anim8_FFLoop);
+            FF_ApplyGT(_Anim8_FFLoop);
         };
 
         if(f & LeGo_Cursor) {
