@@ -153,6 +153,19 @@ func int _FF_RemoveL(var int hndl) {
     return break;
 };
 
+func void FF_RemoveAll(var func function) {
+    _FF_Symbol = MEM_GetFuncPtr(function);
+    foreachHndl(FFItem@, _FF_RemoveAllL);
+};
+
+func int _FF_RemoveAllL(var int hndl) {
+    if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol) {
+        return continue;
+    };
+    delete(hndl);
+    return continue;
+};
+
 //========================================
 // [intern] Enginehook
 //========================================
