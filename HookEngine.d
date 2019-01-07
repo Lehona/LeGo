@@ -236,6 +236,10 @@ func void HookEngineF(var int address, var int oldInstr, var func function) {
 func void HookEngine(var int address, var int oldInstr, var string function) {
     HookEngineI(address, oldInstr, MEM_FindParserSymbol(STR_Upper(function)));
 };
+// Wrapper function for naming consistency
+func void HookEngineS(var int address, var int oldInstr, var string function) {
+    HookEngine(address, oldInstr, function);
+};
 
 
 //========================================

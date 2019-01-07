@@ -83,6 +83,10 @@ func void HookDaedalusFuncS(var string hookedName, var string hookName) {
     MEM_PushIntParam(MEM_FindParserSymbol(STR_Upper(hookName)));
     MEM_Call(HookDaedalusFuncI);
 };
+// Wrapper function for naming consistency
+func void HookDaedalusFuncF(var func hooked, var func hook) {
+    HookDaedalusFunc(hooked, hook);
+};
 
 //========================================
 // Relay functions
