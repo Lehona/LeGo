@@ -69,6 +69,20 @@ func void HookDaedalusFunc(var func hooked, var func hook) {
         MEM_ReplaceFunc(hooked, hook);
     };
 };
+func void HookDaedalusFuncI(var int hookedID, var int hookID) {
+    if (hookedID == -1) || (hookID == -1) {
+        MEM_Warn("HOOKDAEDALUS: Invalid function symbol(s)!");
+        return;
+    };
+    MEM_PushIntParam(hookedID);
+    MEM_PushIntParam(hookID);
+    MEM_Call(HookDaedalusFunc);
+};
+func void HookDaedalusFuncS(var string hookedName, var string hookName) {
+    MEM_PushIntParam(MEM_FindParserSymbol(STR_Upper(hookedName)));
+    MEM_PushIntParam(MEM_FindParserSymbol(STR_Upper(hookName)));
+    MEM_Call(HookDaedalusFuncI);
+};
 
 //========================================
 // Relay functions
