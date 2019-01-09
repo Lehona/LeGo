@@ -159,6 +159,21 @@ func void _CC_Hook() {
     end;
 };
 
+//=======================================
+// Simple LeGo console command
+//=======================================
+func string CC_LeGo(var string _) {
+    var int s; s = SB_New();
+    SB(LeGO_Version);
+    SBc(10); SBc(13);
+    _LeGo_Flags;
+    MEM_Call(LeGo_FlagsHR);
+    SB(MEM_PopStringResult());
+    var string ret; ret = SB_ToString();
+    SB_Destroy();
+    return ret;
+};
+
 //========================================
 // [intern] Old game save compatibility
 //========================================

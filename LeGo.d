@@ -13,7 +13,7 @@
 |*                              auf Ikarus                               *|
 |*                                                                       *|
 \*************************************************************************/
-const string LeGo_Version = "LeGo 2.5.0";
+const string LeGo_Version = "LeGo 2.5.1";
 
 const int LeGo_PrintS          = 1<<0;  // Interface.d
 const int LeGo_HookEngine      = 1<<1;  // HookEngine.d
@@ -79,6 +79,26 @@ func void LeGo_InitFlags(var int f) {
 };
 
 //========================================
+// LeGo flags in human-readable format
+//========================================
+func string LeGo_FlagsHR(var int flags) {
+    var int symbOnset; symbOnset = MEM_GetSymbolIndex("LEGO_VERSION") + 1;
+    if ((!symbOnset) || (!(flags & (LeGo_Draw3D * 2 - 1)))) {
+        return "";
+    };
+
+    var string ret; ret = "";
+    repeat(i, 32); var int i;
+        if (flags & (1 << i)) {
+            var string name; name = MEM_ReadString(MEM_GetSymbolByIndex(symbOnset + i));
+            name = STR_SubStr(name, 5, STR_Len(name)-5); // Cut off 'LEGO_'
+            ret = ConcatStrings(ConcatStrings(ret, name), " ");
+        };
+    end;
+    return STR_Prefix(ret, STR_Len(ret)-1);
+};
+
+//========================================
 // [intern] Immer
 //========================================
 func void LeGo_InitAlways(var int f) {
@@ -99,7 +119,7 @@ func void LeGo_InitAlways(var int f) {
 
             // update gamestate status at the first call of _LeGo_IsLevelChange
             // because it is only called once for consecutive level changes
-            if(_LeGo_Flags & LeGo_Gamestate && (_LeGo_LevelChangeCounter == 1)) {
+            if((f & LeGo_Gamestate) && (_LeGo_LevelChangeCounter == 1)) {
                 _Gamestate_Init(Gamestate_WorldChange);
             };
         };
@@ -107,6 +127,7 @@ func void LeGo_InitAlways(var int f) {
 
     if(f & LeGo_Timer) {
         _Timer_Init();
+		_TimerGT_Init();
     };
 
     if(_LeGo_Loaded && !_LeGo_IsLevelChange()) {
@@ -132,7 +153,7 @@ func void LeGo_InitAlways(var int f) {
         };
 
         if(f & LeGo_Anim8) {
-            FF_Apply(_Anim8_FFLoop);
+            FF_ApplyGT(_Anim8_FFLoop);
         };
 
         if(f & LeGo_Cursor) {
@@ -155,12 +176,6 @@ func void LeGo_InitAlways(var int f) {
     if (f & LeGo_Render) {
         _Render_RestorePointer();
         GameState_AddListener(_Render_RestorePointer_Listener);
-    };
-
-    if(f & LeGo_Interface) {
-        // TODO: Check whether this is working!
-        // TODO: Check whether log entries are invisible sometimes
-        Print_fixPS();
     };
 };
 
@@ -198,12 +213,14 @@ func void LeGo_InitGamestart(var int f) {
 
     if(f & LeGo_ConsoleCommands) {
         HookEngineF(zCConsoleOutputOverwriteAddr, 9, _CC_HOOK);
+        CC_Register(CC_LeGo, "LeGo", "Show information about LeGo");
     };
 
     if(f & LeGo_Saves) {
         HookEngineF(oCGame__changeLevel, 7, _LeGo_ChangeLevelHookBegin);
         HookEngineF(oCGame__changeLevelEnd, 7, _LeGo_ChangeLevelHookEnd);
         HookEngineF(oCSavegameManager__SetAndWriteSavegame, 5, _BW_SAVEGAME);
+        HookEngineF(CGameManager__Read_Savegame, 7, _BR_SetSelectedSlot);
     };
 
     if(f & LeGo_Draw3D) {
@@ -218,6 +235,9 @@ func void LeGo_InitGamestart(var int f) {
         _Render_Init();
     };
 
+    if(f & LeGo_Interface) {
+        Print_fixPS();
+    };
 };
 
 //========================================
@@ -240,6 +260,7 @@ func void LeGo_Init(var int flags) {
     MEM_Info(ConcatStrings(LeGo_Version, " wird initialisiert."));
 
     LeGo_InitFlags(flags);
+    MEM_Info(ConcatStrings("Flags: ", LeGo_FlagsHR(_LeGo_Flags)));
     if(!_LeGo_Init) {
         LeGo_InitGamestart(_LeGo_Flags);
     };
@@ -247,7 +268,7 @@ func void LeGo_Init(var int flags) {
     _LeGo_Init = 1;
 
     // For Gothic 1 mark _LeGo_Loaded with -1 to prevent second call during new game
-    if (GOTHIC_BASE_VERSION == 1) && (!_LeGo_Loaded) {
+    if (GOTHIC_BASE_VERSION == 1) && (!_LeGo_Loaded) && (!Hlp_IsValidNpc(hero)) {
         _LeGo_Loaded = -1;
     } else {
         _LeGo_Loaded = 1;

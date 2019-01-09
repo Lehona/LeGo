@@ -9,6 +9,7 @@
 class A8Head {
     var int value;
     var int fnc;
+    var int dfnc;
     var int flt;
     var int data;
     var int dif;
@@ -21,6 +22,7 @@ class A8Head {
 func void A8Head_Archiver(var A8Head this) {
     PM_SaveInt("value", this.value);
     if(this.fnc) { PM_SaveFuncPtr("loop",  this.fnc);  };
+    if(this.dfnc){ PM_SaveFuncPtr("del",   this.dfnc);  };
     if(this.flt) { PM_SaveFloat  ("float", this.flt);  };
     if(this.data){ PM_SaveInt    ("data",  this.data); };
     if(this.dif) { PM_SaveInt    ("dif",   this.dif);  };
@@ -31,11 +33,18 @@ func void A8Head_Archiver(var A8Head this) {
 func void A8Head_UnArchiver(var A8Head this) {
     this.value = PM_Load("value");
     if(PM_Exists("loop"))  { this.fnc  = PM_LoadFuncPtr("loop"); };
+    if(PM_Exists("del"))   { this.dfnc = PM_LoadFuncPtr("del");  };
     if(PM_Exists("float")) { this.flt  = PM_LoadFloat("float");  };
     if(PM_Exists("data"))  { this.data = PM_LoadInt("data");     };
     if(PM_Exists("dif"))   { this.dif  = PM_LoadInt("dif");      };
     if(PM_Exists("ddif"))  { this.ddif = PM_LoadInt("ddif");     };
     this.queue = PM_Load("queue");
+};
+
+func void A8Head_Delete(var A8Head this) {
+    if (this.dfnc) {
+        MEM_CallByPtr(this.dfnc);
+    };
 };
 
 func void A8Head_Empty(var A8Head h) {
@@ -44,7 +53,7 @@ func void A8Head_Empty(var A8Head h) {
     List_Destroy(h.queue);
     h.queue = 0;
 };
-	
+
 func void A8Head_EmptySub(var int node) {
     if(Hlp_IsValidHandle(MEM_ReadInt(node))) {
         delete(MEM_ReadInt(node));
@@ -301,6 +310,17 @@ func void Anim8_RemoveDataIfEmpty(var int hndl, var int on) {
     h.ddif = !!on;
 };
 
+//========================================
+// Registriere eine on-remove Funktion
+//========================================
+func void Anim8_CallOnRemove(var int hndl, var func dfnc) {
+    if (!Hlp_IsValidHandle(hndl)) {
+        return;
+    };
+    var A8Head h; h = get(hndl);
+    h.dfnc = MEM_GetFuncPtr(dfnc);
+};
+
 
 //========================================
 // Ist das Objekt leer?
@@ -311,7 +331,7 @@ func int Anim8_Empty(var int hndl) {
     };
     var A8Head h; h = get(hndl);
     if(!h.queue) { return 1; };
-    return List_HasLength(h.queue, 2);
+    return !List_HasLength(h.queue, 2);
 };
 
 //========================================

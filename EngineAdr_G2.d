@@ -1,6 +1,3 @@
-var int YouHaveToDeleteOneOfTheEngineAdrFilesInTheLeGoDirectory;
-
-
 /***********************************\
        ADRESSEN DER ENGINECALLS
 \***********************************/
@@ -12,7 +9,7 @@ const int AIV_TALENT_INDEX = 89;
 // Alle (?) genutzen Engineadressen
 //========================================
 const int CGameManager__ApplySomeSettings           = 4355760; //0x4276B0
-const int CGameManager__Read_Savegame               = 4366438; //0x42A066
+const int CGameManager__Read_Savegame               = 4366400; //0x42A040 Hook: Saves
 const int CloseHandle                               = 8079190; //0x7B4756
 const int CreateFileA                               = 8079286; //0x7B47B6
 const int Cursor_Ptr                                = 9246300; //0x8D165C
@@ -43,6 +40,7 @@ const int oCNpc__UnequipItem                        = 7546560; //0x7326C0 Hook: 
 const int oCNpc__UseItem                            = 7584784; //0x73BC10
 const int oCNpc__StartDialogAniX                    = 7700155; // 0x757EBB
 const int oCNpc__StartDialogAniY                    = 7700162; // 0x757EC2
+const int oCNpc__GetPerceptionFunc                  = 7726080; //0x75E400
 const int oCSavegameManager__SetAndWriteSavegame    = 4428037; //0x439105 Hook: Saves
 const int oCSavegameManager__SetAndWriteSavegame_bp_offset = 60;
 const int parser                                    =11223232; //0xAB40C0
@@ -81,6 +79,14 @@ const int zCView__SetFontColor                      = 8034576; //0x7A9910
 const int zCView__SetSize                           = 8026016; //0x7A77A0
 const int zCView__zCView                            = 8017664; //0x7A5700
 const int zCView_Top                                = 8021904; //007A6790
+const int zCView__PrintTimed_color                  = 8027512; //0x7A7D78 Hook: Interface
+const int zCView__PrintTimedCX_color                = 8027837; //0x7A7EBD Hook: Interface
+const int zCView__PrintTimedCY_color                = 8028042; //0x7A7F8A Hook: Interface
+const int zCView__PrintTimedCXY_color               = 8028406; //0x7A80F6 Hook: Interface
+const int zCView__PrintTimed_colored                = 8027536; //0x7A7D90 Hook: Interface
+const int zCView__PrintTimedCX_colored              = 8027857; //0x7A7ED1 Hook: Interface
+const int zCView__PrintTimedCY_colored              = 8028058; //0x7A7F9A Hook: Interface
+const int zCView__PrintTimedCXY_colored             = 8028422; //0x7A8106 Hook: Interface
 const int zCWorld__zCWorld                          = 6421056; //0x61FA40
 const int zFontMan                                  =11221460; //0xAB39D4
 const int zParser__CallFunc                         = 7940592; //0x7929F0
@@ -100,7 +106,8 @@ const int menu_savegame_slot_offset                 = 3276;
 const int sub_4D3D90_X                              = 5062907; //0x4D40FB Hook: Cursor
 const int zCConsole__Register                       = 7875296; //0x782AE0
 const int zCConsoleOutputOverwriteAddr              = 7142904; //0x6CFDF8 Hook: ConsoleCommands
-const int zCOption__ParmValue                       = 4586784; //0X45FD20 // G1 
+const int zCOption__ParmValue                       = 4608896; //0x465380
+const int zCOptions_dir_string_offset               = 124;     //0x7C     // The class zCOption is defined incorrectly in Ikarus for Gothic1!
 const int zCWorld__AdvanceClock                     = 6447328; //0x6260E0 Hook: Draw3D
 const int zlineCache                                = 9257720; //0x8D42F8
 const int zCLineCache__Line3D                       = 5289040; //0x50B450

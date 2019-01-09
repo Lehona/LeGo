@@ -84,19 +84,11 @@ func void _Hook(var int evtHAddr, // ESP-36
     // Iterate over all registered event handler functions
     var zCArray a; a = _^(evtHAddr);
     repeat(i, a.numInArray); var int i;
-        // Remember data stack pointer
-        var int sPtr; sPtr = MEM_Parser.datastack_sptr;
-
-        // Add a stack buffer for naughty functions that pop off of the data stack illegally
-        repeat(j, 10); var int j;
-            MEM_PushIntParam(0);
-        end;
+        // Clear data stack in-between function calls
+        MEM_Parser.datastack_sptr = 0;
 
         // Call the function
         MEM_CallByID(MEM_ReadIntArray(a.array, i));
-
-        // Reset the data stack pointer (remove buffer and anything left on the stack)
-        MEM_Parser.datastack_sptr = sPtr;
 
         // Restore global instances in between function calls
         if (!HookOverwriteInstances) {
@@ -243,6 +235,10 @@ func void HookEngineF(var int address, var int oldInstr, var func function) {
 };
 func void HookEngine(var int address, var int oldInstr, var string function) {
     HookEngineI(address, oldInstr, MEM_FindParserSymbol(STR_Upper(function)));
+};
+// Wrapper function for naming consistency
+func void HookEngineS(var int address, var int oldInstr, var string function) {
+    HookEngine(address, oldInstr, function);
 };
 
 

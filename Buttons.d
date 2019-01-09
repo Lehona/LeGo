@@ -205,10 +205,41 @@ func int Button_GetState(var int hndl) {
 	var _Button btn; btn = get(hndl);
 	return btn.state+0; // Verschachteln
 };
+
 func void Button_Move(var int hndl, var int nposx, var int nposy) {
 	var _Button btn; btn = get(hndl);
-	
+	var int width; width = btn.posx2 - btn.posx;
+	var int height; height = btn.posy2 - btn.posy;
 	View_MovePxl(btn.view, nposx, nposy);
+	
+	btn.posx += Print_ToVirtual(nposx, PS_X);
+	btn.posx2 = btn.posx + width;
+	
+	btn.posy += Print_ToVirtual(nposy, PS_Y);
+	btn.posy2 = btn.posy + height;
+};
+
+// Sadly I chose Pxl as the "default" Move. I regret that.
+func void Button_MoveVrt(var int hndl, var int nvposx, var int nvposy) {
+	Button_Move(hndl, Print_ToPixel(nvposx, PS_X), Print_ToPixel(nvposy, PS_Y));
+};
+
+func void Button_MoveTo(var int hndl, var int nposx, var int nposy) {
+	var _Button btn; btn = get(hndl);
+	var int width; width = btn.posx2 - btn.posx;
+	var int height; height = btn.posy2 - btn.posy;
+	View_MoveToPxl(btn.view, nposx, nposy);
+	
+	btn.posx = Print_ToVirtual(nposx, PS_X);
+	btn.posx2 = btn.posx + width;
+	
+	btn.posy = Print_ToVirtual(nposy, PS_Y);
+	btn.posy2 = btn.posy + height;
+};
+
+// Sadly I chose Pxl as the "default" MoveTo. I regret that.
+func void Button_MoveToVrt(var int hndl, var int nvposx, var int nvposy) {
+	Button_MoveTo(hndl, Print_ToPixel(nvposx, PS_X), Print_ToPixel(nvposy, PS_Y));
 };
 
 func int Button_GetViewHandle(var int hndl) {

@@ -2,7 +2,7 @@
 // LeGo //
 //////////
 
-EngineAdr*.d
+EngineAdr_G2.d
 Timer.d
 Userconst.d
 ItemHelper.d
@@ -11,6 +11,7 @@ Locals.d
 BinaryMachines.d
 _Hashtable.d
 HookEngine.d
+HookDaedalus.d
 PermMem.d
 List.d
 PermMem_Structs.d

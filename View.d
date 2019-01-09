@@ -275,10 +275,11 @@ func void ViewPtr_Move(var int ptr, var int x, var int y) {
     CALL_IntParam(y);
     CALL_IntParam(x);
     CALL__thiscall(ptr, zCView__Move);
-
+	
     v.pposx = Print_ToPixel(v.vposx, PS_X);
     v.pposy = Print_ToPixel(v.vposy, PS_Y);
 };
+
 func void View_Move(var int hndl, var int x, var int y) {
     ViewPtr_Move(getPtr(hndl), x, y);
 };

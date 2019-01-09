@@ -120,7 +120,7 @@ func void _Print_Ratio() {
 var int Print_Screen[2];
 func void Print_GetScreenSize() {
     if (!_@(MEM_Game)) {
-        // Initialize if called during level change (e.g. by PrintScreen_Ext(), caused by log entry)
+        // Initialize if called during level change
         MEM_InitGlobalInst();
     };
     var zCView screen; screen = _^(MEM_Game._zCSession_viewport);
@@ -225,7 +225,7 @@ func void zCViewTextPrint_UnArchiver(var zCViewText this) {
 
 func int Print_Ext(var int x, var int y, var string text, var string font, var int color, var int time) {
     if (!_@(MEM_Game)) || (!_@(MEM_StackPos)) {
-        // Initialize if called during level change (e.g. by PrintScreen_Ext(), caused by log entry)
+        // Initialize if called during level change
         MEM_InitLabels();
         MEM_InitGlobalInst();
     };
@@ -424,66 +424,29 @@ func void AI_PrintS(var c_npc slf, var string txt) {
 //========================================
 // PrintScreen fixen
 //========================================
-func void PrintScreen_Ext(var string txt, var int x, var int y, var string font, var int timeSec) {
-    if(x == -1) {
-        x = (PS_VMax - Print_ToVirtual(Print_GetStringWidth(txt, font), PS_X)) / 2;
-    }
-    else {
-        x = Print_ToVirtual(x, 100);
-    };
-    if(y == -1) {
-        y = (PS_VMax - Print_ToVirtual(Print_GetFontHeight(font), PS_Y)) / 2;
-    }
-    else {
-        y = Print_ToVirtual(y, 100);
-    };
-    Print_Ext(x, y, txt, font, COL_White, timeSec * 1000);
-};
-
-class PS_Param {
-    var string txt;
-    var int x;
-    var int y;
-    var string font;
-    var int timesec;
-}; instance PS_Param@(PS_Param);
-
-func void AI_PrintScreen_Execute(var int h) {
-    var PS_Param p; p = get(h);
-    PrintScreen_Ext(p.txt, p.x, p.y, p.font, p.timeSec);
-    delete(h);
-};
-
-func void AI_PrintScreen_Ext(var string txt, var int x, var int y, var string font, var int timeSec) {
-    var int h; h = New(PS_Param@);
-	PS_Param@ = get(h);
-    PS_Param@.txt = txt;
-    PS_Param@.x = x;
-    PS_Param@.y = y;
-    PS_Param@.font = font;
-    PS_Param@.timeSec = timeSec;
-
-    AI_Function_I(hero, AI_PrintScreen_Execute, h);
-};
 func void Print_FixPS() {
-    var int PS_Ext; PS_Ext = MEM_GetFuncOffset(PrintScreen_Ext);
-    var zCPar_Symbol PS; PS = _^(MEM_ReadIntArray(contentSymbolTableAddress, MEM_GetFuncID(PrintScreen)));
+    /* All zCView::PrintTimed* functions that are called by the externals PrintScreen and AI_PrintScreen
+     * call zCView::CreateText with the arguments "color" and "colored" set to zero/False. These are
+     * overwritten here to force white text, regardless of previous prints.
+     */
 
-    Call_Begin(0);
-        Call_IntParam(_@(PS_Ext));
-        Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
+    const int addr_color[4]   = { zCView__PrintTimed_color,     zCView__PrintTimedCX_color,
+                                  zCView__PrintTimedCY_color,   zCView__PrintTimedCXY_color   };
+    const int addr_colored[4] = { zCView__PrintTimed_colored,   zCView__PrintTimedCX_colored,
+                                  zCView__PrintTimedCY_colored, zCView__PrintTimedCXY_colored };
+    const int offset[4]       = { 28, 64, 32, 60 }; // Function stack offsets for value of "color"
 
-    PS.content = Call_Close();
+    repeat(i, 4); var int i;
+        // Set argument "color" to white
+        var int addr; addr = MEM_ReadStatArr(addr_color, i);
+        MemoryProtectionOverride(addr, 8);
+        MEM_WriteInt(addr, 2376903); // mov DWORD [esp+offset], -1
+        MEM_WriteByte(addr+3, MEM_ReadStatArr(offset, i));
+        MEM_WriteInt(addr+4, -1);
 
-	if (MEMINT_SwitchG1G2(false, true)) {
-		var int AI_PS_Ext; AI_PS_Ext = MEM_GetFuncOffset(AI_PrintScreen_Ext);
-		PS = _^(MEM_GetParserSymbol ("AI_PRINTSCREEN"));
-
-		Call_Begin(0);
-			Call_IntParam(_@(AI_PS_Ext));
-			Call__thiscall(_@(ContentParserAddress), zCParser__DoStack);
-
-		PS.content = Call_Close();
-	};
+        // Set argument "colored" to true
+        addr = MEM_ReadStatArr(addr_colored, i);
+        MemoryProtectionOverride(addr, 4);
+        MEM_WriteInt(addr, 23761040); // nop; nop; push 1
+    end;
 };
-
