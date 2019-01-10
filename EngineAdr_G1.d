@@ -36,7 +36,7 @@ const int oCNpc__EV_PlayAni                         = 7020080; // Hook: AI_Funct
 const int oCNpc__OpenInventory                      = 7057568; //0x6BB0A0 Hook: Quickslots | Hook:Inv
 const int oCNpc__OpenInventory2                    = 7057813; // 6BB195
 const int oCNpc__PutInSlot                          = 6969664; //0x6A5940 - ported
-const int oCNpc__RemoveFromSlot                     = 7643760; //0x74A270
+const int oCNpc__RemoveFromSlot                     = 6971008; //0x6A5E80
 const int oCNpc__UnequipItem                        = 6880192; // Hook: Shields
 //const int oCNpc__UseItem                            = 7584784; //0x73BC10
 const int oCNpc__StartDialogAniX                    = 7021070; //
@@ -260,7 +260,7 @@ func int oCNpc_PutInSlot(var c_npc slf, var string SlotName, var int oCVobPtr, v
 //========================================
 func void oCNpc_RemoveFromSlot(var c_npc slf, var string SlotName, var int retVal, var int SlotID) {
     CALL_IntParam(SlotID);
-    CALL_IntParam(retVal);
+    CALL_PutRetValTo(_@(retVal));
     CALL_zStringPtrParam(SlotName);
     CALL__thiscall(MEM_InstToPtr(slf), oCNpc__RemoveFromSlot);
 };
