@@ -20,6 +20,79 @@ class lCBuff {
 		// var int originID; // Who casted/created this buff?
 };
 
+func void lCBuff_Archiver(var lCBuff this) {
+	PM_SaveString("name", this.name);
+	PM_SaveInt("bufftype", this.bufftype);
+	PM_SaveInt("targetID", this.targetID);
+	PM_SaveInt("durationMS", this.durationMS);
+	PM_SaveInt("tickMS", this.tickMS);
+	PM_SaveInt("nextTickNr", this.nextTickNr);
+
+	if (this.OnApply > 0) {
+		PM_SaveFuncID("OnApply", this.OnApply);
+	};
+	if (this.OnTick > 0) {
+		PM_SaveFuncID("OnTick", this.OnTick);
+	};
+	if (this.OnRemoved > 0) {
+		PM_SaveFuncID("OnRemoved", this.OnRemoved);
+	};
+
+	PM_SaveString("buffTex", this.buffTex);
+
+	// if (this.originID > 0) {
+	// 	PM_SaveFuncID("originID", this.originID);
+	// };
+};
+
+func void lCBuff_Unarchiver(var lCBuff this) {
+	var int obj;
+	if (PM_Exists("name")) { this.name = PM_LoadString("name"); };
+	if (PM_Exists("bufftype")) { this.bufftype = PM_Load("bufftype"); };
+	if (PM_Exists("targetID")) { this.targetID = PM_Load("targetID"); };
+	if (PM_Exists("durationMS")) { this.durationMS = PM_Load("durationMS"); };
+	if (PM_Exists("tickMS")) { this.tickMS = PM_Load("tickMS"); };
+	if (PM_Exists("nextTickNr")) { this.nextTickNr = PM_Load("nextTickNr"); };
+
+	if (PM_Exists("OnApply")) {
+		obj = _PM_SearchObj("OnApply");
+		if (_PM_ObjectType(obj) == _PM_String) { // Compatibility
+			this.OnApply = PM_LoadFuncID("OnApply");
+		} else {
+			this.OnApply = PM_Load("OnApply");
+		};
+	};
+	if (PM_Exists("OnTick")) {
+		obj = _PM_SearchObj("OnTick");
+		if (_PM_ObjectType(obj) == _PM_String) {
+			this.OnTick = PM_LoadFuncID("OnTick");
+		} else {
+			this.OnTick = PM_Load("OnTick");
+		};
+	};
+	if (PM_Exists("OnRemoved")) {
+		obj = _PM_SearchObj("OnRemoved");
+		if (_PM_ObjectType(obj) == _PM_String) {
+			this.OnRemoved = PM_LoadFuncID("OnRemoved");
+		} else {
+			this.OnRemoved = PM_Load("OnRemoved");
+		};
+	};
+
+	if (PM_Exists("buffTex")) { this.buffTex = PM_LoadString("buffTex"); };
+
+	// if (PM_Exists("originID")) {
+	// 	PM_SaveFuncID("originID", this.originID);
+	// 	obj = _PM_SearchObj("originID");
+	// 	if (_PM_ObjectType(obj) == _PM_String) {
+	// 		this.originID = PM_LoadFuncID("originID");
+	// 	} else {
+	// 		this.originID = PM_Load("originID");
+	// 	};
+	// };
+};
+
+
 /* BUFF DISPLAY FOR HERO BEGINS HERE */
 
 
