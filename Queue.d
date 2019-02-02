@@ -100,7 +100,6 @@ class callbackData {
 
 instance callbackData@(callbackData);
 
-/*
 func void callbackData_Archiver(var callbackData this) {
 	PM_SaveFuncID("func", this.funcID);
 	PM_SaveInt("userData", this.userData);
@@ -108,11 +107,16 @@ func void callbackData_Archiver(var callbackData this) {
 };
 
 func void callbackData_Unarchiver(var callbackData this) {
-	this.funcID = PM_Load("func");
+	var int obj; obj = _PM_SearchObj("func");
+	if (_PM_ObjectType(obj) == _PM_String) { // Compatibility
+		this.funcID = PM_LoadFuncID("func");
+	} else {
+		this.funcID = PM_Load("func");
+	};
 	this.userData = PM_Load("userData");
 	this.hasData = PM_Load("hasData");
 };
-*/
+
 func int _CQ_CBData(var int ID, var int uData, var int hData) {
 	var int h; h = new(callbackData@);
 	var callbackData cbd; cbd = get(h);
