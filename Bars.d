@@ -192,7 +192,22 @@ func void Bar_SetAlpha(var int bar, var int alpha) {
 	v.alpha = alpha;
 };
 
+//========================================
+// Bar Texture
+//========================================
+func void Bar_SetBackTexture(var int bar, var string backTex)
+{
+    if(!Hlp_IsValidHandle(bar)) { return; };
+    var _bar b; b = get(bar);
+    View_SetTexture(b.v0, backTex);
+};
 
+func void Bar_SetBarTexture(var int bar, var string barTex)
+{
+    if(!Hlp_IsValidHandle(bar)) { return; };
+    var _bar b; b = get(bar);
+    View_SetTexture(b.v1, barTex);
+};
 
 
 
