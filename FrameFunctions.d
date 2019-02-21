@@ -196,8 +196,8 @@ func int FrameFunctions(var int hndl) {
 		};
         MEM_CallByPtr(itm.fncID);
 
-        // If a FrameFunction removes itself while its delay is small enough s.t. MEM_Goto(0) would be called below,
-        // the game crashes, as MEM_CallByID calls an invalid symbol address.
+        // If a FrameFunction removes itself while its delay is small enough s.t. MEM_Goto(0) is called below,
+        // the game crashes, because MEM_CallByPtr moves the stack pointer to an invalid position.
         if (!Hlp_IsValidHandle(hndl)) {
             return rContinue;
         };
@@ -212,6 +212,10 @@ func int FrameFunctions(var int hndl) {
         if(itm.delay) {
             itm.next += itm.delay;
             MEM_Goto(0);
+        } else {
+            // Minimally increase to prevent running during menu if PiM or GT, i.e. while timer will not increase, the
+            // above condition (timer >= itm.next) will always be satisfied.
+            itm.next = timer + 1;
         };
     };
 
