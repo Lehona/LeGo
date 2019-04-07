@@ -10,7 +10,7 @@ class lCBuff {
 		var int targetID;  // NPC that is currently affected by this buff
 		var int durationMS; // full duration until the buff runs out 
 		var int tickMS; // ms between each tick, first tick at tickMS milliseconds.
-		var int nextTickNr; // e.g. before the first tick, this will be 1
+		var int nextTickNr; // e.g. before the first tick this will be 0; OBSOLETE, remove when possible
 
 		var int OnApply; 
 		var int OnTick;
@@ -18,6 +18,10 @@ class lCBuff {
 
 		var string buffTex; // Currently only used for buffs applied on the hero
 		// var int originID; // Who casted/created this buff?
+
+		// Internal,  no need to set during instance construction
+		var int _startedTime;
+		var int _endTime; // Not rendundant with durationMS because buffs can be refreshed
 };
 
 func void lCBuff_Archiver(var lCBuff this) {
@@ -27,6 +31,8 @@ func void lCBuff_Archiver(var lCBuff this) {
 	PM_SaveInt("durationMS", this.durationMS);
 	PM_SaveInt("tickMS", this.tickMS);
 	PM_SaveInt("nextTickNr", this.nextTickNr);
+	PM_SaveInt("_startedTime", this._startedTime);
+	PM_SaveInt("_endTime", this._endTime);
 
 	if (this.OnApply > 0) {
 		PM_SaveFuncID("OnApply", this.OnApply);
@@ -53,6 +59,8 @@ func void lCBuff_Unarchiver(var lCBuff this) {
 	if (PM_Exists("durationMS")) { this.durationMS = PM_Load("durationMS"); };
 	if (PM_Exists("tickMS")) { this.tickMS = PM_Load("tickMS"); };
 	if (PM_Exists("nextTickNr")) { this.nextTickNr = PM_Load("nextTickNr"); };
+	if (PM_Exists("_startedTime")) { this._startedTime = PM_Load("_startedTime"); };
+	if (PM_Exists("_endTime")) { this._endTime = PM_Load("_endTime"); };
 
 	if (PM_Exists("OnApply")) {
 		obj = _PM_SearchObj("OnApply");
@@ -99,15 +107,21 @@ func void lCBuff_Unarchiver(var lCBuff this) {
 var int bufflist_hero; // @zCArray<@lCBuff> 
 var int bufflist_views[BUFFLIST_SIZE]; // @zCView
 
+const int BUFF_Y = 7000;
+const int BUFF_HEIGHT = 500;
+
 func void Bufflist_Init() {
 	Print_GetScreenSize();
-	var int xsize; xsize = roundf(divf(mkf(500), Print_Ratio));
+	var int xsize; xsize = roundf(divf(mkf(BUFF_HEIGHT), Print_Ratio));
 	bufflist_hero = new(zCArray@);
 	var int k; var int v;
+
 	repeat(k, BUFFLIST_SIZE);
-		v = View_Create(((100+xsize)*k),7000, (100+xsize)*k+xsize, 7500);
+		v = View_Create(((100+xsize)*k), BUFF_Y, (100+xsize)*k+xsize, BUFF_Y+BUFF_HEIGHT);
 		MEM_WriteStatArr(bufflist_views, k, v);
 	end;
+
+	FF_ApplyExtGT(_Bufflist_UpdateDurationFade, 0, -1);
 };
 
 func void Bufflist_Add(var int bh) {
@@ -119,12 +133,9 @@ func void Bufflist_Add(var int bh) {
 	View_SetTexture(v, b.buffTex);
 	View_Open(v);
 };
-
 func void Bufflist_Remove(var int bh) {
 	var zCArray arr; arr = get(bufflist_hero);
 	var int index; index = MEM_ArrayIndexOf(getPtr(bufflist_hero), bh);
-
-
 
 	if (arr.numInArray == 1 && index == 0) { 
 		View_Close(bufflist_views[0]); 
@@ -140,10 +151,41 @@ func void Bufflist_Remove(var int bh) {
 	if (index == arr.numInArray) { return; };
 
 	MEM_WriteIntArray(arr.array, index, 
-			MEM_ReadIntArray(arr.array, arr.numInArray));
-
-	
+			MEM_ReadIntArray(arr.array, arr.numInArray));	
 };
+
+
+func void _Bufflist_UpdateDurationFade() {
+	var zCArray arr; arr = get(bufflist_hero);
+
+ 	var int k;
+ 	repeat(k, arr.numInArray);
+ 		var int bl_view; bl_view = MEM_ReadStatArr(bufflist_views, k);
+
+ 		var lCBuff buff; buff = get(MEM_ReadIntArray(arr.array, k));
+
+ 		var int now; now = TimerGT(); 
+
+ 		var zCView view; view = get(bl_view);
+
+
+ 		var int timediff; timediff = buff._endTime-now;
+
+ 		if timediff < 0 {
+ 			timediff = 0;
+ 		};
+
+ 		var int xf; xf = fracf(timediff, buff.durationMS);
+
+ 		// If you don't like this, complain to GiftGrün
+ 		// 128 - 128/tan(1) * tan(2x-1)
+ 		var int new_alphaf; new_alphaf = addf(mkf(128), mulf(divf(mkf(128), tan(FLOATEINS)), tan(subf(mulf(mkf(2), xf), FLOATEINS))));
+ 		View_SetColor(bl_view, RGBA(255, 255, 255, roundf(absf(new_alphaf))));
+	end;
+};
+
+
+
 
 /* BUFF DISPLAY FOR HERO ENDS HERE */
 
@@ -203,6 +245,9 @@ func int Buff_Apply(var c_npc npc, var int buff) {
 		var lCBuff b; b = get(bh);
 
 		b.targetID = Npc_GetID(npc);
+
+		b._startedTime = TimerGT();
+		b._endTime = b._startedTime + b.durationMS;
 	
 		if (b.OnApply) {
 				bh;
