@@ -180,7 +180,15 @@ func void _Bufflist_UpdateDurationFade() {
  		// If you don't like this, complain to GiftGrün
  		// 128 - 128/tan(1) * tan(2x-1)
  		var int new_alphaf; new_alphaf = addf(mkf(128), mulf(divf(mkf(128), tan(FLOATEINS)), tan(subf(mulf(mkf(2), xf), FLOATEINS))));
- 		View_SetColor(bl_view, RGBA(255, 255, 255, roundf(absf(new_alphaf))));
+ 		var int new_alpha; new_alpha = roundf(new_alphaf);
+ 		
+ 		if new_alpha < 0 {
+ 			new_alpha = 0;
+ 		} else if new_alpha > 255 {
+ 			new_alpha = 255;
+ 		};
+
+ 		View_SetColor(bl_view, RGBA(255, 255, 255, new_alpha));
 	end;
 };
 
