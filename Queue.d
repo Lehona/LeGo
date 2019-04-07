@@ -14,7 +14,7 @@ func int Q_Create() {
 	var Queue q; q = get(h);
 	q.empty = true;
 	q.listHandle = new(zClist@);
-	return h;
+	return +h;
 };
 
 func void Q_Enqueue(var int queue, var int data) {	
@@ -35,7 +35,7 @@ func int Q_IsEmpty(var int queue) {
 		return -1;
 	};
 	var Queue Q; Q = get(queue);
-	return Q.empty;
+	return +Q.empty;
 };
 
 func int Q_Advance(var int queue) {
@@ -71,7 +71,30 @@ func int Q_Advance(var int queue) {
 		Q.empty = true;
 	};
 	
-	return result;	
+	return +result;	
+};
+
+func int Q_Peek(var int queue) {
+	if (!Hlp_IsValidHandle(queue)) {
+		MEM_Info("Q_Peek: invalid queue handle");
+		return 0;
+	};
+	
+	var Queue Q; Q = get(queue);
+
+	if (!Hlp_IsValidHandle(Q.listHandle)) {
+		MEM_Info("Q_Peek: invalid list handle");
+		return 0; 
+	};
+
+	if (Q_IsEmpty(queue)) {
+		MEM_Info("Q_Peek: Advanced an empty queue. Use Q_IsEmpty()");
+		return 0;
+	};
+
+	var zCList list; list = get(Q.listHandle);	
+	return +list.data;
+
 };
 
 func void Q_For(var int queue, var int funcID) {
