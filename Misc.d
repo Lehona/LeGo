@@ -1,7 +1,6 @@
 const int phi = 1070141312; // PI/2
 
 func int atan2f(var int x, var int y) {
-	const int _atan2f = 8123804; //0x7BF59C
 	const int call = 0;
 	var int ret;
 	if (Call_Begin(call)) {
