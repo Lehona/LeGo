@@ -103,7 +103,6 @@ func void _Render_Hook_Sub(var int list) {
             oCItem_Render(itm.itmPtr, _render_wld, View_GetPtr(itm.view), floatNULL);
 
         } else if ((itm.view_open) && (Hlp_IsValidHandle(itm.view))) {
-        //} else if ((itm.view_open) && (itm.view)) {
             View_Render(itm.view);
         };
     };
