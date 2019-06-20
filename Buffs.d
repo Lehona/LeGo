@@ -158,9 +158,26 @@ func void Bufflist_Remove(var int bh) {
 func void _Bufflist_UpdateDurationFade() {
 	var zCArray arr; arr = get(bufflist_hero);
 
+	var int viewState; // 0 = Open, 1 = Closed -- retains value through sequential invocations
+	var int changeViews; // set to true if view status should be changed (i.e. view_open/close should be called)
+
+	if (MEM_Game.showPlayerStatus == viewState) {
+		// The viewState has changed, so we open/close all views
+		viewState = !MEM_Game.showPlayerStatus;
+		changeViews = true;
+	};
+
  	var int k;
  	repeat(k, arr.numInArray);
  		var int bl_view; bl_view = MEM_ReadStatArr(bufflist_views, k);
+
+ 		if (changeViews) {
+ 			if (MEM_Game.showPlayerStatus) {
+ 				View_Open(bl_view);
+ 			} else {
+ 				View_Close(bl_view);
+ 			};
+ 		};
 
  		var lCBuff buff; buff = get(MEM_ReadIntArray(arr.array, k));
 
@@ -189,7 +206,10 @@ func void _Bufflist_UpdateDurationFade() {
  		};
 
  		View_SetColor(bl_view, RGBA(255, 255, 255, new_alpha));
+
 	end;
+
+	changeViews = false;
 };
 
 
