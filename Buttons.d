@@ -21,9 +21,73 @@ class _Button {
 	var int state; 	
 
 };
-const string _BUTTON_STRUCT = "auto|10";
+// const string _BUTTON_STRUCT = "auto|10";
+
+func void _Button_Archiver(var _Button this) {
+	if (this.userdata)     { PM_SaveInt("userdata",    this.userdata); };
+
+	PM_SaveInt("posx",  this.posx);
+	PM_SaveInt("posy",  this.posy);
+	PM_SaveInt("posx2", this.posx2);
+	PM_SaveInt("posy2", this.posy2);
+
+	if (this.on_enter > 0) { PM_SaveFuncID("on_enter", this.on_enter); };
+	if (this.on_leave > 0) { PM_SaveFuncID("on_leave", this.on_leave); };
+	if (this.on_click > 0) { PM_SaveFuncID("on_click", this.on_click); };
+
+	PM_SaveInt("view",  this.view); // Could also save it as classPtr to spare some handles?
+	PM_SaveInt("state", this.state);
+};
+
+func void _Button_UnArchiver(var _Button this) {
+	var int obj;
+	if (PM_Exists("userdata")) { this.userdata = PM_Load("userdata"); };
+
+	this.posx  = PM_Load("posx");
+	this.posy  = PM_Load("posy");
+	this.posx2 = PM_Load("posx2");
+	this.posy2 = PM_Load("posy2");
+
+	if (PM_Exists("on_enter")) {
+		obj = _PM_SearchObj("on_enter");
+		if (_PM_ObjectType(obj) == _PM_String) { // Compatibility
+			this.on_enter = PM_LoadFuncID("on_enter");
+		} else {
+			this.on_enter = PM_Load("on_enter");
+		};
+	} else {
+		this.on_enter = MEM_GetFuncID(Button_Null);
+	};
+	if (PM_Exists("on_leave")) {
+		obj = _PM_SearchObj("on_leave");
+		if (_PM_ObjectType(obj) == _PM_String) {
+			this.on_leave = PM_LoadFuncID("on_leave");
+		} else {
+			this.on_leave = PM_Load("on_leave");
+		};
+	} else {
+		this.on_leave = MEM_GetFuncID(Button_Null);
+	};
+	if (PM_Exists("on_click")) {
+		obj = _PM_SearchObj("on_click");
+		if (_PM_ObjectType(obj) == _PM_String) {
+			this.on_click = PM_LoadFuncID("on_click");
+		} else {
+			this.on_click = PM_Load("on_click");
+		};
+	} else {
+		this.on_click = MEM_GetFuncID(Button_Null);
+	};
+
+	this.view  = PM_Load("view");
+	this.state = PM_Load("state");
+};
+
 func void _Button_Delete(var _Button btn) {
-	View_Delete(btn.view);
+	// View might have been deleted already!
+	if (Hlp_IsValidHandle(btn.view)) {
+		View_Delete(btn.view);
+	};
 };
 
 func void Button_Null(var int hndl) {};

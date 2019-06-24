@@ -14,7 +14,7 @@ func int Q_Create() {
 	var Queue q; q = get(h);
 	q.empty = true;
 	q.listHandle = new(zClist@);
-	return h;
+	return +h;
 };
 
 func void Q_Enqueue(var int queue, var int data) {	
@@ -35,7 +35,7 @@ func int Q_IsEmpty(var int queue) {
 		return -1;
 	};
 	var Queue Q; Q = get(queue);
-	return Q.empty;
+	return +Q.empty;
 };
 
 func int Q_Advance(var int queue) {
@@ -71,7 +71,30 @@ func int Q_Advance(var int queue) {
 		Q.empty = true;
 	};
 	
-	return result;	
+	return +result;	
+};
+
+func int Q_Peek(var int queue) {
+	if (!Hlp_IsValidHandle(queue)) {
+		MEM_Info("Q_Peek: invalid queue handle");
+		return 0;
+	};
+	
+	var Queue Q; Q = get(queue);
+
+	if (!Hlp_IsValidHandle(Q.listHandle)) {
+		MEM_Info("Q_Peek: invalid list handle");
+		return 0; 
+	};
+
+	if (Q_IsEmpty(queue)) {
+		MEM_Info("Q_Peek: Advanced an empty queue. Use Q_IsEmpty()");
+		return 0;
+	};
+
+	var zCList list; list = get(Q.listHandle);	
+	return +list.data;
+
 };
 
 func void Q_For(var int queue, var int funcID) {
@@ -100,7 +123,6 @@ class callbackData {
 
 instance callbackData@(callbackData);
 
-/*
 func void callbackData_Archiver(var callbackData this) {
 	PM_SaveFuncID("func", this.funcID);
 	PM_SaveInt("userData", this.userData);
@@ -108,11 +130,16 @@ func void callbackData_Archiver(var callbackData this) {
 };
 
 func void callbackData_Unarchiver(var callbackData this) {
-	this.funcID = PM_Load("func");
+	var int obj; obj = _PM_SearchObj("func");
+	if (_PM_ObjectType(obj) == _PM_String) { // Compatibility
+		this.funcID = PM_LoadFuncID("func");
+	} else {
+		this.funcID = PM_Load("func");
+	};
 	this.userData = PM_Load("userData");
 	this.hasData = PM_Load("hasData");
 };
-*/
+
 func int _CQ_CBData(var int ID, var int uData, var int hData) {
 	var int h; h = new(callbackData@);
 	var callbackData cbd; cbd = get(h);

@@ -150,7 +150,7 @@ func void _Anim8_Ext(var int hndl, var int targetVal, var int timeSpan, var int 
     };
       //if((h.value == c.target) && (!UseQueue)) { interpol = A8_Wait; }; // This seemed to be useless and responsible for a bug
     c.startVal = h.value;
-    c.startTime = Timer();
+    c.startTime = TimerGT();
     c.timeSpan = mkf(timeSpan);
     c.interpol = interpol;
     _Anim8_SetVelo(h, c);
@@ -200,7 +200,7 @@ func int _Anim8_Loop(var int hndl) {
     var A8Command c; c = get(ldata);
 
     // Eigentliche Interpolierung
-    var int t; t = mkf(Timer() - c.startTime);
+    var int t; t = mkf(TimerGT() - c.startTime);
 
     if(c.interpol&&c.interpol < A8_Wait) {
         if(c.interpol == A8_Constant) {
@@ -249,7 +249,7 @@ func int _Anim8_Loop(var int hndl) {
             };
             c = get(ldata);
             c.startVal = h.value;
-            c.startTime = Timer();
+            c.startTime = TimerGT();
             _Anim8_SetVelo(h, c);
         }
         else if(h.dif) {

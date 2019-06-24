@@ -1,7 +1,6 @@
 const int phi = 1070141312; // PI/2
 
 func int atan2f(var int x, var int y) {
-	const int _atan2f = 8123804; //0x7BF59C
 	const int call = 0;
 	var int ret;
 	if (Call_Begin(call)) {
@@ -23,11 +22,10 @@ func int distance2Df(var int x1, var int x2, var int y1, var int y2) {
 	return +(sqrtf(addf(mulf(dx, dx), mulf(dy, dy))));
 };
 func int distance2D(var int x1, var int x2, var int y1, var int y2) {
-	return roundf(distance2Df(mkf(x1), mkf(x2), mkf(y1), mkf(y2)));
+	return +roundf(distance2Df(mkf(x1), mkf(x2), mkf(y1), mkf(y2)));
 };
 
 func int sin(var int angle) {
-	
 	const int call = 0;
 	var int ret;
 	if (Call_Begin(call)) {
@@ -62,4 +60,8 @@ func int asin(var int sine) {
 
 func int cos(var int angle) {
 	return +sin(subf(phi, angle));
+};
+
+func int tan(var int x) {
+	return +divf(sin(x), cos(x));
 };
