@@ -121,7 +121,9 @@ func void Bufflist_Init() {
 		MEM_WriteStatArr(bufflist_views, k, v);
 	end;
 
-	FF_ApplyExtGT(_Bufflist_UpdateDurationFade, 0, -1);
+	if (BUFF_FadeOut) {
+		FF_ApplyExtGT(_Bufflist_UpdateDurationFade, 0, -1);
+	};
 };
 
 func void Bufflist_Add(var int bh) {
