@@ -13,7 +13,7 @@
 |*                              auf Ikarus                               *|
 |*                                                                       *|
 \*************************************************************************/
-const string LeGo_Version = "LeGo 2.5.1";
+const string LeGo_Version = "LeGo 2.6.0";
 
 const int LeGo_PrintS          = 1<<0;  // Interface.d
 const int LeGo_HookEngine      = 1<<1;  // HookEngine.d
