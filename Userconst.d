@@ -126,3 +126,9 @@ const int AIV_TALENT = AIV_TALENT_INDEX; // Genutzte AI-Var
 //   DIAG_Prefix + AniName + DIAG_Suffix + ((rand() % (Max - (Min - 1))) + Min).ToString("00");
 const string DIAG_Prefix = "DG_";
 const string DIAG_Suffix = "_";
+
+//========================================
+// Buffs
+//========================================
+const int Buff_FadeOut = 1; // Deactivate fade-out by setting this to 0
+
