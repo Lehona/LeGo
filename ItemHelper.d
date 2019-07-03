@@ -33,11 +33,11 @@ func void GetItemHelper() {
     };
 };
 
-func int Itm_GetPtr(var int instance) {	
+func int Itm_GetPtr(var int _instance) {	
 	GetItemHelper();
-	if (!Npc_HasItems(Item_Helper, instance)) {
-		CreateInvItem(Item_Helper, instance);
+	if (!Npc_HasItems(Item_Helper, _instance)) {
+		CreateInvItem(Item_Helper, _instance);
 	};
-	Npc_GetInvItem(Item_Helper, instance);
+	Npc_GetInvItem(Item_Helper, _instance);
 	return _@(item);
 };

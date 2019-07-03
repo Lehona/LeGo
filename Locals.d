@@ -53,7 +53,7 @@ func void Locals() {
     const int locals_bufferInt = 0;
     var string locals_retstr;
     var zCPar_Symbol retinst;
-    var int arr, var int type;
+    var int arr; var int type;
     var int sPtr;
 
     // Array vorbereiten

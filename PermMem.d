@@ -479,7 +479,7 @@ class _PM_SaveObject_Cls {
     var int type;
     var string name;
     var int content; // zCArray<_PM_SaveObject*>*
-    var string class;
+    var string _class;
 };
 instance _PM_SaveObject_Cls@(_PM_SaveObject_Cls);
 const int _PM_SaveObject_Cls_size = 24 + 4 + 20;
@@ -544,7 +544,7 @@ func void _PM_SaveStruct_DeleteArr(var int arr) {
             var _PM_SaveObject_Cls oc; oc = MEM_PtrToInst(o);
             // Nur hat die Klasse am Ende statt elements noch einen string class
             if(t <= _PM_ClassPtr) {
-                oc.class = "";
+                oc._class = "";
                 _PM_FreedSize += _PM_SaveObject_Cls_size;
                 if(oc.content) {
                     _PM_SaveStruct_DeleteArr(oc.content);
@@ -629,13 +629,13 @@ func int _PM_NewObjectInt(var string name, var int content) {
     return ptr;
 };
 
-func int _PM_NewObjectClass(var string name, var string class, var int p, var int content) {
+func int _PM_NewObjectClass(var string name, var string _class, var int p, var int content) {
     var int ptr; ptr = _PM_Alloc(_PM_SaveObject_Cls_size);
     var _PM_SaveObject_Cls oCls; oCls = MEM_PtrToInst(ptr);
     oCls.name = name;
     if(!p) { oCls.type = _PM_Class; }
     else   { oCls.type = _PM_ClassPtr; };
-    oCls.class = class;
+    oCls._class = _class;
     oCls.content = content;
     return ptr;
 };
@@ -707,7 +707,7 @@ func string _PM_ObjectToString(var int obj) {
         if(oCls.type == _PM_Class) { prefix = "c"; }
         else                       { prefix = "p"; };
         if(oCls.content) {
-            data = ConcatStrings(prefix, oCls.class);
+            data = ConcatStrings(prefix, oCls._class);
         }
         else {
             data = ConcatStrings(prefix, "NULL");
@@ -1178,7 +1178,7 @@ func void _PM_ReadClass() {
 
         if(type == _PM_Class||type == _PM_ClassPtr) {
             var _PM_SaveObject_Cls c; c = MEM_PtrToInst(obj);
-            if(STR_Compare(c.class, "NULL")) {
+            if(STR_Compare(c._class, "NULL")) {
                 c.content = MEM_ArrayCreate();
 
                 MEM_ArrayPush(_PM_Head.contentStack, _PM_Head.content);
@@ -1276,7 +1276,7 @@ func void _PM_ClassToInst_ClassToPtr(var int obj, var int ptr) {
     _PM_Head.currOffs = ptr;
     _PM_Head.content = oc.content;
 
-    _PM_ClassToInst0(oc.class);
+    _PM_ClassToInst0(oc._class);
 
     _PM_Head.currOffs = MEM_ArrayPop(_PM_Head.offsStack);
     _PM_Head.content = MEM_ArrayPop(_PM_Head.contentStack);
@@ -1335,9 +1335,9 @@ func void _PM_ClassToInst_Auto(var string className) {
         else if(type == _PM_ClassPtr) {
             var _PM_SaveObject_Cls oc; oc = MEM_PtrToInst(obj);
             if(oc.content) {
-                var int classPtr; classPtr = MEM_GetParserSymbol(oc.class);
+                var int classPtr; classPtr = MEM_GetParserSymbol(oc._class);
                 if(!classPtr) {
-                    _PM_Error(ConcatStrings("Unknown class. ", oc.class));
+                    _PM_Error(ConcatStrings("Unknown class. ", oc._class));
                     return;
                 };
                 var int ptr; ptr = MEM_Alloc(MEM_ReadInt(classPtr + zCParSymbol_offset_offset));
@@ -1604,11 +1604,11 @@ func int _PM_Load(var string objName, var int type, var int ptr) {
     }
     else if(type == _PM_Class||type == _PM_ClassPtr) {
         var _PM_SaveObject_Cls oc; oc = MEM_PtrToInst(obj);
-        if(!STR_Compare(oc.class, "NULL")) {
+        if(!STR_Compare(oc._class, "NULL")) {
             return 0;
         };
         if(!ptr) {
-            ptr = MEM_Alloc(MEM_ReadInt(MEM_GetParserSymbol(oc.class) + zCParSymbol_offset_offset));
+            ptr = MEM_Alloc(MEM_ReadInt(MEM_GetParserSymbol(oc._class) + zCParSymbol_offset_offset));
         };
         _PM_ClassToInst_ClassToPtr(obj, ptr);
         return ptr;

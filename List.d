@@ -583,8 +583,8 @@ func void List_MoveDown(var int list, var int offset) {
         _List_ErrNum("MoveDown", 3);
         return;
     };
-    var int l0, var int l1, var int l2;
-    var zCList zl0, var zCList zl1, var zCList zl2;
+    var int l0; var int l1; var int l2;
+    var zCList zl0; var zCList zl1; var zCList zl2;
     l0 = List_Node(list, offset-2);
     if(!l0) { return; };
     zl0 = _^(l0);
@@ -608,8 +608,8 @@ func void List_MoveDownS(var int list, var int offset) {
         _List_ErrNum("MoveDownS", 3);
         return;
     };
-    var int l0, var int l1, var int l2;
-    var zCListSort zl0, var zCListSort zl1, var zCListSort zl2;
+    var int l0; var int l1; var int l2;
+    var zCListSort zl0; var zCListSort zl1; var zCListSort zl2;
     l0 = List_NodeS(list, offset-2);
     if(!l0) { return; };
     zl0 = _^(l0);
