@@ -1,3 +1,4 @@
+//suppress: W1
 // Eine Hashtable ist eigentlich bloﬂ zCArray<zCArray<_HT_Obj>*>, also ein zweidimensionales Array.
 
 class _HT_Obj {
