@@ -135,6 +135,7 @@ func void Bufflist_Add(var int bh) {
 	View_SetTexture(v, b.buffTex);
 	View_Open(v);
 };
+
 func void Bufflist_Remove(var int bh) {
 	var zCArray arr; arr = get(bufflist_hero);
 	var int index; index = MEM_ArrayIndexOf(getPtr(bufflist_hero), bh);
@@ -246,6 +247,7 @@ func int Buff_Has(var c_npc npc, var int buff) {
 		if (Buff_BuffHndl != 0) {	
 			return Buff_BuffHndl;
 		};
+		return 0;
 };	
 
 func void _Buff_Dispatcher(var int bh) { // This is called every tick and is responsible for deleting the object 
@@ -310,6 +312,7 @@ func void Buff_Refresh(var int bh) {
 	var lcBuff b; b = get(bh);
 
 	b.nextTickNr = 1;
+	b._endTime = TimerGT() + b.durationMS;
 };
 
 
@@ -331,7 +334,7 @@ func void Buff_Remove(var int bh) {
 			MEM_CallByID(b.onRemoved);
 	};
 
-	if (b.targetID == Npc_GetID(hero)) {
+	if (b.targetID == Npc_GetID(hero) && Buffs_DisplayForHero) {
 			Bufflist_Remove(bh);
 	};
 
