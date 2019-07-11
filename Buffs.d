@@ -1,4 +1,4 @@
-//suppress: W1
+//! suppress: W1
 const int BUFF_GOOD = 1;
 const int BUFF_NEUTRAL = 0;
 const int BUFF_BAD = -1;
