@@ -119,7 +119,7 @@ func void Locals() {
     // Größe bestimmen
     var int size; size = 0;
 
-    while(1); //{
+    _while(1); //{
         cid += 1;
         sPtr = MEM_ReadIntArray(currSymbolTableAddress, cid);
         s = _^(sPtr);
@@ -177,7 +177,7 @@ func void Locals() {
     const int s_header = 3 * 5;
 
     // Zuerst alle Symbole pushen
-    while(1); //{
+    _while(1); //{
         cid += 1;
         if(cid == mid) {
             break;
@@ -294,7 +294,7 @@ func void Locals() {
     };
 
     // Und wieder alles popen
-    while(1); //{
+    _while(1); //{
         cid -= 1;
         if(cid == fid) {
             break;
@@ -409,7 +409,7 @@ func int Tokens_Copy(var int src, var int dest, var int len) {
     var int dstF; dstF = dest+len;
     var int srcF; srcF = src+len;
     var int diff; diff = dest-src;
-    while(dstC < dstF);
+    _while(dstC < dstF);
         var int tok; tok = MEM_ReadByte(dstC);
         if(tok == zPAR_TOK_JUMPF || tok == zPAR_TOK_JUMP) {
             MEM_Info("Move if for Bytes.");

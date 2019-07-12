@@ -219,7 +219,7 @@ func void CQ_Exhaust(var int CQhandle) {
 		return;
 	};
 	
-	while(!CQ_IsEmpty(CQhandle));
+	_while(!CQ_IsEmpty(CQhandle));
 		CQ_Advance(CQhandle);
 	end;
 };

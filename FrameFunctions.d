@@ -97,10 +97,10 @@ func int FF_Active(var func function) {
 
 func int _FF_Active(var int hndl) {
     if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol) {
-        return continue;
+        return _continue;
     };
     _FF_Symbol = 0;
-    return break;
+    return _break;
 };
 
 //========================================
@@ -148,10 +148,10 @@ func void FF_Remove(var func function) {
 
 func int _FF_RemoveL(var int hndl) {
     if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol) {
-        return continue;
+        return _continue;
     };
     delete(hndl);
-    return break;
+    return _break;
 };
 
 func void FF_RemoveAll(var func function) {
@@ -161,10 +161,10 @@ func void FF_RemoveAll(var func function) {
 
 func int _FF_RemoveAllL(var int hndl) {
     if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol) {
-        return continue;
+        return _continue;
     };
     delete(hndl);
-    return continue;
+    return _continue;
 };
 
 //========================================
@@ -241,18 +241,18 @@ func int _FF_RemoveLData(var int hndl)
 {
     if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol)
     {
-        return continue;
+        return _continue;
     };
 
     var FFItem itm; itm = get(hndl);
     if(itm.data != _FF_Data)
     {
-        return continue;
+        return _continue;
     }
     else
     {
         delete(hndl);
-        return break;
+        return _break;
     };
 };
 
@@ -272,18 +272,18 @@ func int _FF_ActiveData(var int hndl)
 {
     if(MEM_ReadInt(getPtr(hndl)) != _FF_Symbol)
     {
-        return continue;
+        return _continue;
     };
 
     var FFItem itm; itm = get(hndl);
     if(itm.data != _FF_Data)
     {
-        return continue;
+        return _continue;
     }
     else
     {
         _FF_Symbol = 0;
-        return break;
+        return _break;
     };
 };
 

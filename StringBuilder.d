@@ -141,7 +141,7 @@ func void SBraw(var int ptr, var int len) {
     var int n; n = c.cln + len;
     if(n > c.cal) {
         var int o; o = c.cal;
-        while(n > c.cal);
+        _while(n > c.cal);
             c.cal *= 2;
         end;
         c.ptr = MEM_Realloc(c.ptr, o, c.cal);
@@ -215,7 +215,7 @@ func void SBf(var int f) {
 // Länge setzen
 //========================================
 func void SB_SetLength(var int l) {
-    while(l > SB_Length());
+    _while(l > SB_Length());
 		SBw(0);
 	end;
     MEM_WriteInt(_SB_Current+4, l);
@@ -243,7 +243,7 @@ func string STR_Escape(var string s0) {
     SB_InitBuffer(z.len * 2);
     var int i; i = 0;
     var int l; l = z.len;
-    while(i < l);
+    _while(i < l);
         var int c; c = MEM_ReadByte(z.ptr + i);
         if(c == 92) { // '\'
             SBc(92);
@@ -277,7 +277,7 @@ func string STR_Unescape(var string s0) {
     SB_InitBuffer(z.len);
     var int i; i = 0;
     var int l; l = z.len;
-    while(i < l);
+    _while(i < l);
         var int c; c = MEM_ReadByte(z.ptr + i);
         if(c == 92) { // '\'
             i += 1;
@@ -287,7 +287,7 @@ func string STR_Unescape(var string s0) {
             }
             else {
                 var int j; j = 0;
-                while(j < 33);
+                _while(j < 33);
                     var int n; n = MEM_ReadStatArr(STR_Sequences, j);
                     if(c == n) {
                         SBc(j);

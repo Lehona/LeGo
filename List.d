@@ -34,7 +34,7 @@ func int List_End(var int list) {
         return 0;
     };
     var zCList l; l = _^(list);
-    while(l.next);
+    _while(l.next);
         l = _^(l.next);
     end;
     return _@(l);
@@ -46,7 +46,7 @@ func int List_EndS(var int list) {
         return 0;
     };
     var zCListSort l; l = _^(list);
-    while(l.next);
+    _while(l.next);
         l = _^(l.next);
     end;
     return _@(l);
@@ -62,7 +62,7 @@ func int List_Length(var int list) {
     };
     var zCList l; l = _^(list);
     var int i; i = 1;
-    while(l.next);
+    _while(l.next);
         l = _^(l.next);
         i += 1;
     end;
@@ -76,7 +76,7 @@ func int List_LengthS(var int list) {
     };
     var zCListSort l; l = _^(list);
     var int i; i = 1;
-    while(l.next);
+    _while(l.next);
         l = _^(l.next);
         i += 1;
     end;
@@ -96,7 +96,7 @@ func int List_HasLength(var int list, var int len) {
     };
     var zCList l; l = _^(list);
     var int i; i = 1;
-    while(l.next);
+    _while(l.next);
         l = _^(l.next);
         i += 1;
         if(i == len) {
@@ -116,7 +116,7 @@ func int List_HasLengthS(var int list, var int len) {
     };
     var zCListSort l; l = _^(list);
     var int i; i = 1;
-    while(l.next);
+    _while(l.next);
         l = _^(l.next);
         i += 1;
         if(i == len) {
@@ -136,7 +136,7 @@ func int List_Node(var int list, var int nr) {
     };
     var zCList l; l = _^(list);
     var int i; i = 1;
-    while(i < nr);
+    _while(i < nr);
         if(!l.next) {
             _List_ErrLen("Node");
             return 0;
@@ -155,7 +155,7 @@ func int List_NodeS(var int list, var int nr) {
     };
     var zCListSort l; l = _^(list);
     var int i; i = 1;
-    while(i < nr);
+    _while(i < nr);
         if(!l.next) {
             _List_ErrLen("NodeS");
             return 0;
@@ -288,7 +288,7 @@ func void List_Destroy(var int list) {
         return;
     };
     var zCList l; l = _^(list);
-    while(l.next);
+    _while(l.next);
         var int n; n = l.next;
         MEM_Free(_@(l));
         l = _^(n);
@@ -301,7 +301,7 @@ func void List_DestroyS(var int list) {
         return;
     };
     var zCListSort l; l = _^(list);
-    while(l.next);
+    _while(l.next);
         var int n; n = l.next;
         MEM_Free(_@(l));
         l = _^(n);
@@ -317,7 +317,7 @@ func void List_ForF(var int list, var func fnc) {
         return;
     };
     var zCList l;
-    while(list);
+    _while(list);
         l = _^(list);
         list;
         MEM_Call(fnc);
@@ -331,7 +331,7 @@ func void List_ForI(var int list, var int funcID) {
         return;
     };
     var zCList l;
-    while(list);
+    _while(list);
         l = _^(list);
         list;
         MEM_CallByID(funcID);
@@ -346,7 +346,7 @@ func void List_For(var int list, var string fnc) {
     };
     var int f; f = MEM_FindParserSymbol(STR_Upper(fnc));
     var zCList l;
-    while(list);
+    _while(list);
         l = _^(list);
         list;
         MEM_CallByID(f);
@@ -360,7 +360,7 @@ func void List_ForFS(var int list, var func fnc) {
         return;
     };
     var zCListSort l;
-    while(list);
+    _while(list);
         l = _^(list);
         list;
         MEM_Call(fnc);
@@ -374,7 +374,7 @@ func void List_ForIS(var int list, var int funcID) {
         return;
     };
     var zCListSort l;
-    while(list);
+    _while(list);
         l = _^(list);
         list;
         MEM_CallByID(funcID);
@@ -389,7 +389,7 @@ func void List_ForS(var int list, var string fnc) {
     };
     var int f; f = MEM_FindParserSymbol(STR_Upper(fnc));
     var zCListSort l;
-    while(list);
+    _while(list);
         l = _^(list);
         list;
         MEM_CallByID(f);
@@ -411,7 +411,7 @@ func int List_ToArray(var int list) {
         return a;
     };
     var zCList l;
-    while(list);
+    _while(list);
         l = _^(list);
         MEM_ArrayInsert(a, l.data);
         list = l.next;
@@ -430,7 +430,7 @@ func int List_ToArrayS(var int list) {
         return a;
     };
     var zCListSort l;
-    while(list);
+    _while(list);
         l = _^(list);
         MEM_ArrayInsert(a, l.data);
         list = l.next;
@@ -490,7 +490,7 @@ func int List_Contains(var int list, var int data) {
     };
     var zCList l;
     var int i; i = 1;
-    while(list);
+    _while(list);
         l = _^(list);
         if(l.data == data) {
             return i;
@@ -508,7 +508,7 @@ func int List_ContainsS(var int list, var int data) {
     };
     var zCListSort l;
     var int i; i = 1;
-    while(list);
+    _while(list);
         l = _^(list);
         if(l.data == data) {
             return i;
@@ -711,7 +711,7 @@ func void List_InsertSorted(var int list, var int data, var func compare) {
         return;
     };
 
-    while(lp.next); // while there is a next node
+    _while(lp.next); // while there is a next node
         ln = _^(lp.next);
         if (List_Compare(ln.data, data, compare)) {
             /* ln.data is bigger, but lp.data isn't, so I have to insert it inbetween! */
@@ -746,7 +746,7 @@ func void List_InsertSortedS(var int list, var int data, var func compare) {
         return;
     };
 
-    while(lp.next); // while there is a next node
+    _while(lp.next); // while there is a next node
         ln = _^(lp.next);
         if (List_Compare(ln.data, data, compare)) {
             /* ln.data is bigger, but lp.data isn't, so I have to insert it inbetween! */

@@ -149,7 +149,7 @@ func void ViewPtr_SetAlphaAll(var int ptr, var int val) {
 	if (v.textLines_next) { 
 		var int list; list = v.textLines_next;
 		var zCList l;
-		while(list);
+		_while(list);
 			l = _^(list);
 			PrintPtr_SetAlpha(l.data,val);
 			list = l.next;
@@ -474,7 +474,7 @@ func void ViewPtr_AlignText(var int ptr, var int margin) {
     var int width;
 
     if(margin == 0) {
-        while(lp);
+        _while(lp);
             l = _^(lp);
             vt = _^(l.data);
             width = Print_ToVirtual(Print_GetStringWidthPtr(vt.text, vt.font), PS_X) * PS_VMAX / v.vsizex;
@@ -483,7 +483,7 @@ func void ViewPtr_AlignText(var int ptr, var int margin) {
         end;
     }
     else if(margin > 0) {
-        while(lp);
+        _while(lp);
             l = _^(lp);
             vt = _^(l.data);
             vt.posx = margin;
@@ -491,7 +491,7 @@ func void ViewPtr_AlignText(var int ptr, var int margin) {
         end;
     }
     else {
-        while(lp);
+        _while(lp);
             l = _^(lp);
             vt = _^(l.data);
             width = Print_ToVirtual(Print_GetStringWidthPtr(vt.text, vt.font), PS_X) * PS_VMAX / v.vsizex;
