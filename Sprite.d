@@ -1,4 +1,4 @@
-
+//! suppress: W1
 var int sinApprox; var int cosApprox;
 func void SinCosApprox(var int angle) {
     const int sinPtr = 0;

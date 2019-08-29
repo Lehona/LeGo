@@ -1,3 +1,4 @@
+//! suppress: W1
 class HT_Array {
 	var int array;
 	var int numalloc;

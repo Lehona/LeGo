@@ -1,3 +1,4 @@
+//! suppress: W1
 /***********************************\
              EVENTHANDLER
 \***********************************/
@@ -9,7 +10,7 @@ instance lCEvent(zCArray);
 
 func void lCEvent_Archiver(var zCArray this) {
     var int i; i = 0;
-    while(i < this.numInArray);
+    _while(i < this.numInArray);
         PM_SaveFuncID(ConcatStrings("handler", IntToString(i)), MEM_ReadIntArray(this.array, i));
         i += 1;
     end;
@@ -18,7 +19,7 @@ func void lCEvent_Archiver(var zCArray this) {
 func void lCEvent_Unarchiver(var zCArray arr) {
     var int i; i = 0;
     var int this; this = MEM_InstToPtr(arr);
-    while(true);
+    _while(true);
         var string c; c = ConcatStrings("handler", IntToString(i));
         if (!PM_Exists(c)) {
             return;
@@ -118,7 +119,7 @@ func void Event_Remove(var int h, var func handler) {
 func void EventPtr_Execute(var int ptr, var int d) {
     var zCArray a; a = _^(ptr);
     var int i; i = 0;
-    while(i < a.numInArray);
+    _while(i < a.numInArray);
         d;
         MEM_CallByID(MEM_ReadIntArray(a.array, i));
         i += 1;

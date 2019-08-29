@@ -1,3 +1,4 @@
+//! suppress: W1
 /***********************************\
             HOOKDAEDALUS
 \***********************************/
@@ -38,7 +39,7 @@ func void HookDaedalusFunc(var func hooked, var func hook) {
 
         // Read code stack at beginning of hooked function
         var int numBytes; numBytes = 0;
-        while(numBytes < 5);
+        _while(numBytes < 5);
             var int tok; tok = MEM_ReadByte(targetPtr+numBytes);
             if (tok == zPAR_TOK_CALL)
             || (tok == zPAR_TOK_CALLEXTERN)
