@@ -237,8 +237,9 @@ func int _Buff_Check(var int buffh) {
 	var lCBuff b; b = get(buffh);
 	if (Buff_NpcID == b.targetID) {
 			Buff_BuffHndl = buffh;
-			return break;
+			return rBreak;
 	};
+	return rContinue;
 };
 func int Buff_Has(var c_npc npc, var int buff) {
 		Buff_NpcID = Npc_GetID(npc);
