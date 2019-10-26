@@ -92,17 +92,11 @@ func void _Button_Delete(var _Button btn) {
 
 func void Button_Null(var int hndl) {};
 
-const int MAX_BUTTONS = 256;
-var int _Buttons[MAX_BUTTONS]; // Wer mehr Buttons hat, hat doch 'nen Rad ab :) Kann aber auch gerne erweitert werden.
-var int _Buttons_NextSlot;
 instance _Button@(_Button);
 
 //(posx|posy) refers to the upper left corner
 func int Button_Create(var int posx, var int posy, var int width, var int height, var string tex, var func on_enter, var func on_leave, var func on_click) {
-	if (_Buttons_NextSlot == MAX_BUTTONS) {
-		return 0;
-	};
-	
+		
 	var int button; button = new(_Button@);
 	var _Button btn; btn = get(button);
 	
@@ -123,9 +117,6 @@ func int Button_Create(var int posx, var int posy, var int width, var int height
 	
 	View_SetTexture(btn.view, tex);
 			
-				
-	MEM_WriteStatArr(_Buttons, _Buttons_NextSlot, button);
-	_Buttons_NextSlot += 1;
 	return button+0;
 };
 
@@ -137,20 +128,8 @@ func void Button_Delete(var int hndl) {
 	if (!Hlp_IsValidHandle(hndl)) {
 		return;
 	};
-	var int i; i = 0;
-	var int pos; pos = MEM_StackPos.position;
-	if (i >= _Buttons_NextSlot) {
-		return;
-	};
-	if (MEM_ReadStatArr(_Buttons, i) == hndl) {
-		delete(hndl);
-		var int tmp; tmp = MEM_ReadStatArr(_Buttons, _Buttons_NextSlot-1); // Letztes Element
-		MEM_WriteStatArr(_Buttons, i, tmp);
-		MEM_WriteStatArr(_Buttons, _Buttons_NextSlot-1, 0);
-		_Buttons_NextSlot -= 1; // Array verkleinern
-	};
-	i += 1;
-	MEM_StackPos.position = pos;
+	
+	delete(hndl);
 };
 	
 
@@ -364,7 +343,7 @@ func void Buttons_Do() {
 		};
 		View_MoveToPxl(_BUTTON_MO, x, y);
 	};
-	
+
 	foreachHndl( _Button@, _Button_processMouseEvents );
 
 };
