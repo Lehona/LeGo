@@ -326,6 +326,29 @@ func int Button_GetCaptionPtr(var int hndl) {
 	return v.textLines_next;
 };
 
+func void _Button_processMouseEvents( var int btn_hndl ) {
+	var _Button btn; btn = get( btn_hndl );
+
+	var int CY; CY = Print_ToVirtual(CURSOR_Y, PS_Y);
+	var int CX; CX = Print_ToVirtual(CURSOR_X, PS_X);
+	if (btn.state & BUTTON_ACTIVE) {
+		if (btn.posx <= CX && btn.posx2 >= CX && btn.posy <= CY && btn.posy2 >= CY) {
+			if (Cursor_Left==KEY_PRESSED) {
+				MEM_PushIntParam(btn_hndl);
+				MEM_CallByID(btn.on_click);
+			};
+			if ((btn.state & BUTTON_ENTERED)==0) {
+				MEM_PushIntParam(btn_hndl);
+				MEM_CallByID(btn.on_enter);
+				btn.state = btn.state | BUTTON_ENTERED;
+			};
+		} else if (btn.state & BUTTON_ENTERED) {
+			MEM_PushIntParam(btn_hndl);
+			MEM_CallByID(btn.on_leave);
+			btn.state = btn.state & ~BUTTON_ENTERED;
+		}; 
+	};
+};
 	
 func void Buttons_Do() {
 	var _Button btn;
@@ -341,35 +364,9 @@ func void Buttons_Do() {
 		};
 		View_MoveToPxl(_BUTTON_MO, x, y);
 	};
-	var int i; i = 0;
-	var int pos; pos = MEM_StackPos.position;
-		if (i >= _Buttons_NextSlot) {
-			return;
-		};
-		
-		btn = get(MEM_ReadStatArr(_Buttons, i));
-		var int CY; CY = Print_ToVirtual(CURSOR_Y, PS_Y);
-		var int CX; CX = Print_ToVirtual(CURSOR_X, PS_X);
-		if (btn.state & BUTTON_ACTIVE) {
-			if (btn.posx <= CX && btn.posx2 >= CX && btn.posy <= CY && btn.posy2 >= CY) {
-				if (Cursor_Left==KEY_PRESSED) {
-					MEM_PushIntParam(MEM_ReadStatArr(_Buttons, i));
-					MEM_CallByID(btn.on_click);
-				};
-				if ((btn.state & BUTTON_ENTERED)==0) {
-					MEM_PushIntParam(MEM_ReadStatArr(_Buttons, i));
-					MEM_CallByID(btn.on_enter);
-					btn.state = btn.state | BUTTON_ENTERED;
-				};
-			} else if (btn.state & BUTTON_ENTERED) {
-				MEM_PushIntParam(MEM_ReadStatArr(_Buttons, i));
-				MEM_CallByID(btn.on_leave);
-				btn.state = btn.state & ~BUTTON_ENTERED;
-			}; 
-		};
-				
-		i += 1;
-		MEM_StackPos.position = pos;
+	
+	foreachHndl( _Button@, _Button_processMouseEvents );
+
 };
 
 
