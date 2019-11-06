@@ -184,6 +184,7 @@ func void Button_DeleteMouseover() {
 	
 	View_Close(_BUTTON_MO);
 };
+
 func void Button_CreateMouseover(var string text, var string font) {
 	var int len; var int max; max = 0; var int i; i = 0; var int pos; pos = MEM_StackPos.position; 
 	
@@ -305,8 +306,8 @@ func int Button_GetCaptionPtr(var int hndl) {
 	return v.textLines_next;
 };
 
-func void _Button_processMouseEvents( var int btn_hndl ) {
-	var _Button btn; btn = get( btn_hndl );
+func int _Buttons_Do_Sub(var int btn_hndl) {
+	var _Button btn; btn = get(btn_hndl);
 
 	var int CY; CY = Print_ToVirtual(CURSOR_Y, PS_Y);
 	var int CX; CX = Print_ToVirtual(CURSOR_X, PS_X);
@@ -327,6 +328,8 @@ func void _Button_processMouseEvents( var int btn_hndl ) {
 			btn.state = btn.state & ~BUTTON_ENTERED;
 		}; 
 	};
+
+	return rContinue;
 };
 	
 func void Buttons_Do() {
@@ -343,9 +346,8 @@ func void Buttons_Do() {
 		};
 		View_MoveToPxl(_BUTTON_MO, x, y);
 	};
-
-	foreachHndl( _Button@, _Button_processMouseEvents );
-
+	
+	foreachHndl(_Button@, _Buttons_Do_Sub);
 };
 
 
