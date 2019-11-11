@@ -248,15 +248,16 @@ func void foreachHndl(var int inst, var func fnc) {
     MEM_Copy(z.array, a, l);
     var int i; i = 0;
     var int o; o = MEM_GetFuncPtr(fnc);
-    var int p; p = MEM_StackPos.position;
+    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
     while(i < l);
         var int h; h = MEM_ReadInt(a+(i<<2)); //handle
         if(_HT_Get(HandlesPointer, h)) {
             h;
             MEM_CallByPtr(o);
-            if(MEM_PopIntResult() == rBreak) {
-                break;
-                // i = l;
+            if(fsymb.offset) {
+                if(MEM_PopIntResult() == rBreak) {
+                    break;
+                };
             };
         };
         i += 1;
