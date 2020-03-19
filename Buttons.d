@@ -231,6 +231,7 @@ func void Button_Activate(var int hndl) {
 func void Button_Deactivate(var int hndl) {
 	var _Button btn; btn = get(hndl);
 	if (btn.state & BUTTON_ENTERED) {
+		MEM_PushIntParam(hndl);
 		MEM_CallByID(btn.on_leave);
 	};
 	btn.state = 0; // Purge all data
