@@ -1213,6 +1213,23 @@ func void _PM_ReadClass() {
     _PM_Tabs -= 1;
 };
 
+func void _PM_SkipClass() {
+    if(STR_Compare(_PM_TextLine(), "{")) {
+        _PM_Error(ConcatStrings("'{' erwartet. ", _PM_Head.instName));
+        return;
+    };
+
+    _PM_Tabs += 1;
+
+    var int p; p = MEM_StackPos.position;
+    var string str; str = _PM_TextLine();
+    if (STR_Compare(str, "}")) {
+        MEM_StackPos.position = p;
+    };
+
+    _PM_Tabs -= 1;
+};
+
 func void _PM_ReadSaveStruct() {
     // Speicherkopf vorbereiten
     if(_PM_HeadPtr) {
@@ -1238,12 +1255,20 @@ func void _PM_ReadSaveStruct() {
     _PM_Head.inst = MEM_FindParserSymbol(_PM_Head.instName);
     if(_PM_Head.inst == -1) {
         _PM_Error(ConcatStrings("Unbekannte Instanz: ", _PM_Head.instName));
+        _PM_SkipClass();
+        _PM_Head = MEM_NullToInst();
+        free(_PM_HeadPtr, _PM_SaveStruct@);
+        _PM_HeadPtr = 0;
         return;
     };
 
     var int classPtr; classPtr = MEM_GetParserSymbol(_PM_Head.className);
     if(!classPtr) {
         _PM_Error(ConcatStrings("Unbekannte Klasse: ", _PM_Head.className));
+        _PM_SkipClass();
+        _PM_Head = MEM_NullToInst();
+        free(_PM_HeadPtr, _PM_SaveStruct@);
+        _PM_HeadPtr = 0;
         return;
     };
 
@@ -1430,13 +1455,15 @@ func void _PM_Unarchive() {
 
         _PM_ReadSaveStruct();
         _PM_SearchObjCache = "";
-        _PM_SaveStructToInst();
+        if (_PM_HeadPtr) {
+            _PM_SaveStructToInst();
+
+            _HT_Insert(HandlesPointer, _PM_Head.currOffs, i);
+            _HT_Insert(HandlesInstance, _PM_Head.inst, i);
+        };
 
         BR_NextLine();
         _PM_Line += 1;
-
-        _HT_Insert(HandlesPointer, _PM_Head.currOffs, i);
-        _HT_Insert(HandlesInstance, _PM_Head.inst, i);
 
         MEM_StackPos.position = p;
     }
