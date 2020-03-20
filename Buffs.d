@@ -121,7 +121,9 @@ func void Bufflist_Init() {
 		MEM_WriteStatArr(bufflist_views, k, v);
 	end;
 
-	FF_ApplyExtGT(_Bufflist_UpdateDurationFade, 0, -1);
+	if (BUFF_FadeOut) {
+		FF_ApplyExtGT(_Bufflist_UpdateDurationFade, 0, -1);
+	};
 };
 
 func void Bufflist_Add(var int bh) {
@@ -133,6 +135,7 @@ func void Bufflist_Add(var int bh) {
 	View_SetTexture(v, b.buffTex);
 	View_Open(v);
 };
+
 func void Bufflist_Remove(var int bh) {
 	var zCArray arr; arr = get(bufflist_hero);
 	var int index; index = MEM_ArrayIndexOf(getPtr(bufflist_hero), bh);
@@ -158,9 +161,26 @@ func void Bufflist_Remove(var int bh) {
 func void _Bufflist_UpdateDurationFade() {
 	var zCArray arr; arr = get(bufflist_hero);
 
+	var int viewState; // 0 = Open, 1 = Closed -- retains value through sequential invocations
+	var int changeViews; // set to true if view status should be changed (i.e. view_open/close should be called)
+
+	if (MEM_Game.showPlayerStatus == viewState) {
+		// The viewState has changed, so we open/close all views
+		viewState = !MEM_Game.showPlayerStatus;
+		changeViews = true;
+	};
+
  	var int k;
  	repeat(k, arr.numInArray);
  		var int bl_view; bl_view = MEM_ReadStatArr(bufflist_views, k);
+
+ 		if (changeViews) {
+ 			if (MEM_Game.showPlayerStatus) {
+ 				View_Open(bl_view);
+ 			} else {
+ 				View_Close(bl_view);
+ 			};
+ 		};
 
  		var lCBuff buff; buff = get(MEM_ReadIntArray(arr.array, k));
 
@@ -179,7 +199,7 @@ func void _Bufflist_UpdateDurationFade() {
 
  		// If you don't like this, complain to GiftGrün
  		// 128 - 128/tan(1) * tan(2x-1)
- 		var int new_alphaf; new_alphaf = addf(mkf(128), mulf(divf(mkf(128), tan(FLOATEINS)), tan(subf(mulf(mkf(2), xf), FLOATEINS))));
+ 		var int new_alphaf; new_alphaf = addf(mkf(160), mulf(divf(mkf(128), tan(FLOATEINS)), tan(subf(mulf(mkf(2), xf), FLOATEINS))));
  		var int new_alpha; new_alpha = roundf(new_alphaf);
  		
  		if new_alpha < 0 {
@@ -189,7 +209,10 @@ func void _Bufflist_UpdateDurationFade() {
  		};
 
  		View_SetColor(bl_view, RGBA(255, 255, 255, new_alpha));
+
 	end;
+
+	changeViews = false;
 };
 
 
@@ -214,8 +237,9 @@ func int _Buff_Check(var int buffh) {
 	var lCBuff b; b = get(buffh);
 	if (Buff_NpcID == b.targetID) {
 			Buff_BuffHndl = buffh;
-			return break;
+			return rBreak;
 	};
+	return rContinue;
 };
 func int Buff_Has(var c_npc npc, var int buff) {
 		Buff_NpcID = Npc_GetID(npc);
@@ -224,6 +248,7 @@ func int Buff_Has(var c_npc npc, var int buff) {
 		if (Buff_BuffHndl != 0) {	
 			return Buff_BuffHndl;
 		};
+		return 0;
 };	
 
 func void _Buff_Dispatcher(var int bh) { // This is called every tick and is responsible for deleting the object 
@@ -288,6 +313,7 @@ func void Buff_Refresh(var int bh) {
 	var lcBuff b; b = get(bh);
 
 	b.nextTickNr = 1;
+	b._endTime = TimerGT() + b.durationMS;
 };
 
 
@@ -309,7 +335,7 @@ func void Buff_Remove(var int bh) {
 			MEM_CallByID(b.onRemoved);
 	};
 
-	if (b.targetID == Npc_GetID(hero)) {
+	if (b.targetID == Npc_GetID(hero) && Buffs_DisplayForHero) {
 			Bufflist_Remove(bh);
 	};
 

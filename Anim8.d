@@ -41,11 +41,7 @@ func void A8Head_UnArchiver(var A8Head this) {
     this.queue = PM_Load("queue");
 };
 
-func void A8Head_Delete(var A8Head this) {
-    if (this.dfnc) {
-        MEM_CallByPtr(this.dfnc);
-    };
-};
+
 
 func void A8Head_Empty(var A8Head h) {
     if(!h.queue) { return; };
@@ -57,6 +53,13 @@ func void A8Head_Empty(var A8Head h) {
 func void A8Head_EmptySub(var int node) {
     if(Hlp_IsValidHandle(MEM_ReadInt(node))) {
         delete(MEM_ReadInt(node));
+    };
+};
+
+func void A8Head_Delete(var A8Head this) {
+	A8Head_Empty(this);
+    if (this.dfnc) {
+        MEM_CallByPtr(this.dfnc);
     };
 };
 
