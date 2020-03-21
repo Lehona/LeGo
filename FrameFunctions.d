@@ -45,6 +45,11 @@ func void FFItem_Unarchiver(var FFItem this) {
 	if (PM_Exists("gametime")) {
 		this.gametime = PM_Load("gametime");
 	};
+
+    // Fix function signature of invalid functions
+    if (this.fncID == MEM_GetFuncPtr(_PM_EmptyFunc_int)) && (!this.hasData) {
+        this.fncID = MEM_GetFuncPtr(_PM_EmptyFunc_void);
+    };
 };
 
 var int _FF_Symbol;
