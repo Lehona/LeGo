@@ -1677,8 +1677,16 @@ func string PM_LoadString(var string name) {
     return os.content;
 };
 
+func void _PM_EmptyFunc_void() {};
+func void _PM_EmptyFunc_int(var int i) {};
+func void _PM_EmptyFunc_int_int(var int i, var int j) {};
+
 func int PM_LoadFuncID(var string name) {
-    return MEM_FindParserSymbol(PM_LoadString(name));
+    var int funcID; funcID = MEM_FindParserSymbol(PM_LoadString(name));
+    if (funcID == -1) {
+        funcID = MEM_GetFuncID(_PM_EmptyFunc_void);
+    };
+    return funcID;
 };
 
 func int PM_LoadFuncOffset(var string name) {
