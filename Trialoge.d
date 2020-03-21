@@ -99,11 +99,11 @@ func void DiaCAM_Enable() {
 // [intern] Variablen
 //========================================
 var int TRIA_NpcPtr[TRIA_MaxNPC]; // Sammlung aller Teilnehmer
-var int TRIA_Running;             // L√§uft ein Trialog?
-var int TRIA_CPtr;                // Z√§hler f√ºr die Sammlung
+var int TRIA_Running;             // L‰uft ein Trialog?
+var int TRIA_CPtr;                // Z‰hler f¸r die Sammlung
 var int TRIA_Last;                // Der Npc der zuletzt gesprochen hat
 var int TRIA_Self;                // Pointer auf self
-var string TRIA_Camera;           // L√§uft eine Kamerafahrt?
+var string TRIA_Camera;           // L‰uft eine Kamerafahrt?
 
 func void ZS_TRIA() {};
 func int ZS_TRIA_Loop() {
@@ -231,20 +231,20 @@ func void _TRIA_InitNPC(var c_npc slf) {
 };
 
 //========================================
-// Npc in das Gespr√§ch einladen
+// Npc in das Gespr‰ch einladen
 //========================================
 func void TRIA_Invite(var c_npc slf) {
     if(TRIA_Running) {
-        MEM_Warn("TRIA_Invite: Der Trialog l√§uft bereits.");
+        MEM_Warn("TRIA_Invite: Der Trialog l‰uft bereits.");
         return;
     };
     if(TRIA_CPtr == TRIA_MaxNPC) {
-        MEM_Error("TRIA_Invite: Zu viele Npcs. Erh√∂he bitte TRIA_MaxNPC.");
+        MEM_Error("TRIA_Invite: Zu viele Npcs. Erhˆhe bitte TRIA_MaxNPC.");
         return;
     };
     if(Hlp_GetInstanceID(slf) == Hlp_GetInstanceID(hero)
     || Hlp_GetInstanceID(slf) == Hlp_GetInstanceID(self)) {
-        MEM_Warn("TRIA_Invite: Der Held und/oder Self k√∂nnen nicht eingeladen werden. Sie sind bereits anwesend.");
+        MEM_Warn("TRIA_Invite: Der Held und/oder Self kˆnnen nicht eingeladen werden. Sie sind bereits anwesend.");
         return;
     };
     if((Npc_GetDistToNpc(slf, hero) > truncf(MEM_ReadInt(SPAWN_INSERTRANGE_Address)))
@@ -262,7 +262,7 @@ func void TRIA_Invite(var c_npc slf) {
 //========================================
 func void TRIA_Start() {
     if(TRIA_Running) {
-        MEM_Warn("TRIA_Start: Es l√§uft bereits ein Trialog.");
+        MEM_Warn("TRIA_Start: Es l‰uft bereits ein Trialog.");
         return;
     };
     var int i; i = 0;
@@ -299,7 +299,7 @@ func void TRIA_Barrier() {
     TRIA_Wait();
     var int i; i = !1;
     var int j; j = 0;
-    var c_npc last; last = MEM_PtrToInst(MEM_ReadStatArr(TRIA_NpcPtr, TRIA_CPtr)); // Ist immer self, aber so ist es verst√§ndlicher
+    var c_npc last; last = MEM_PtrToInst(MEM_ReadStatArr(TRIA_NpcPtr, TRIA_CPtr)); // Ist immer self, aber so ist es verst‰ndlicher
     var int p; p = MEM_StackPos.position;
     if(i < TRIA_CPtr) {
         var c_npc curr; curr = MEM_PtrToInst(MEM_ReadStatArr(TRIA_NpcPtr, i));
@@ -315,7 +315,7 @@ func void TRIA_Barrier() {
 };
 
 //========================================
-// Den n√§chsten Npc als "self" setzen
+// Den n‰chsten Npc als "self" setzen
 //========================================
 func void TRIA_Next(var c_npc n0) {
     if(!TRIA_Running) {
@@ -323,7 +323,7 @@ func void TRIA_Next(var c_npc n0) {
         return;
     };
     if(Hlp_GetInstanceID(n0) == Hlp_GetInstanceID(hero)) {
-        MEM_Warn("TRIA_Next: 'hero' ist kein erlaubter Parameter f√ºr diese Funktion.");
+        MEM_Warn("TRIA_Next: 'hero' ist kein erlaubter Parameter f¸r diese Funktion.");
         return;
     };
 
@@ -376,7 +376,7 @@ func void _TRIA_Uncam(var string evt) {
 };
 
 //========================================
-// Trialog abschlie√üen
+// Trialog abschlieﬂen
 //========================================
 func void TRIA_Finish() {
     if(!TRIA_Running) {
