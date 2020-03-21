@@ -1684,7 +1684,7 @@ func void _PM_EmptyFunc_int_int(var int i, var int j) {};
 func int PM_LoadFuncID(var string name) {
     var int funcID; funcID = MEM_FindParserSymbol(PM_LoadString(name));
     if (funcID == -1) {
-        funcID = MEM_GetFuncID(_PM_EmptyFunc_void);
+        funcID = MEM_GetFuncID(_PM_EmptyFunc_int); // Most common function signature in LeGo classes
     };
     return funcID;
 };
