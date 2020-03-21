@@ -128,8 +128,8 @@ func void TRIA_Wait() {
 //========================================
 func void _TRIA_UpdateVisual(var c_npc slf, var int armor) {
     var oCNpc npc; npc = Hlp_GetNpc(slf);
-  
-    Mdl_SetVisualBody(
+    
+	Mdl_SetVisualBody(
         slf,
         npc.body_visualName,
         (npc.bitfield[0]&oCNpc_bitfield0_body_TexVarNr)>>14,
