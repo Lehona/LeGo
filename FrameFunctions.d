@@ -137,6 +137,10 @@ func void FF_ApplyOnce(var func function) {
     FF_ApplyOnceExt(function, 0, -1);
 };
 
+func void FF_ApplyOnceGT(var func function) {
+    FF_ApplyOnceExtGT(function, 0, -1);
+};
+
 //========================================
 // Funktion entfernen
 //========================================
