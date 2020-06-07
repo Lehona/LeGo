@@ -164,9 +164,7 @@ func void _Anim8_Ext(var int hndl, var int targetVal, var int timeSpan, var int 
 // [intern] FF-Loop
 //========================================
 func void _Anim8_FFLoop() {
-    MEM_PushIntParam(A8Head@);
-    MEM_GetFuncID(_Anim8_Loop);
-    MEM_StackPos.position = foreachHndl_ptr;
+    foreachHndl(A8Head@, _Anim8_Loop);
 };
 func int _Anim8_Loop(var int hndl) {
     var A8Head h; h = get(hndl);
@@ -264,6 +262,7 @@ func int _Anim8_Loop(var int hndl) {
             delete(hndl);
         };
     };
+    return rContinue;
 };
 
 //========================================
