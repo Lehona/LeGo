@@ -181,6 +181,38 @@ func void Bar_MoveTo(var int bar, var int x, var int y) {
 };
 
 //========================================
+// Bar Resize
+//========================================
+func void Bar_Resize(var int bar, var int width, var int height) {
+    if(!Hlp_IsValidHandle(bar)) { return; };
+    var _bar b; b = get(bar);
+    var zCView v0; v0 = View_Get(b.v0);
+    var zCView v1; v1 = View_Get(b.v1);
+    var int barDiffX; barDiffX = v0.vsizex - b.barW;
+    var int barDiffY; barDiffY = v0.vsizey - v1.vsizey;
+    View_ResizePxl(b.v0, width, height);
+
+    var int barWidth;
+    if (width > 0) {
+        var int curVal; curVal = (b.barW * 100) / v1.vsizex;
+        b.barW = Print_ToVirtual(width - Print_ToPixel(barDiffX, PS_X), PS_X);
+        barWidth = Print_ToPixel((b.barW * 100) / curVal, PS_X);
+    } else {
+        barWidth = width;
+        if (width == 0) { b.barW = 0; };
+    };
+
+    var int barHeight;
+    if (height > 0) {
+        barHeight = Print_ToPixel(v0.vsizey - barDiffY, PS_Y);
+    } else {
+        barHeight = height;
+    };
+
+    View_ResizePxl(b.v1, barWidth, barHeight);
+};
+
+//========================================
 // Bar Alpha
 //========================================
 func void Bar_SetAlpha(var int bar, var int alpha) {
