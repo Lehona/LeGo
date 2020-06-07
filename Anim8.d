@@ -39,6 +39,14 @@ func void A8Head_UnArchiver(var A8Head this) {
     if(PM_Exists("dif"))   { this.dif  = PM_LoadInt("dif");      };
     if(PM_Exists("ddif"))  { this.ddif = PM_LoadInt("ddif");     };
     this.queue = PM_Load("queue");
+
+    // Fix function signature of invalid functions
+    if (this.dfnc == MEM_GetFuncPtr(_PM_EmptyFunc_int)) {
+        this.dfnc = MEM_GetFuncPtr(_PM_EmptyFunc_void);
+    };
+    if (this.fnc == MEM_GetFuncPtr(_PM_EmptyFunc_int)) && (this.data) {
+        this.fnc = MEM_GetFuncPtr(_PM_EmptyFunc_int_int);
+    };
 };
 
 
