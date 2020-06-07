@@ -24,7 +24,7 @@ class Bar {
 prototype GothicBar(Bar) {
     x = Print_Screen[PS_X] / 2;
     y = Print_Screen[PS_Y] - 20;
-    barTop = 3;
+    barTop = MEMINT_SwitchG1G2(2, 3);
     barLeft = 7;
     width = 180;
     height = 20;
@@ -129,8 +129,11 @@ func int Bar_Create(var int inst) {
     v = View_Get(b.v1);
     v.fxOpen = 0;
     v.fxClose = 0;
-    View_Open(b.v0);
-    View_Open(b.v1);
+    MEM_Call(_Bar_PlayerStatus);
+    if (MEM_PopIntResult()) {
+        View_Open(b.v0);
+        View_Open(b.v1);
+    };
     Bar_SetValue(bh, bu.value);
     free(ptr, inst);
     return bh;
@@ -268,6 +271,27 @@ func void Bar_SetBarTexture(var int bar, var string barTex)
     if(!Hlp_IsValidHandle(bar)) { return; };
     var _bar b; b = get(bar);
     View_SetTexture(b.v1, barTex);
+};
+
+//========================================
+// Auto-hide bars
+//========================================
+func int _Bar_PlayerStatus() {
+    return (Hlp_IsValidNpc(hero)) && (MEM_Game.showPlayerStatus);
+};
+func void _Bar_Update() {
+    MEM_InitGlobalInst();
+    var int status; status = _Bar_PlayerStatus();
+
+    const int SET = 0;
+    if (SET != status) {
+        SET = status;
+        if (SET) {
+            foreachHndl(_bar@, Bar_Show);
+        } else {
+            foreachHndl(_bar@, Bar_Hide);
+        };
+    };
 };
 
 //========================================
