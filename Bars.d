@@ -179,6 +179,9 @@ func void Bar_MoveTo(var int bar, var int x, var int y) {
 	View_Move(b.v0, x, y);
 	View_Move(b.v1, x, y);
 };
+func void Bar_MoveToPxl(var int bar, var int x, var int y) {
+    Bar_MoveTo(bar, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
+};
 
 //========================================
 // Bar Resize
@@ -186,30 +189,56 @@ func void Bar_MoveTo(var int bar, var int x, var int y) {
 func void Bar_Resize(var int bar, var int width, var int height) {
     if(!Hlp_IsValidHandle(bar)) { return; };
     var _bar b; b = get(bar);
+
+    // Remember center position
     var zCView v0; v0 = View_Get(b.v0);
+    var int vCenterX; vCenterX = v0.vposx + (v0.vsizex>>1);
+    var int vCenterY; vCenterY = v0.vposy + (v0.vsizey>>1);
+
+    // Scale inner view offset
     var zCView v1; v1 = View_Get(b.v1);
     var int barDiffX; barDiffX = v0.vsizex - b.barW;
     var int barDiffY; barDiffY = v0.vsizey - v1.vsizey;
-    View_ResizePxl(b.v0, width, height);
+    var int scaleX; scaleX = fracf(width, v0.vsizex);
+    var int scaleY; scaleY = fracf(height, v0.vsizey);
+    barDiffX = roundf(mulf(mkf(barDiffX), scaleX));
+    barDiffY = roundf(mulf(mkf(barDiffY), scaleY));
 
-    var int barWidth;
+    // Update outer view
+    View_Resize(b.v0, width, height);
+
+    // Calculate inner view width
+    var int barWidth; var int barX;
     if (width > 0) {
-        var int curVal; curVal = (b.barW * 100) / v1.vsizex;
-        b.barW = Print_ToVirtual(width - Print_ToPixel(barDiffX, PS_X), PS_X);
-        barWidth = Print_ToPixel((b.barW * 100) / curVal, PS_X);
+        var int curVal; curVal = fracf(b.barW, v1.vsizex);
+        b.barW = width - barDiffX;
+        barWidth = roundf(divf(mkf(b.barW), curVal));
+        barX = (v0.vposx + roundf(fracf(barDiffX, 2))) - v1.vposx;
     } else {
         barWidth = width;
+        barX = 0;
         if (width == 0) { b.barW = 0; };
     };
 
-    var int barHeight;
+    // Calculate inner view height
+    var int barHeight; var int barY;
     if (height > 0) {
-        barHeight = Print_ToPixel(v0.vsizey - barDiffY, PS_Y);
+        barHeight = v0.vsizey - barDiffY;
+        barY = (v0.vposy + roundf(fracf(barDiffY, 2))) - v1.vposy;
     } else {
         barHeight = height;
+        barY = 0;
     };
 
-    View_ResizePxl(b.v1, barWidth, barHeight);
+    // Update inner view
+    View_Resize(b.v1, barWidth, barHeight);
+    View_Move(b.v1, barX, barY);
+
+    // Re-center bar
+    Bar_MoveTo(bar, vCenterX, vCenterY);
+};
+func void Bar_ResizePxl(var int bar, var int x, var int y) {
+    Bar_Resize(bar, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
 };
 
 //========================================
