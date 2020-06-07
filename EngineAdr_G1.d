@@ -22,6 +22,7 @@ const int oCGame__changeLevelEnd                    = 6542428; //0x63D45C Hook: 
 const int oCGame__Render                            = 6544352; //Hook: FrameFunctions
 const int oCGame__RenderX                           = 6544518; //
 const int oCGame__UpdateStatus                      = 6526632; //Hook: Focusnames
+const int oCGame__UpdateScreenResolution            = 6523984; //0x638C50 Hook: Bars
 const int oCItem__Render                            = 6762352; //
 const int oCNpc__CloseInventory                     = 7058164; // Hook: Quickslots
 //const int oCNpc__DropUnconscious                    = 7560880; //0x735EB0 Hook: Shields*/

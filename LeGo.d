@@ -239,6 +239,10 @@ func void LeGo_InitGamestart(var int f) {
     if(f & LeGo_Interface) {
         Print_fixPS();
     };
+
+    if(f & LeGo_Bars) {
+        HookEngineF(oCGame__UpdateScreenResolution, 5, _Bar_UpdateResolution);
+    };
 };
 
 //========================================

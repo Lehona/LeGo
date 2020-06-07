@@ -270,14 +270,58 @@ func void Bar_SetBarTexture(var int bar, var string barTex)
     View_SetTexture(b.v1, barTex);
 };
 
+//========================================
+// Update bar to new screen resolution
+//========================================
+const int _Bar_screen_x = 0;
+const int _Bar_screen_y = 0;
 
+func void _Bar_UpdateResolution() {
+    // To be safe, backup the last resolution manually. Someone might have called Print_GetScreenSize in the meantime!
+    Print_GetScreenSize();
 
+    // Update all bar sizes on change of screen resolution
+    if (_Bar_screen_x != Print_Screen[PS_X]) || (_Bar_screen_y != Print_Screen[PS_Y]) {
 
+        // On first call (usually right after Init_Global), record screen size without any changes
+        if (_Bar_screen_x) {
+            foreachHndl(_bar@, _Bar_UpdateSize);
+        };
 
+        _Bar_screen_x = Print_Screen[PS_X];
+        _Bar_screen_y = Print_Screen[PS_Y];
+    };
+};
+func void _Bar_UpdateSize(var int bar) {
+    var _bar b; b = get(bar);
+    var zCView v; v = View_Get(b.v0);
 
+    // Resizing to same pixel size
+    var int changeX; changeX = fracf(_Bar_screen_x, Print_Screen[PS_X]);
+    var int changeY; changeY = fracf(_Bar_screen_y, Print_Screen[PS_Y]);
+    var int width;  width  = roundf(mulf(mkf(v.vsizex), changeX));
+    var int height; height = roundf(mulf(mkf(v.vsizey), changeY));
 
+    // Repositioning to same pixel coordinates (Gothic places bars at pixel positions!)
+    // To mind the aspect ratio changes, position relative to either left/top or right/bottom of screen
+    var int x; var int y;
+    if (v.vposx < PS_VMax/2) {
+        var int pixelsFromLeft;  pixelsFromLeft = Print_ToPixel(v.vposx, _Bar_screen_x);
+        x = Print_ToVirtual(pixelsFromLeft, PS_X);
+    } else {
+        var int pixelsFromRight; pixelsFromRight = _Bar_screen_x - Print_ToPixel(v.vposx, _Bar_screen_x);
+        x = Print_ToVirtual(Print_Screen[PS_X] - pixelsFromRight, PS_X);
+    };
+    if (v.vposy < PS_VMax/2) {
+        var int pixelsFromTop;  pixelsFromTop = Print_ToPixel(v.vposy, _Bar_screen_y);
+        y = Print_ToVirtual(pixelsFromTop, PS_Y);
+    } else {
+        var int pixelsFromBottom; pixelsFromBottom = _Bar_screen_y - Print_ToPixel(v.vposy, _Bar_screen_y);
+        y = Print_ToVirtual(Print_Screen[PS_Y] - pixelsFromBottom, PS_Y);
+    };
+    x += width>>1;
+    y += height>>1;
 
-
-
-
-
+    Bar_Resize(bar, width, height);
+    Bar_MoveTo(bar, x, y);
+};
