@@ -327,21 +327,30 @@ func void _Bar_UpdateSize(var int bar) {
     var int height; height = roundf(mulf(mkf(v.vsizey), changeY));
 
     // Repositioning to same pixel coordinates (Gothic places bars at pixel positions!)
-    // To mind the aspect ratio changes, position relative to either left/top or right/bottom of screen
-    var int x; var int y;
-    if (v.vposx < PS_VMax/2) {
+    // Since the pixel size is the same across resolutions, the positions need to be too to keep gaps between bars
+    // To mind the aspect ratio changes, position relative to either left/top, center/middle or right/bottom of screen
+    var int x; var int y; var int pos;
+    pos = v.vposx + (v.vsizex>>1);
+    if (pos < (PS_VMax + 1) / 3) { // Left third of the screen
         var int pixelsFromLeft;  pixelsFromLeft = Print_ToPixel(v.vposx, _Bar_screen_x);
         x = Print_ToVirtual(pixelsFromLeft, PS_X);
-    } else {
+    } else if (pos >= (PS_VMax + 1) /3 * 2) { // Right third of the screen
         var int pixelsFromRight; pixelsFromRight = _Bar_screen_x - Print_ToPixel(v.vposx, _Bar_screen_x);
         x = Print_ToVirtual(Print_Screen[PS_X] - pixelsFromRight, PS_X);
+    } else { // Center segment
+        var int pixelsFromCenter; pixelsFromCenter = (_Bar_screen_x / 2) - Print_ToPixel(v.vposx, _Bar_screen_x);
+        x = Print_ToVirtual(Print_Screen[PS_X] / 2 - pixelsFromCenter, PS_X);
     };
-    if (v.vposy < PS_VMax/2) {
+    pos = v.vposy + (v.vsizey>>1);
+    if (pos < (PS_VMax + 1) / 3) { // Lower third of the screen
         var int pixelsFromTop;  pixelsFromTop = Print_ToPixel(v.vposy, _Bar_screen_y);
         y = Print_ToVirtual(pixelsFromTop, PS_Y);
-    } else {
+    } else if (pos >= (PS_VMax + 1) /3 * 2) { // Upper third of the screen
         var int pixelsFromBottom; pixelsFromBottom = _Bar_screen_y - Print_ToPixel(v.vposy, _Bar_screen_y);
         y = Print_ToVirtual(Print_Screen[PS_Y] - pixelsFromBottom, PS_Y);
+    } else { // Middle segment
+        var int pixelsFromMiddle; pixelsFromMiddle = (_Bar_screen_y / 2) - Print_ToPixel(v.vposy, _Bar_screen_y);
+        y = Print_ToVirtual(Print_Screen[PS_Y] / 2 - pixelsFromMiddle, PS_Y);
     };
     x += width>>1;
     y += height>>1;
