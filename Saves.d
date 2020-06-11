@@ -111,6 +111,12 @@ func void _BR_LoadGame() {
         };
         BR_Savegame();
         BR_Close();
+    } else if(_LeGo_Flags & LeGo_PermMem) {
+        // If PermMem was not part of a previous version of the mod, initialize it fresh (copied from LeGo_InitAlways)
+        _PM_Reset();
+        HandlesPointer = _HT_Create();
+        HandlesInstance = _HT_Create();
+        _PM_CreateForeachTable();
     };
     if(_LeGo_Flags & LeGo_Gamestate) {
         _Gamestate_Init(Gamestate_Loaded);

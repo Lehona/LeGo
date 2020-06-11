@@ -138,43 +138,46 @@ func void LeGo_InitAlways(var int f) {
         };
     };
 
-    if(!_LeGo_Loaded) {
-
-
-        if(f & LeGo_Gamestate) {
+    if(f & LeGo_Gamestate) {
+        if(!_LeGo_Loaded) {
             _Gamestate_Init(Gamestate_NewGame);
         };
+    };
 
-        if(f & LeGo_Buttons) {
-            FF_Apply(Buttons_Do);
-        };
+    if(f & LeGo_Buttons) {
+        FF_ApplyOnce(Buttons_Do);
+    };
 
-        if(f & LeGo_Bloodsplats) {
-            FF_Apply(_Bloodsplats_Loop);
-        };
+    if(f & LeGo_Bloodsplats) {
+        FF_ApplyOnce(_Bloodsplats_Loop);
+    };
 
-        if(f & LeGo_Anim8) {
-            FF_ApplyGT(_Anim8_FFLoop);
-        };
+    if(f & LeGo_Anim8) {
+        FF_ApplyOnceGT(_Anim8_FFLoop);
+    };
 
-        if(f & LeGo_Cursor) {
+    if(f & LeGo_Cursor) {
+        if (!Cursor_Event) {
             Cursor_Event = Event_Create();
         };
+    };
 
-        if (f & LeGo_Render) {
-            _render_list = new(zCList@);
+    if (f & LeGo_Buffs) {
+        if (!bufflist_hero) {
+            Bufflist_Init();
         };
-        if (f & LeGo_Buffs) {
-                Bufflist_Init();
+    };
+
+    if (f & LeGo_Names) {
+        if (!_LeGo_Loaded) || (!_nrTalents) {
+            Talent_Names = TAL_CreateTalent();
         };
-
-        if (f & LeGo_Names) {
-			Talent_Names = TAL_CreateTalent();
-		};
-
     };
 
     if (f & LeGo_Render) {
+        if (!_render_list) {
+            _render_list = new(zCList@);
+        };
         _Render_RestorePointer();
         GameState_AddListener(_Render_RestorePointer_Listener);
     };
