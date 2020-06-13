@@ -317,15 +317,27 @@ func int _Buttons_Do_Sub(var int btn_hndl) {
 			if (Cursor_Left==KEY_PRESSED) {
 				MEM_PushIntParam(btn_hndl);
 				MEM_CallByID(btn.on_click);
+				// Might have been deleted just now
+				if (!Hlp_IsValidHandle(btn_hndl)) {
+					return rContinue;
+				};
 			};
 			if ((btn.state & BUTTON_ENTERED)==0) {
 				MEM_PushIntParam(btn_hndl);
 				MEM_CallByID(btn.on_enter);
+				// Might have been deleted just now
+				if (!Hlp_IsValidHandle(btn_hndl)) {
+					return rContinue;
+				};
 				btn.state = btn.state | BUTTON_ENTERED;
 			};
 		} else if (btn.state & BUTTON_ENTERED) {
 			MEM_PushIntParam(btn_hndl);
 			MEM_CallByID(btn.on_leave);
+			// Might have been deleted just now
+			if (!Hlp_IsValidHandle(btn_hndl)) {
+				return rContinue;
+			};
 			btn.state = btn.state & ~BUTTON_ENTERED;
 		}; 
 	};
