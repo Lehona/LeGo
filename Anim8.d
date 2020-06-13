@@ -244,6 +244,10 @@ func int _Anim8_Loop(var int hndl) {
             roundf(h.value);
         };
         MEM_CallByPtr(h.fnc);
+        // Might have been deleted just now
+        if (!Hlp_IsValidHandle(hndl)) {
+            return rContinue;
+        };
     };
 
     if(gef(t, c.timeSpan)) {
