@@ -268,6 +268,10 @@ func void _Buff_Dispatcher(var int bh) { // This is called every tick and is res
 		if (b.onTick) {
 			bh;
 			MEM_CallByID(b.onTick);
+			// Might have been deleted just now
+			if (!Hlp_IsValidHandle(bh)) {
+				return;
+			};
 		};
 
 		b.nextTickNr += 1;
@@ -285,6 +289,10 @@ func int Buff_Apply(var c_npc npc, var int buff) {
 		if (b.OnApply) {
 				bh;
 				MEM_CallByID(b.OnApply);
+				// Might have been deleted just now (would make little sense)
+				if (!Hlp_IsValidHandle(bh)) {
+					return -1;
+				};
 		};
 		b.nextTickNr = 1;
 
