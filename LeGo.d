@@ -157,13 +157,13 @@ func void LeGo_InitAlways(var int f) {
     };
 
     if(f & LeGo_Cursor) {
-        if (!Cursor_Event) {
+        if (!Hlp_IsValidHandle(Cursor_Event)) {
             Cursor_Event = Event_Create();
         };
     };
 
     if (f & LeGo_Buffs) {
-        if (!bufflist_hero) {
+        if (!Hlp_IsValidHandle(bufflist_hero)) {
             Bufflist_Init();
         };
     };
@@ -175,7 +175,7 @@ func void LeGo_InitAlways(var int f) {
     };
 
     if (f & LeGo_Render) {
-        if (!_render_list) {
+        if (!Hlp_IsValidHandle(_render_list)) {
             _render_list = new(zCList@);
         };
         _Render_RestorePointer();
