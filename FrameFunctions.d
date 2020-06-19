@@ -45,6 +45,11 @@ func void FFItem_Unarchiver(var FFItem this) {
 	if (PM_Exists("gametime")) {
 		this.gametime = PM_Load("gametime");
 	};
+
+    // Fix function signature of invalid functions
+    if (this.fncID == MEM_GetFuncPtr(_PM_EmptyFunc_int)) && (!this.hasData) {
+        this.fncID = MEM_GetFuncPtr(_PM_EmptyFunc_void);
+    };
 };
 
 var int _FF_Symbol;
@@ -135,6 +140,10 @@ func void FF_ApplyOnceExtGT(var func function, var int delay, var int cycles) {
 //========================================
 func void FF_ApplyOnce(var func function) {
     FF_ApplyOnceExt(function, 0, -1);
+};
+
+func void FF_ApplyOnceGT(var func function) {
+    FF_ApplyOnceExtGT(function, 0, -1);
 };
 
 //========================================

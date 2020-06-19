@@ -138,6 +138,11 @@ func void callbackData_Unarchiver(var callbackData this) {
 	};
 	this.userData = PM_Load("userData");
 	this.hasData = PM_Load("hasData");
+
+	// Fix function signature of invalid functions
+	if (this.funcID == MEM_GetFuncID(_PM_EmptyFunc_int)) && (!this.hasData) {
+		this.funcID = MEM_GetFuncID(_PM_EmptyFunc_void);
+	};
 };
 
 func int _CQ_CBData(var int ID, var int uData, var int hData) {

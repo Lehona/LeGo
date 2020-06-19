@@ -132,31 +132,17 @@ func void Print_GetScreenSize() {
 //========================================
 // Pixel in Virtuelle Koordinaten
 //========================================
-func int Print_ToVirtual(var int pxl, var int dim) {
+func int Print_ToVirtualF(var int pxl, var int dim) {
     Print_GetScreenSize();
-    pxl *= 8192;
+    pxl *= PS_VMax;
     if(dim == PS_X) {
-        return pxl / Print_Screen[PS_X];
+        return fracf(pxl, Print_Screen[PS_X]);
     }
     else if(dim == PS_Y) {
-        return pxl / Print_Screen[PS_Y];
+        return fracf(pxl, Print_Screen[PS_Y]);
     };
-    return pxl / dim;
+    return fracf(pxl, dim);
 };
-func int Print_ToPixel(var int vrt, var int dim) {
-    Print_GetScreenSize();
-    if(dim == PS_X) {
-        vrt *= Print_Screen[PS_X];
-    }
-    else if(dim == PS_Y) {
-        vrt *= Print_Screen[PS_Y];
-    }
-    else {
-        vrt *= dim;
-    };
-    return vrt / 8192;
-};
-
 func int Print_ToPixelF(var int vrt, var int dim) {
     Print_GetScreenSize();
     if(dim == PS_X) {
@@ -170,6 +156,14 @@ func int Print_ToPixelF(var int vrt, var int dim) {
     };
     return fracf(vrt, PS_VMax);
 };
+
+func int Print_ToVirtual(var int pxl, var int dim) {
+    return roundf(Print_ToVirtualF(pxl, dim));
+};
+func int Print_ToPixel(var int vrt, var int dim) {
+    return roundf(Print_ToPixelF(vrt, dim));
+};
+
 
 func int Print_ToRatio(var int size, var int dim) {
     if (dim == PS_Y) {

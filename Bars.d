@@ -24,7 +24,7 @@ class Bar {
 prototype GothicBar(Bar) {
     x = Print_Screen[PS_X] / 2;
     y = Print_Screen[PS_Y] - 20;
-    barTop = 3;
+    barTop = MEMINT_SwitchG1G2(2, 3);
     barLeft = 7;
     width = 180;
     height = 20;
@@ -129,8 +129,11 @@ func int Bar_Create(var int inst) {
     v = View_Get(b.v1);
     v.fxOpen = 0;
     v.fxClose = 0;
-    View_Open(b.v0);
-    View_Open(b.v1);
+    MEM_Call(_Bar_PlayerStatus);
+    if (MEM_PopIntResult()) {
+        View_Open(b.v0);
+        View_Open(b.v1);
+    };
     Bar_SetValue(bh, bu.value);
     free(ptr, inst);
     return bh;
@@ -179,6 +182,67 @@ func void Bar_MoveTo(var int bar, var int x, var int y) {
 	View_Move(b.v0, x, y);
 	View_Move(b.v1, x, y);
 };
+func void Bar_MoveToPxl(var int bar, var int x, var int y) {
+    Bar_MoveTo(bar, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
+};
+
+//========================================
+// Bar Resize
+//========================================
+func void Bar_Resize(var int bar, var int width, var int height) {
+    if(!Hlp_IsValidHandle(bar)) { return; };
+    var _bar b; b = get(bar);
+
+    // Remember center position
+    var zCView v0; v0 = View_Get(b.v0);
+    var int vCenterX; vCenterX = v0.vposx + (v0.vsizex>>1);
+    var int vCenterY; vCenterY = v0.vposy + (v0.vsizey>>1);
+
+    // Scale inner view offset
+    var zCView v1; v1 = View_Get(b.v1);
+    var int barDiffX; barDiffX = v0.vsizex - b.barW;
+    var int barDiffY; barDiffY = v0.vsizey - v1.vsizey;
+    var int scaleX; scaleX = fracf(width, v0.vsizex);
+    var int scaleY; scaleY = fracf(height, v0.vsizey);
+    barDiffX = roundf(mulf(mkf(barDiffX), scaleX));
+    barDiffY = roundf(mulf(mkf(barDiffY), scaleY));
+
+    // Update outer view
+    View_Resize(b.v0, width, height);
+
+    // Calculate inner view width
+    var int barWidth; var int barX;
+    if (width > 0) {
+        var int curVal; curVal = fracf(b.barW, v1.vsizex);
+        b.barW = width - barDiffX;
+        barWidth = roundf(divf(mkf(b.barW), curVal));
+        barX = (v0.vposx + roundf(fracf(barDiffX, 2))) - v1.vposx;
+    } else {
+        barWidth = width;
+        barX = 0;
+        if (width == 0) { b.barW = 0; };
+    };
+
+    // Calculate inner view height
+    var int barHeight; var int barY;
+    if (height > 0) {
+        barHeight = v0.vsizey - barDiffY;
+        barY = (v0.vposy + roundf(fracf(barDiffY, 2))) - v1.vposy;
+    } else {
+        barHeight = height;
+        barY = 0;
+    };
+
+    // Update inner view
+    View_Resize(b.v1, barWidth, barHeight);
+    View_Move(b.v1, barX, barY);
+
+    // Re-center bar
+    Bar_MoveTo(bar, vCenterX, vCenterY);
+};
+func void Bar_ResizePxl(var int bar, var int x, var int y) {
+    Bar_Resize(bar, Print_ToVirtual(x, PS_X), Print_ToVirtual(y, PS_Y));
+};
 
 //========================================
 // Bar Alpha
@@ -209,14 +273,88 @@ func void Bar_SetBarTexture(var int bar, var string barTex)
     View_SetTexture(b.v1, barTex);
 };
 
+//========================================
+// Auto-hide bars
+//========================================
+func int _Bar_PlayerStatus() {
+    return (Hlp_IsValidNpc(hero)) && (MEM_Game.showPlayerStatus);
+};
+func void _Bar_Update() {
+    MEM_InitGlobalInst();
+    var int status; status = _Bar_PlayerStatus();
 
+    const int SET = 0;
+    if (SET != status) {
+        SET = status;
+        if (SET) {
+            foreachHndl(_bar@, Bar_Show);
+        } else {
+            foreachHndl(_bar@, Bar_Hide);
+        };
+    };
+};
 
+//========================================
+// Update bar to new screen resolution
+//========================================
+const int _Bar_screen_x = 0;
+const int _Bar_screen_y = 0;
 
+func void _Bar_UpdateResolution() {
+    // To be safe, backup the last resolution manually. Someone might have called Print_GetScreenSize in the meantime!
+    Print_GetScreenSize();
 
+    // Update all bar sizes on change of screen resolution
+    if (_Bar_screen_x != Print_Screen[PS_X]) || (_Bar_screen_y != Print_Screen[PS_Y]) {
 
+        // On first call (usually right after Init_Global), record screen size without any changes
+        if (_Bar_screen_x) {
+            foreachHndl(_bar@, _Bar_UpdateSize);
+        };
 
+        _Bar_screen_x = Print_Screen[PS_X];
+        _Bar_screen_y = Print_Screen[PS_Y];
+    };
+};
+func void _Bar_UpdateSize(var int bar) {
+    var _bar b; b = get(bar);
+    var zCView v; v = View_Get(b.v0);
 
+    // Resizing to same pixel size
+    var int changeX; changeX = fracf(_Bar_screen_x, Print_Screen[PS_X]);
+    var int changeY; changeY = fracf(_Bar_screen_y, Print_Screen[PS_Y]);
+    var int width;  width  = roundf(mulf(mkf(v.vsizex), changeX));
+    var int height; height = roundf(mulf(mkf(v.vsizey), changeY));
 
+    // Repositioning to same pixel coordinates (Gothic places bars at pixel positions!)
+    // Since the pixel size is the same across resolutions, the positions need to be too to keep gaps between bars
+    // To mind the aspect ratio changes, position relative to either left/top, center/middle or right/bottom of screen
+    var int x; var int y; var int pos;
+    pos = v.vposx + (v.vsizex>>1);
+    if (pos < (PS_VMax + 1) / 3) { // Left third of the screen
+        var int pixelsFromLeft;  pixelsFromLeft = Print_ToPixel(v.vposx, _Bar_screen_x);
+        x = Print_ToVirtual(pixelsFromLeft, PS_X);
+    } else if (pos >= (PS_VMax + 1) /3 * 2) { // Right third of the screen
+        var int pixelsFromRight; pixelsFromRight = _Bar_screen_x - Print_ToPixel(v.vposx, _Bar_screen_x);
+        x = Print_ToVirtual(Print_Screen[PS_X] - pixelsFromRight, PS_X);
+    } else { // Center segment
+        var int pixelsFromCenter; pixelsFromCenter = (_Bar_screen_x / 2) - Print_ToPixel(v.vposx, _Bar_screen_x);
+        x = Print_ToVirtual(Print_Screen[PS_X] / 2 - pixelsFromCenter, PS_X);
+    };
+    pos = v.vposy + (v.vsizey>>1);
+    if (pos < (PS_VMax + 1) / 3) { // Lower third of the screen
+        var int pixelsFromTop;  pixelsFromTop = Print_ToPixel(v.vposy, _Bar_screen_y);
+        y = Print_ToVirtual(pixelsFromTop, PS_Y);
+    } else if (pos >= (PS_VMax + 1) /3 * 2) { // Upper third of the screen
+        var int pixelsFromBottom; pixelsFromBottom = _Bar_screen_y - Print_ToPixel(v.vposy, _Bar_screen_y);
+        y = Print_ToVirtual(Print_Screen[PS_Y] - pixelsFromBottom, PS_Y);
+    } else { // Middle segment
+        var int pixelsFromMiddle; pixelsFromMiddle = (_Bar_screen_y / 2) - Print_ToPixel(v.vposy, _Bar_screen_y);
+        y = Print_ToVirtual(Print_Screen[PS_Y] / 2 - pixelsFromMiddle, PS_Y);
+    };
+    x += width>>1;
+    y += height>>1;
 
-
-
+    Bar_Resize(bar, width, height);
+    Bar_MoveTo(bar, x, y);
+};

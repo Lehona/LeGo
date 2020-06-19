@@ -248,15 +248,16 @@ func void foreachHndl(var int inst, var func fnc) {
     MEM_Copy(z.array, a, l);
     var int i; i = 0;
     var int o; o = MEM_GetFuncPtr(fnc);
-    var int p; p = MEM_StackPos.position;
+    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
     while(i < l);
         var int h; h = MEM_ReadInt(a+(i<<2)); //handle
         if(_HT_Get(HandlesPointer, h)) {
             h;
             MEM_CallByPtr(o);
-            if(MEM_PopIntResult() == rBreak) {
-                break;
-                // i = l;
+            if(fsymb.offset) {
+                if(MEM_PopIntResult() == rBreak) {
+                    break;
+                };
             };
         };
         i += 1;
@@ -1212,6 +1213,23 @@ func void _PM_ReadClass() {
     _PM_Tabs -= 1;
 };
 
+func void _PM_SkipClass() {
+    if(STR_Compare(_PM_TextLine(), "{")) {
+        _PM_Error(ConcatStrings("'{' erwartet. ", _PM_Head.instName));
+        return;
+    };
+
+    _PM_Tabs += 1;
+
+    var int p; p = MEM_StackPos.position;
+    var string str; str = _PM_TextLine();
+    if (STR_Compare(str, "}")) {
+        MEM_StackPos.position = p;
+    };
+
+    _PM_Tabs -= 1;
+};
+
 func void _PM_ReadSaveStruct() {
     // Speicherkopf vorbereiten
     if(_PM_HeadPtr) {
@@ -1237,12 +1255,20 @@ func void _PM_ReadSaveStruct() {
     _PM_Head.inst = MEM_FindParserSymbol(_PM_Head.instName);
     if(_PM_Head.inst == -1) {
         _PM_Error(ConcatStrings("Unbekannte Instanz: ", _PM_Head.instName));
+        _PM_SkipClass();
+        _PM_Head = MEM_NullToInst();
+        free(_PM_HeadPtr, _PM_SaveStruct@);
+        _PM_HeadPtr = 0;
         return;
     };
 
     var int classPtr; classPtr = MEM_GetParserSymbol(_PM_Head.className);
     if(!classPtr) {
         _PM_Error(ConcatStrings("Unbekannte Klasse: ", _PM_Head.className));
+        _PM_SkipClass();
+        _PM_Head = MEM_NullToInst();
+        free(_PM_HeadPtr, _PM_SaveStruct@);
+        _PM_HeadPtr = 0;
         return;
     };
 
@@ -1429,13 +1455,15 @@ func void _PM_Unarchive() {
 
         _PM_ReadSaveStruct();
         _PM_SearchObjCache = "";
-        _PM_SaveStructToInst();
+        if (_PM_HeadPtr) {
+            _PM_SaveStructToInst();
+
+            _HT_Insert(HandlesPointer, _PM_Head.currOffs, i);
+            _HT_Insert(HandlesInstance, _PM_Head.inst, i);
+        };
 
         BR_NextLine();
         _PM_Line += 1;
-
-        _HT_Insert(HandlesPointer, _PM_Head.currOffs, i);
-        _HT_Insert(HandlesInstance, _PM_Head.inst, i);
 
         MEM_StackPos.position = p;
     }
@@ -1649,8 +1677,16 @@ func string PM_LoadString(var string name) {
     return os.content;
 };
 
+func void _PM_EmptyFunc_void() {};
+func void _PM_EmptyFunc_int(var int i) {};
+func void _PM_EmptyFunc_int_int(var int i, var int j) {};
+
 func int PM_LoadFuncID(var string name) {
-    return MEM_FindParserSymbol(PM_LoadString(name));
+    var int funcID; funcID = MEM_FindParserSymbol(PM_LoadString(name));
+    if (funcID == -1) {
+        funcID = MEM_GetFuncID(_PM_EmptyFunc_int); // Most common function signature in LeGo classes
+    };
+    return funcID;
 };
 
 func int PM_LoadFuncOffset(var string name) {

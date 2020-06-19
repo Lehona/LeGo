@@ -92,17 +92,11 @@ func void _Button_Delete(var _Button btn) {
 
 func void Button_Null(var int hndl) {};
 
-const int MAX_BUTTONS = 256;
-var int _Buttons[MAX_BUTTONS]; // Wer mehr Buttons hat, hat doch 'nen Rad ab :) Kann aber auch gerne erweitert werden.
-var int _Buttons_NextSlot;
 instance _Button@(_Button);
 
 //(posx|posy) refers to the upper left corner
 func int Button_Create(var int posx, var int posy, var int width, var int height, var string tex, var func on_enter, var func on_leave, var func on_click) {
-	if (_Buttons_NextSlot == MAX_BUTTONS) {
-		return 0;
-	};
-	
+		
 	var int button; button = new(_Button@);
 	var _Button btn; btn = get(button);
 	
@@ -123,9 +117,6 @@ func int Button_Create(var int posx, var int posy, var int width, var int height
 	
 	View_SetTexture(btn.view, tex);
 			
-				
-	MEM_WriteStatArr(_Buttons, _Buttons_NextSlot, button);
-	_Buttons_NextSlot += 1;
 	return button+0;
 };
 
@@ -137,20 +128,8 @@ func void Button_Delete(var int hndl) {
 	if (!Hlp_IsValidHandle(hndl)) {
 		return;
 	};
-	var int i; i = 0;
-	var int pos; pos = MEM_StackPos.position;
-	if (i >= _Buttons_NextSlot) {
-		return;
-	};
-	if (MEM_ReadStatArr(_Buttons, i) == hndl) {
-		delete(hndl);
-		var int tmp; tmp = MEM_ReadStatArr(_Buttons, _Buttons_NextSlot-1); // Letztes Element
-		MEM_WriteStatArr(_Buttons, i, tmp);
-		MEM_WriteStatArr(_Buttons, _Buttons_NextSlot-1, 0);
-		_Buttons_NextSlot -= 1; // Array verkleinern
-	};
-	i += 1;
-	MEM_StackPos.position = pos;
+	
+	delete(hndl);
 };
 	
 
@@ -205,6 +184,7 @@ func void Button_DeleteMouseover() {
 	
 	View_Close(_BUTTON_MO);
 };
+
 func void Button_CreateMouseover(var string text, var string font) {
 	var int len; var int max; max = 0; var int i; i = 0; var int pos; pos = MEM_StackPos.position; 
 	
@@ -251,6 +231,7 @@ func void Button_Activate(var int hndl) {
 func void Button_Deactivate(var int hndl) {
 	var _Button btn; btn = get(hndl);
 	if (btn.state & BUTTON_ENTERED) {
+		MEM_PushIntParam(hndl);
 		MEM_CallByID(btn.on_leave);
 	};
 	btn.state = 0; // Purge all data
@@ -326,6 +307,43 @@ func int Button_GetCaptionPtr(var int hndl) {
 	return v.textLines_next;
 };
 
+func int _Buttons_Do_Sub(var int btn_hndl) {
+	var _Button btn; btn = get(btn_hndl);
+
+	var int CY; CY = Print_ToVirtual(CURSOR_Y, PS_Y);
+	var int CX; CX = Print_ToVirtual(CURSOR_X, PS_X);
+	if (btn.state & BUTTON_ACTIVE) {
+		if (btn.posx <= CX && btn.posx2 >= CX && btn.posy <= CY && btn.posy2 >= CY) {
+			if (Cursor_Left==KEY_PRESSED) {
+				MEM_PushIntParam(btn_hndl);
+				MEM_CallByID(btn.on_click);
+				// Might have been deleted just now
+				if (!Hlp_IsValidHandle(btn_hndl)) {
+					return rContinue;
+				};
+			};
+			if ((btn.state & BUTTON_ENTERED)==0) {
+				MEM_PushIntParam(btn_hndl);
+				MEM_CallByID(btn.on_enter);
+				// Might have been deleted just now
+				if (!Hlp_IsValidHandle(btn_hndl)) {
+					return rContinue;
+				};
+				btn.state = btn.state | BUTTON_ENTERED;
+			};
+		} else if (btn.state & BUTTON_ENTERED) {
+			MEM_PushIntParam(btn_hndl);
+			MEM_CallByID(btn.on_leave);
+			// Might have been deleted just now
+			if (!Hlp_IsValidHandle(btn_hndl)) {
+				return rContinue;
+			};
+			btn.state = btn.state & ~BUTTON_ENTERED;
+		}; 
+	};
+
+	return rContinue;
+};
 	
 func void Buttons_Do() {
 	var _Button btn;
@@ -341,35 +359,8 @@ func void Buttons_Do() {
 		};
 		View_MoveToPxl(_BUTTON_MO, x, y);
 	};
-	var int i; i = 0;
-	var int pos; pos = MEM_StackPos.position;
-		if (i >= _Buttons_NextSlot) {
-			return;
-		};
-		
-		btn = get(MEM_ReadStatArr(_Buttons, i));
-		var int CY; CY = Print_ToVirtual(CURSOR_Y, PS_Y);
-		var int CX; CX = Print_ToVirtual(CURSOR_X, PS_X);
-		if (btn.state & BUTTON_ACTIVE) {
-			if (btn.posx <= CX && btn.posx2 >= CX && btn.posy <= CY && btn.posy2 >= CY) {
-				if (Cursor_Left==KEY_PRESSED) {
-					MEM_PushIntParam(MEM_ReadStatArr(_Buttons, i));
-					MEM_CallByID(btn.on_click);
-				};
-				if ((btn.state & BUTTON_ENTERED)==0) {
-					MEM_PushIntParam(MEM_ReadStatArr(_Buttons, i));
-					MEM_CallByID(btn.on_enter);
-					btn.state = btn.state | BUTTON_ENTERED;
-				};
-			} else if (btn.state & BUTTON_ENTERED) {
-				MEM_PushIntParam(MEM_ReadStatArr(_Buttons, i));
-				MEM_CallByID(btn.on_leave);
-				btn.state = btn.state & ~BUTTON_ENTERED;
-			}; 
-		};
-				
-		i += 1;
-		MEM_StackPos.position = pos;
+	
+	foreachHndl(_Button@, _Buttons_Do_Sub);
 };
 
 

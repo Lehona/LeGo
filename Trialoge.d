@@ -128,7 +128,16 @@ func void TRIA_Wait() {
 //========================================
 func void _TRIA_UpdateVisual(var c_npc slf, var int armor) {
     var oCNpc npc; npc = Hlp_GetNpc(slf);
-    Mdl_SetVisualBody(slf, npc.body_visualName, (npc.bitfield[0]&oCNpc_bitfield0_body_TexVarNr)>>14, 0, npc.head_visualName, (npc.bitfield[1]&oCNpc_bitfield1_head_TexVarNr)>>16, 0, armor);
+    
+	Mdl_SetVisualBody(
+        slf,
+        npc.body_visualName,
+        (npc.bitfield[0]&oCNpc_bitfield0_body_TexVarNr)>>14,
+        (npc.bitfield[1]&oCNpc_bitfield1_body_TexColorNr),
+        npc.head_visualName,
+        (npc.bitfield[1]&oCNpc_bitfield1_head_TexVarNr)>>16,
+        (npc.bitfield[2]&oCNpc_bitfield2_teeth_TexVarNr),
+        armor);
 };
 
 //========================================

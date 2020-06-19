@@ -39,13 +39,17 @@ func void A8Head_UnArchiver(var A8Head this) {
     if(PM_Exists("dif"))   { this.dif  = PM_LoadInt("dif");      };
     if(PM_Exists("ddif"))  { this.ddif = PM_LoadInt("ddif");     };
     this.queue = PM_Load("queue");
-};
 
-func void A8Head_Delete(var A8Head this) {
-    if (this.dfnc) {
-        MEM_CallByPtr(this.dfnc);
+    // Fix function signature of invalid functions
+    if (this.dfnc == MEM_GetFuncPtr(_PM_EmptyFunc_int)) {
+        this.dfnc = MEM_GetFuncPtr(_PM_EmptyFunc_void);
+    };
+    if (this.fnc == MEM_GetFuncPtr(_PM_EmptyFunc_int)) && (this.data) {
+        this.fnc = MEM_GetFuncPtr(_PM_EmptyFunc_int_int);
     };
 };
+
+
 
 func void A8Head_Empty(var A8Head h) {
     if(!h.queue) { return; };
@@ -57,6 +61,13 @@ func void A8Head_Empty(var A8Head h) {
 func void A8Head_EmptySub(var int node) {
     if(Hlp_IsValidHandle(MEM_ReadInt(node))) {
         delete(MEM_ReadInt(node));
+    };
+};
+
+func void A8Head_Delete(var A8Head this) {
+	A8Head_Empty(this);
+    if (this.dfnc) {
+        MEM_CallByPtr(this.dfnc);
     };
 };
 
@@ -161,9 +172,7 @@ func void _Anim8_Ext(var int hndl, var int targetVal, var int timeSpan, var int 
 // [intern] FF-Loop
 //========================================
 func void _Anim8_FFLoop() {
-    MEM_PushIntParam(A8Head@);
-    MEM_GetFuncID(_Anim8_Loop);
-    MEM_StackPos.position = foreachHndl_ptr;
+    foreachHndl(A8Head@, _Anim8_Loop);
 };
 func int _Anim8_Loop(var int hndl) {
     var A8Head h; h = get(hndl);
@@ -235,6 +244,10 @@ func int _Anim8_Loop(var int hndl) {
             roundf(h.value);
         };
         MEM_CallByPtr(h.fnc);
+        // Might have been deleted just now
+        if (!Hlp_IsValidHandle(hndl)) {
+            return rContinue;
+        };
     };
 
     if(gef(t, c.timeSpan)) {
@@ -261,6 +274,7 @@ func int _Anim8_Loop(var int hndl) {
             delete(hndl);
         };
     };
+    return rContinue;
 };
 
 //========================================

@@ -33,6 +33,9 @@ func void TAL_SetValue(var c_npc npc, var int talent, var int value) {
 		npc.aivar[AIV_TALENT] = _TAL_CreateArray();
 	};
 	_TAL_CheckSize(npc.aivar[AIV_TALENT]);
+	if (talent >= _nrTalents) {
+		return;
+	};
 	MEM_ArrayWrite(getPtr(npc.aivar[AIV_TALENT]), talent, value);
 };
 
@@ -42,6 +45,9 @@ func int TAL_GetValue(var c_npc npc, var int talent) {
 		return 0;
 	};
 	_TAL_CheckSize(npc.aivar[AIV_TALENT]);
+	if (talent >= _nrTalents) {
+		return 0;
+	};
 	MEM_ArrayRead(getPtr(npc.aivar[AIV_TALENT]), talent);
 };
 
