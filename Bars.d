@@ -297,8 +297,8 @@ func void _Bar_Update() {
 //========================================
 // Update bar to new screen resolution
 //========================================
-const int _Bar_screen_x = 0;
-const int _Bar_screen_y = 0;
+var int _Bar_screen_x;
+var int _Bar_screen_y;
 
 func void _Bar_UpdateResolution() {
     // To be safe, backup the last resolution manually. Someone might have called Print_GetScreenSize in the meantime!
