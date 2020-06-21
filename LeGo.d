@@ -244,7 +244,7 @@ func void LeGo_InitGamestart(var int f) {
     };
 
     if(f & LeGo_Bars) {
-        HookEngineF(oCGame__UpdateScreenResolution, 5, _Bar_UpdateResolution);
+        HookEngineF(oCGame__UpdateScreenResolution_end, 6, _Bar_UpdateResolution);
         HookEngineF(oCGame__UpdateStatus_start, 6, _Bar_Update);
     };
 };
