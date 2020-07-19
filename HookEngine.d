@@ -224,20 +224,11 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(32); // Save pointer on the stack
 
     // Call deadalus hook function
-    ASM_1(ASMINT_OP_pushIm);
-    ASM_4(ev);
-
-    ASM_1(ASMINT_OP_pushIm);
-    ASM_4(MEM_GetFuncID(_Hook));
-
-    ASM_1(ASMINT_OP_pushIm);
-    ASM_4(parser);
-
-    ASM_1(ASMINT_OP_call);
-    ASM_4(zParser__CallFunc-ASM_Here()-4);
-
-    ASM_2(ASMINT_OP_addImToESP);
-    ASM_1(12); // 3*4: parser, _Hook, address
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(ev);
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEM_GetFuncID(_Hook));
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(parser);
+    ASM_1(ASMINT_OP_call);            ASM_4(zParser__CallFunc-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(12); // 3*4: parser, _Hook, address
 
     // Restore Daedalus stack "pointer"
     ASM_3(ASMINT_OP_movESPplusToEAX); ASM_1(32);
@@ -262,12 +253,10 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     // Append original instruction
     MEM_CopyBytes(ptr, ASMINT_Cursor, oldInstr);
     MEM_Free(ptr);
-
     ASMINT_Cursor += oldInstr;
 
     // Return to engine function
-    ASM_1(ASMINT_OP_pushIm);
-    ASM_4(address + oldInstr);
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(address + oldInstr);
     ASM_1(ASMINT_OP_retn);
 
     var int i; i = ASM_Close();
