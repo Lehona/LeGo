@@ -103,12 +103,12 @@ func void _Hook(var int evtHAddr, // ESP-44
 
         // Stack registers should be kept read-only in between function calls
         ESP = _esp; // Stack pointer is read-only
-        EBP = _ebp; // Base pointer is read-only
     end;
 
     // Update modifiable registers on stack (ESP points to the position before pushad)
     MEM_WriteInt(ESP-40, EDI);
     MEM_WriteInt(ESP-36, ESI);
+    MEM_WriteInt(ESP-32, EBP);
     MEM_WriteInt(ESP-24, EBX);
     MEM_WriteInt(ESP-20, EDX);
     MEM_WriteInt(ESP-16, ECX);
