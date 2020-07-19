@@ -23,15 +23,15 @@ var int HookOverwriteInstances; // self, other, item
 //========================================
 // [intern] Hook controller
 //========================================
-func void _Hook(var int evtHAddr, // ESP-36
-                var int _edi,     // ESP-32 // Function parameters in order of popad (reverse order of pushad)
-                var int _esi,     // ESP-28
-                var int _ebp,     // ESP-24
-                var int _esp,     // ESP-20
-                var int _ebx,     // ESP-16
-                var int _edx,     // ESP-12
-                var int _ecx,     // ESP-8
-                var int _eax) {   // ESP-4
+func void _Hook(var int evtHAddr, // ESP-44
+                var int _edi,     // ESP-40 // Function parameters in order of popad (reverse order of pushad)
+                var int _esi,     // ESP-36
+                var int _ebp,     // ESP-32
+                var int _esp,     // ESP-28
+                var int _ebx,     // ESP-24
+                var int _edx,     // ESP-20
+                var int _ecx,     // ESP-16
+                var int _eax) {   // ESP-12
 
     // Backup use-instance before anything else. Temporary variable for now, because it's done before locals()
     var int _instBak_temp; _instBak_temp = MEM_GetUseInstance();
@@ -107,12 +107,12 @@ func void _Hook(var int evtHAddr, // ESP-36
     end;
 
     // Update modifiable registers on stack (ESP points to the position before pushad)
-    MEM_WriteInt(ESP-32, EDI);
-    MEM_WriteInt(ESP-28, ESI);
-    MEM_WriteInt(ESP-16, EBX);
-    MEM_WriteInt(ESP-12, EDX);
-    MEM_WriteInt(ESP-8,  ECX);
-    MEM_WriteInt(ESP-4,  EAX);
+    MEM_WriteInt(ESP-40, EDI);
+    MEM_WriteInt(ESP-36, ESI);
+    MEM_WriteInt(ESP-24, EBX);
+    MEM_WriteInt(ESP-20, EDX);
+    MEM_WriteInt(ESP-16, ECX);
+    MEM_WriteInt(ESP-12, EAX);
 
     // Restore register variables for recursive hooks
     EDI = ediBak;
@@ -185,7 +185,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     MEM_CopyBytes(address, ptr, oldInstr);
 
     // ----- Allocate new stream for assembly code -----
-    ASM_Open(25 + oldInstr + 6 + 1); // Asm code + oldInstr + retn + 1
+    ASM_Open(138 + oldInstr + 6 + 1); // Asm code + oldInstr + retn + 1
 
     // ----- Treat possibly protected memory -----
     MemoryProtectionOverride(address, oldInstr+3);
@@ -197,9 +197,33 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
 
     // ----- Write new assembly code -----
 
-    // Call deadalus hook function
+    // Set up stack and backup general purpose registers
+    ASM_2(ASMINT_OP_subESPplus);      ASM_1(8);
     ASM_1(ASMINT_OP_pusha); // ESP -= 32 (8*4)
 
+    // Increase pushed ESP to correct it for use within Daedalus hook
+    ASM_2(ASMINT_OP_movESPtoEAX);
+    ASM_2(ASMINT_OP_addImToEAX);      ASM_1(32+8); // 32 bytes popa, 8 bytes data stack backup
+    ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(12); // Current stack position of pushed ESP
+
+    // Allocate memory for backing up Daedalus data stack for hooking external engine functions
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4); // Data stack size
+    ASM_1(ASMINT_OP_call);            ASM_4(malloc_adr-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(4); // Clean up 1 parameter from stack
+    ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(32+4); // Save pointer on the stack
+
+    // Backup Daedalus data stack
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4);
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(ContentParserAddress+zCParser_datastack_stack_offset);
+    ASM_1(ASMINT_OP_pushEAX);
+    ASM_1(ASMINT_OP_call);            ASM_4(memcpy_adr-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(12); // Clean up 3 parameters from stack
+
+    // Backup Daedalus data stack "pointer"
+    ASM_1(ASMINT_OP_movMemToEAX);     ASM_4(ContentParserAddress+zCParser_datastack_sptr_offset);
+    ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(32); // Save pointer on the stack
+
+    // Call deadalus hook function
     ASM_1(ASMINT_OP_pushIm);
     ASM_4(ev);
 
@@ -215,7 +239,25 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     ASM_2(ASMINT_OP_addImToESP);
     ASM_1(12); // 3*4: parser, _Hook, address
 
-    ASM_1(ASMINT_OP_popa); // Pop altered registers
+    // Restore Daedalus stack "pointer"
+    ASM_3(ASMINT_OP_movESPplusToEAX); ASM_1(32);
+    ASM_2(ASMINT_OP_movEAXToMem);     ASM_4(ContentParserAddress+zCParser_datastack_sptr_offset);
+
+    // Restore Daedalus stack
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4);
+    ASM_3(ASMINT_OP_pushESPplus);     ASM_1(32+4+4); // Current stack position of memory pointer
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(ContentParserAddress+zCParser_datastack_stack_offset);
+    ASM_1(ASMINT_OP_call);            ASM_4(memcpy_adr-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(12);  // Clean up 3 parameters from stack
+
+    // Free memory
+    ASM_3(ASMINT_OP_pushESPplus);     ASM_1(32+4); // Current stack position of memory pointer
+    ASM_1(ASMINT_OP_call);            ASM_4(free_adr-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(4); // Clean up 1 parameter from stack
+
+    // Clean up stack and pop altered registers
+    ASM_1(ASMINT_OP_popa);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(8);
 
     // Append original instruction
     MEM_CopyBytes(ptr, ASMINT_Cursor, oldInstr);

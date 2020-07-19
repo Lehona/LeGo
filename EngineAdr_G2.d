@@ -118,6 +118,25 @@ const int zTBSphere3D__Draw                         = 5521904; //0x5441F0
 const int zTBBox3D__Draw                            = 5529312; //0x545EE0
 const int zCOBBox3D__Draw                           = 5533040; //0x546D70
 const int zcon_address_lego							= 11221088; //0xAB3860 //zcon_address is defined in Ikarus but only for Gothic2!
+const int malloc_adr                                = 8078534; //0x7B44C6
+const int free_adr                                  = 8078540; //0x7B44CC
+const int memcpy_adr                                = 8213280; //0x7D5320
+
+//========================================
+// More class offsets
+//========================================
+const int zCParser_datastack_stack_offset =   88; //0x0058
+const int zCParser_datastack_sptr_offset  = 8280; //0x2058
+
+//========================================
+// More assembly op codes
+//========================================
+// 2 Bytes
+const int ASMINT_OP_subESPplus      =   60547; //0xEC83
+// 3 Bytes
+const int ASMINT_OP_movEAXtoESPplus = 2376841; //0x244489
+const int ASMINT_OP_movESPplusToEAX = 2376843; //0x24448B
+const int ASMINT_OP_pushESPplus     = 2389247; //0x2474FF
 
 //========================================
 // Globale Flagvariable
