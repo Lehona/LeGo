@@ -185,7 +185,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     MEM_CopyBytes(address, ptr, oldInstr);
 
     // ----- Allocate new stream for assembly code -----
-    ASM_Open(138 + oldInstr + 6 + 1); // Asm code + oldInstr + retn + 1
+    ASM_Open(129 + oldInstr + 6 + 1); // Asm code + oldInstr + retn + 1
 
     // ----- Treat possibly protected memory -----
     MemoryProtectionOverride(address, oldInstr+3);
@@ -349,7 +349,7 @@ func void RemoveHookI(var int address, var int oldInstr, var int function) {
 
         // Remove engine hook
         var int newCodeAddr; newCodeAddr = MEM_ReadInt(address+1)+address+5;
-        var int rvtCodeAddr; rvtCodeAddr = newCodeAddr+25; // Original code
+        var int rvtCodeAddr; rvtCodeAddr = newCodeAddr+129; // Original code
 
         // Replace jump with original instruction
         MEM_CopyBytes(rvtCodeAddr, address, oldInstr);
