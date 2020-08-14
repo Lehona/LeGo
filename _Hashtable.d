@@ -167,9 +167,7 @@ func void _HT_Destroy(var int ptr) {
 	repeat(i, arr.numAlloc/4);
 		bucket = MEM_ReadIntArray(arr.array, i);
 		if (bucket) {
-			buck = _^(bucket);
-			MEM_Free(buck.array);
-			MEM_Free(bucket);
+			MEM_ArrayFree(bucket);
 		};
 	end;
 	MEM_Free(arr.array);
