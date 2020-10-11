@@ -47,9 +47,27 @@ class _bar {
     var int barW;
     var int v0; // zCView(h)
     var int v1; // zCView(h)
+    var int hidden;
 };
 
 instance _bar@(_bar);
+
+func void _bar_Archiver(var _bar this) {
+    PM_SaveInt("valMax", this.valMax);
+    PM_SaveInt("barW",   this.barW);
+    PM_SaveInt("v0",     this.v0);
+    PM_SaveInt("v1",     this.v1);
+    PM_SaveInt("hidden", this.hidden);
+};
+
+func void _bar_Unarchiver(var _bar this) {
+    this.valMax = PM_Load("valMax");
+    this.barW   = PM_Load("barW");
+    this.v0     = PM_Load("v0");
+    this.v1     = PM_Load("v1");
+    if (PM_Exists("hidden")) { this.hidden = PM_Load("hidden"); };
+};
+
 
 func void _bar_Delete(var _bar b) {
     if(Hlp_IsValidHandle(b.v0)) {
@@ -110,23 +128,25 @@ func void Bar_Delete(var int bar) {
 };
 
 //========================================
-// Bar zeigen
+// Bar verstecken
 //========================================
 func void Bar_Hide(var int bar) {
 	if(!Hlp_IsValidHandle(bar)) { return; };
 	var _bar b; b = get(bar);
 	View_Close(b.v0);
 	View_Close(b.v1);
+	b.hidden = TRUE;
 };
 
 //========================================
-// Bar verstecken
+// Bar zeigen
 //========================================
 func void Bar_Show(var int bar) {
 	if(!Hlp_IsValidHandle(bar)) { return; };
 	var _bar b; b = get(bar);
 	View_Open(b.v0);
 	View_Open(b.v1);
+	b.hidden = FALSE;
 };
 
 //========================================
@@ -371,15 +391,28 @@ func int _Bar_PlayerStatus() {
     MEM_InitGlobalInst();
     return (Hlp_IsValidNpc(hero)) && (MEM_Game.showPlayerStatus);
 };
+func void _Bar_UpdateShow(var int bar) {
+    if (!Hlp_IsValidHandle(bar)) { return; };
+    var _bar b; b = get(bar);
+    if (b.hidden) { return; };
+    View_Open(b.v0);
+    View_Open(b.v1);
+};
+func void _Bar_UpdateHide(var int bar) {
+    if (!Hlp_IsValidHandle(bar)) { return; };
+    var _bar b; b = get(bar);
+    View_Close(b.v0);
+    View_Close(b.v1);
+};
 func void _Bar_Update() {
     var int status; status = _Bar_PlayerStatus();
     const int SET = 0;
     if (SET != status) {
         SET = status;
         if (SET) {
-            foreachHndl(_bar@, Bar_Show);
+            foreachHndl(_bar@, _Bar_UpdateShow);
         } else {
-            foreachHndl(_bar@, Bar_Hide);
+            foreachHndl(_bar@, _Bar_UpdateHide);
         };
     };
 };
