@@ -1073,8 +1073,8 @@ func void _PM_Archive_HTSub(var int key, var int val) {
 		MEM_Call(List_Create);
 		PM_HandleList = MEM_PopIntResult();
 	} else {
-		/* List_InsertSorted(PM_HandleList, key, List_CmpAscending); */
-		PM_HandleList; key; MEM_GetFuncID(List_CmpAscending);
+		/* List_InsertSorted(PM_HandleList, key, List_CmpAscendingUnsigned); */
+		PM_HandleList; key; MEM_GetFuncID(List_CmpAscendingUnsigned);
 		MEM_Call(List_InsertSorted);
 	};
 };
