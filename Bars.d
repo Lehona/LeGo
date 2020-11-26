@@ -65,7 +65,11 @@ func void _bar_Unarchiver(var _bar this) {
     this.barW   = PM_Load("barW");
     this.v0     = PM_Load("v0");
     this.v1     = PM_Load("v1");
-    if (PM_Exists("hidden")) { this.hidden = PM_Load("hidden"); };
+    if (PM_Exists("hidden")) {
+        this.hidden = PM_Load("hidden");
+    } else {
+        this.hidden = -1; // Obtained from view (see _Bar_UpdateShow)
+    };
 };
 
 
@@ -394,6 +398,11 @@ func int _Bar_PlayerStatus() {
 func void _Bar_UpdateShow(var int bar) {
     if (!Hlp_IsValidHandle(bar)) { return; };
     var _bar b; b = get(bar);
+    if (b.hidden == -1) {
+        // Previous LeGo versions: Obtain status from open/closed view
+        var zCView v; v = View_Get(b.v0);
+        b.hidden = !v.isOpen;
+    };
     if (b.hidden) { return; };
     View_Open(b.v0);
     View_Open(b.v1);
