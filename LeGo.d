@@ -181,6 +181,11 @@ func void LeGo_InitAlways(var int f) {
         _Render_RestorePointer();
         GameState_AddListener(_Render_RestorePointer_Listener);
     };
+
+    if (f & LeGo_Bars) {
+        // Reset bar visibility updating status (in case of quick-load)
+        _Bar_Update_Status = -1;
+    };
 };
 
 //========================================

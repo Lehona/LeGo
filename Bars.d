@@ -3,6 +3,11 @@
 \***********************************/
 
 //========================================
+// [intern] Bar update status
+//========================================
+const int _Bar_Update_Status = -1;
+
+//========================================
 // Klasse für den Nutzer
 //========================================
 class Bar {
@@ -401,7 +406,7 @@ func void _Bar_UpdateShow(var int bar) {
     if (b.hidden == -1) {
         // Previous LeGo versions: Obtain status from open/closed view
         var zCView v; v = View_Get(b.v0);
-        b.hidden = !v.isOpen;
+        b.hidden = (v.isClosed || v.continueClose);
     };
     if (b.hidden) { return; };
     View_Open(b.v0);
@@ -415,10 +420,9 @@ func void _Bar_UpdateHide(var int bar) {
 };
 func void _Bar_Update() {
     var int status; status = _Bar_PlayerStatus();
-    const int SET = 0;
-    if (SET != status) {
-        SET = status;
-        if (SET) {
+    if (_Bar_Update_Status != status) {
+        _Bar_Update_Status = status;
+        if (status) {
             foreachHndl(_bar@, _Bar_UpdateShow);
         } else {
             foreachHndl(_bar@, _Bar_UpdateHide);
