@@ -78,14 +78,14 @@ func void _Hook(var int evtHAddr, // ESP-44
         MEM_InitGlobalInst();
     };
 
-    // Do not overwrite the global instances by default
-    HookOverwriteInstances = FALSE;
-
     // Iterate over all registered event handler functions
     var zCArray a; a = _^(evtHAddr);
     repeat(i, a.numInArray); var int i;
         // Clear data stack in-between function calls
         MEM_Parser.datastack_sptr = 0;
+
+        // Do not overwrite the global instances by default
+        HookOverwriteInstances = FALSE;
 
         // Call the function
         MEM_CallByID(MEM_ReadIntArray(a.array, i));
