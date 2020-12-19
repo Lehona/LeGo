@@ -92,6 +92,11 @@ func void _AI_FUNCTION_EVENT() {
         return;
     };
 
+    // Provide global instances (will be reverted by HookEngine afterwards)
+    self = _^(ECX);
+    other = MEM_NullToInst(); // Invalidate to avoid misuse
+    item = MEM_NullToInst();
+
     var string argc; argc = STR_Split(AniName, " ", 1);
     if (Hlp_StrCmp(argc, "I")) {
         i0 = STR_ToInt(STR_Split(AniName, " ", 2));
