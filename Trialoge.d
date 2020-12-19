@@ -179,6 +179,7 @@ func void _TRIA_Copy(var int n0, var int n1) {
     MEM_SwapBytes(_@s(onp0.mds_name),          _@s(onp1.mds_name),         76);                          // visuals
 	MEM_SwapBytes(_@(onp0._zCVob_bitfield),    _@(onp1._zCVob_bitfield),   20);                          // vob bitfield
 	MEM_SwapBytes(_@(onp0._zCVob_visualAlpha), _@(onp1._zCVob_visualAlpha), 4);
+    MEM_SwapBytes(_@(onp0.protection),         _@(onp1.protection),        32);                          // protection
     Mdl_SetModelScale(np0, fn0.f0, fn0.f1, fn0.f2);
     Mdl_SetModelScale(np1, fn1.f0, fn1.f1, fn1.f2);
     Mdl_SetModelFatness(np0, fn0.f3);
