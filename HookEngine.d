@@ -128,9 +128,17 @@ func void _Hook(var int evtHAddr, // ESP-44
         MEM_CallByID(funcID);
 
         // Assign EAX from return value
-        if (fncSymb.offset) {
+        if (fncSymb.offset) && (MEM_Parser.datastack_sptr > 0) {
             if (fncSymb.offset == (zPAR_TYPE_INT >> 12)) || (fncSymb.offset == (zPAR_TYPE_FLOAT >> 12)) {
-                EAX = MEM_PopIntResult();
+                // Safety checks on stack integrity
+                if (MEM_Parser.datastack_sptr >= 2) {
+                    var int sPtr; sPtr = MEM_Parser.datastack_sptr; // Stack pointer is constantly changing so copy it
+                    var int tok; tok = contentParserAddress + zCParser_datastack_stack_offset + (sPtr-1)*4;
+                    if (MEM_ReadInt(tok) == zPAR_TOK_PUSHINT) {
+                        // There is indeed a valid return value
+                        EAX = MEM_PopIntResult();
+                    };
+                };
             } else {
                 // Strings are not supported, because we would need a unique string for each hook. Who frees the memory?
                 // Instances are not supported, because they are ambiguous: Return a pointer or a symbol ID?
