@@ -122,6 +122,7 @@ const int zCLineCache__Line3D                       = 5224976; //0x4FBA10
 const int zTBSphere3D__Draw                         = 5440832; //0x530540
 const int zTBBox3D__Draw                            = 5447312; //0x531E90
 const int zCOBBox3D__Draw                           = 5451040; //0x532D20
+const int zString__vtbl                             = 8193768; //0x7D06E8
 
 // mark56 | not used
 // inv

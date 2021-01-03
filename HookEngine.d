@@ -87,8 +87,58 @@ func void _Hook(var int evtHAddr, // ESP-44
         // Do not overwrite the global instances by default
         HookOverwriteInstances = FALSE;
 
+        // Obtain hooking function
+        var int funcID; funcID = MEM_ReadIntArray(a.array, i);
+        var zCPar_Symbol fncSymb; fncSymb = _^(MEM_GetSymbolByIndex(funcID));
+
+        // Supply function arguments if expected
+        var int stackOffset; stackOffset = 4;
+        repeat(j, fncSymb.bitfield & zCPar_Symbol_bitfield_ele); var int j;
+            var zCPar_Symbol symb; symb = _^(MEM_GetSymbolByIndex(funcID+1+j));
+            var int stackValue; stackValue = MEM_ReadInt(ESP+stackOffset); stackOffset += 4;
+            if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
+                // Either zString or zString* on stack
+                var string str; str = "";
+                if (stackValue) {
+                    if (stackValue == zString__vtbl) {
+                        str = MEM_ReadString(ESP+stackOffset);
+                        stackOffset += sizeof_zString-4;
+                    } else if (MEM_ReadInt(stackValue) == zString__vtbl) {
+                        str = MEM_ReadString(stackValue);
+                    };
+                };
+                MEM_PushStringParam(str);
+            } else if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_INSTANCE) {
+                // Either symbol index or pointer on stack
+                if (stackValue > 0) && (stackValue < currSymbolTableLength) { // Exclude yINSTANCE_HELP
+                    var zCPar_Symbol symb2; symb2 = _^(MEM_GetSymbolByIndex(stackValue));
+                    if ((symb2.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_INSTANCE) {
+                        stackValue = symb2.offset;
+                    };
+                };
+                symb.offset = stackValue;
+                MEM_PushInstParam(funcID+1+j);
+            } else {
+                // Otherwise push value directly (integer/float/...)
+                MEM_PushIntParam(stackValue);
+            };
+        end;
+
         // Call the function
-        MEM_CallByID(MEM_ReadIntArray(a.array, i));
+        MEM_CallByID(funcID);
+
+        // Assign EAX from return value
+        if (fncSymb.offset) {
+            if (fncSymb.offset == (zPAR_TYPE_INT >> 12)) || (fncSymb.offset == (zPAR_TYPE_FLOAT >> 12)) {
+                EAX = MEM_PopIntResult();
+            } else {
+                // Strings are not supported, because we would need a unique string for each hook. Who frees the memory?
+                // Instances are not supported, because they are ambiguous: Return a pointer or a symbol ID?
+                // Since EAX is a 32-bit register, any non-simple data-type should be manually returned as a pointer
+                MEM_Error("HOOKENGINE: Only integer/float return values are supported. Return a pointer if necessary.");
+                // No need to clean up the stack here
+            };
+        };
 
         // Restore global instances in between function calls
         if (!HookOverwriteInstances) {

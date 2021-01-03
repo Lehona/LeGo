@@ -121,6 +121,7 @@ const int zcon_address_lego							= 11221088; //0xAB3860 //zcon_address is defin
 const int malloc_adr                                = 8078534; //0x7B44C6
 const int free_adr                                  = 8078540; //0x7B44CC
 const int memcpy_adr                                = 8213280; //0x7D5320
+const int zString__vtbl                             = 8578800; //0x82E6F0
 
 //========================================
 // More class offsets
