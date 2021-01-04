@@ -134,7 +134,7 @@ func void _Hook(var int evtHAddr, // ESP-44
                 if (MEM_Parser.datastack_sptr >= 2) {
                     var int sPtr; sPtr = MEM_Parser.datastack_sptr; // Stack pointer is constantly changing so copy it
                     var int tok; tok = contentParserAddress + zCParser_datastack_stack_offset + (sPtr-1)*4;
-                    if (MEM_ReadInt(tok) == zPAR_TOK_PUSHINT) {
+                    if (MEM_ReadInt(tok) == zPAR_TOK_PUSHINT) || (MEM_ReadInt(tok) == zPAR_TOK_PUSHVAR) {
                         // There is indeed a valid return value
                         EAX = MEM_PopIntResult();
                     };
