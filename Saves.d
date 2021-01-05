@@ -116,6 +116,7 @@ func void _BR_LoadGame() {
         _PM_Reset();
         HandlesPointer = _HT_Create();
         HandlesInstance = _HT_Create();
+        HandlesWrapped = MEM_ArrayCreate();
         _PM_CreateForeachTable();
     };
     if(_LeGo_Flags & LeGo_Gamestate) {

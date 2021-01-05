@@ -109,6 +109,7 @@ func void LeGo_InitAlways(var int f) {
 			_PM_Reset();
 			HandlesPointer = _HT_Create();
 			HandlesInstance = _HT_Create();
+			HandlesWrapped = MEM_ArrayCreate();
 			_PM_CreateForeachTable();
 		};
 	};
