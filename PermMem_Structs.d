@@ -22,6 +22,79 @@ instance float@(_int);
 class _string { var string s; };
 instance string@(_string);
 
+func int GetStringSymbolByAddr(var int addr) {
+    repeat(id, MEM_Parser.symtab_table_numInArray); var int id;
+        var int symbPtr; symbPtr = MEM_ReadIntArray(MEM_Parser.symtab_table_array, id);
+        var zCPar_Symbol symb; symb = _^(symbPtr);
+        if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
+            if (symb.content == addr) {
+                return symbPtr;
+            };
+        };
+    end;
+    return FALSE;
+};
+
+func void _string_Archiver(var _string this) {
+    PM_SaveString("s", this.s);
+    var int symbPtr; symbPtr = GetStringSymbolByAddr(_@s(this.s));
+    if (symbPtr) {
+        PM_SaveString("symb", MEM_ReadString(symbPtr));
+    };
+};
+func void _string_Unarchiver(var _string this) {
+    if (PM_Exists("symb")) {
+        var int symbPtr; symbPtr = MEM_GetSymbol(PM_LoadString("symb"));
+        if (symbPtr) {
+            var zCPar_Symbol symb; symb = _^(symbPtr);
+            if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
+                MEM_Free(_PM_Head.currOffs);                    // Free the just allocated memory
+                _PM_Head.currOffs = symb.content;               // Set the pointer
+                this = _^(symb.content);                        // Update the instance
+                MEM_ArrayInsert(HandlesWrapped, PM_CurrHandle); // Mark as manually maintained
+            };
+        };
+    };
+    this.s = PM_LoadString("s");
+};
+
+const int PM_String_addr = 0;
+func int PM_StringSubSub(var int hndl) {
+    if (PM_String_addr == getPtr(hndl)) {
+        PM_String_addr = 0;
+        return rBreak;
+    };
+    return rContinue;
+};
+func void PM_StringSub() {
+    MEMINT_StackPopInst();
+    MEMINT_StackPushInst(zPAR_TOK_PUSHINT);
+    PM_String_addr = MEMINT_StackPopInt();
+
+    // Check if already stored
+    foreachHndl(string@, PM_StringSubSub);
+    if (PM_String_addr) {
+        wrap(string@, PM_String_addr);
+    };
+};
+
+/*
+ * Convenience function to wrap a string variable into a handle to make it persistent.
+ * Saved and restored automatically by PermMem without any manual work, the string will remain untouched in its
+ * usual behavior and handling.
+ *
+ * var string myString;
+ * PM_String(myString);       // Only necessary once
+ * myString = "Hello World";  // The string will now maintain its contents over saving and loading
+ *
+ */
+func void PM_String(var string var) {
+    // On first call: Replace myself and jump back to before I was called (+ parameter)
+    MEM_ReplaceFunc(PM_String, PM_StringSub);
+    MEM_SetCallerStackPos(MEM_GetCallerStackPos() - 10); // zPAR_TOK_CALL + 4 bytes + zPAR_TOK_PUSHVAR + 4 bytes
+};
+
+
 const string zCList_Struct = "auto zCList*";
 instance zCList@(zCList);
 
