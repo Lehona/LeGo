@@ -58,23 +58,23 @@ func void _string_Unarchiver(var _string this) {
     this.s = PM_LoadString("s");
 };
 
-const int PM_String_addr = 0;
-func int PM_StringSubSub(var int hndl) {
-    if (PM_String_addr == getPtr(hndl)) {
-        PM_String_addr = 0;
+const int PM_BindString_addr = 0;
+func int PM_BindStringSubSub(var int hndl) {
+    if (PM_BindString_addr == getPtr(hndl)) {
+        PM_BindString_addr = 0;
         return rBreak;
     };
     return rContinue;
 };
-func void PM_StringSub() {
+func void PM_BindStringSub() {
     MEMINT_StackPopInst();
     MEMINT_StackPushInst(zPAR_TOK_PUSHINT);
-    PM_String_addr = MEMINT_StackPopInt();
+    PM_BindString_addr = MEMINT_StackPopInt();
 
     // Check if already stored
-    foreachHndl(string@, PM_StringSubSub);
-    if (PM_String_addr) {
-        wrap(string@, PM_String_addr);
+    foreachHndl(string@, PM_BindStringSubSub);
+    if (PM_BindString_addr) {
+        wrap(string@, PM_BindString_addr);
     };
 };
 
@@ -84,13 +84,13 @@ func void PM_StringSub() {
  * usual behavior and handling.
  *
  * var string myString;
- * PM_String(myString);       // Only necessary once
+ * PM_BindString(myString);   // Only necessary once
  * myString = "Hello World";  // The string will now maintain its contents over saving and loading
  *
  */
-func void PM_String(var string var) {
+func void PM_BindString(var string var) {
     // On first call: Replace myself and jump back to before I was called (+ parameter)
-    MEM_ReplaceFunc(PM_String, PM_StringSub);
+    MEM_ReplaceFunc(PM_BindString, PM_BindStringSub);
     MEM_SetCallerStackPos(MEM_GetCallerStackPos() - 10); // zPAR_TOK_CALL + 4 bytes + zPAR_TOK_PUSHVAR + 4 bytes
 };
 
