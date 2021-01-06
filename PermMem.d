@@ -415,6 +415,70 @@ func void setPtr(var int h, var int ptr) {
 };
 
 //========================================
+// Get all instances assigned to an address
+//========================================
+func int _PM_GetClassReferencesByOffset(var string className, var int offset) {
+    // Allocate memory for resulting string array
+    var int arrPtr; arrPtr = MEM_ArrayCreate();
+
+    // Modify zCParser::ResetWithVarReferenceList to fill our string array
+    const int addr = 0;
+    if (!addr) {
+        addr = zCParser__ResetWithVarReferenceList+95;
+        MemoryProtectionOverride(addr, 17);
+        const int bytes[5] = {0, 0, 0, 0, 0};
+        MEM_CopyBytes(addr, _@(bytes), 17);
+        /* 90 90 90 90 90     nop
+           50                 push   eax
+           8B 0D XX XX XX XX  mov    ecx, [arrPtr]
+           E8 XX XX XX XX     call   zCArray<zString>::InsertEnd  */
+        const int newbytes[4] = { /*90909090*/-1869574000, /*0D8B5090*/227233936, 0, /*EB,*/ 0 };
+        newbytes[2] = _@(arrPtr);
+        newbytes[3] = zCArray_zString__InsertEnd - (addr+12)-5;
+    };
+    MEM_CopyBytes(_@(newbytes), addr, 12);
+    MEM_WriteInt(addr+13, newbytes[3]);
+
+    // Run cascade of engine functions
+    var int refList; refList = MEM_ArrayCreate();
+    const int call = 0;
+    const int classNamePtr = 0;
+    if (CALL_Begin(call)) {
+        classNamePtr = _@s(className);
+        CALL_PtrParam(_@(refList));
+        CALL_PtrParam(_@(classNamePtr));
+        CALL__thiscall(_@(parser), zCParser__CreateVarReferenceList);
+
+        CALL_PtrParam(_@(offset));
+        CALL_PtrParam(_@(refList));
+        CALL__thiscall(_@(parser), zCParser__ResetWithVarReferenceList);
+        call = CALL_End();
+    };
+    MEM_ArrayFree(refList);
+
+    // Revert changes in zCParser::ResetWithVarReferenceList
+    MEM_CopyBytes(_@(bytes), addr, 17);
+
+    // Return results if any
+    if (!MEM_ArraySize(arrPtr)) {
+        MEM_ArrayFree(arrPtr);
+        arrPtr = 0;
+    };
+    return +arrPtr;
+};
+
+//========================================
+// Get all instances referencing a handle
+//========================================
+func int _PM_GetInstRef(var int h) {
+    if (!Hlp_IsValidHandle(h)) { return 0; };
+    var int ptr; ptr = getPtr(h);
+    var int inst; inst = getInst(h);
+    var zCPar_Symbol clss; clss = _PM_ToClass(inst);
+    return _PM_GetClassReferencesByOffset(clss.name, ptr);
+};
+
+//========================================
 // Betrachten der folgenden
 // Scripte auf eigene Gefahr :0
 //========================================
@@ -1097,6 +1161,18 @@ func void _PM_Archive_ListSub(var int lPtr) {
 	PM_CurrHandle = key;
     _PM_InstToSaveStruct(_HT_Get(HandlesPointer, key), _HT_Get(HandlesInstance, key));
 
+    // Obtain all referencing symbols
+    var int arrPtr; arrPtr = _PM_GetInstRef(key);
+    if (arrPtr) {
+        // PM_SaveStringArray("__PM_REFERENCES", MEM_ReadInt(arrPtr), MEM_ArraySize(arrPtr));
+        MEM_PushStringParam("__PM_REFERENCES");
+        MEM_ReadInt(arrPtr);
+        MEM_ArraySize(arrPtr);
+        MEM_Call(PM_SaveStringArray);
+
+        MEM_ArrayFree(arrPtr);
+    };
+
     BW_Text(ConcatStrings("HNDL:", IntToString(key/*+1*/)));
     BW_NextLine();
 
@@ -1468,6 +1544,7 @@ func void _PM_Unarchive() {
         _PM_ReadSaveStruct();
         _PM_SearchObjCache = "";
         if (_PM_HeadPtr) {
+            MEM_Call(_PM_ResolveRefs);
             _PM_SaveStructToInst();
 
             _HT_Insert(HandlesPointer, _PM_Head.currOffs, i);
@@ -1734,7 +1811,37 @@ func void PM_LoadToPtr(var string name, var int destPtr) {
     destPtr = _PM_Load(name, -1, destPtr);
 };
 
+func void _PM_ResolveRefs() {
+    _PM_SearchWarn = 0;
+    var int obj; obj = _PM_SearchObj("__PM_REFERENCES");
+    if (!obj) { return; };
 
+    if (_PM_ObjectType(obj) == _PM_StrArr) {
+        var int arr; arr = PM_Load("__PM_REFERENCES");
 
+        if (arr) {
+            var zCPar_Symbol clss; clss = _PM_ToClass(_PM_Head.inst);
+            var _PM_SaveObject_Arr oa; oa = MEM_PtrToInst(obj);
+            repeat(j, oa.elements); var int j;
+                var int symbId;  symbId  = MEM_FindParserSymbol(MEM_ReadStringArray(arr, j));
+                var int symbPtr; symbPtr = MEM_GetSymbolByIndex(symbId);
 
+                if (!symbPtr) { continue; }; // Valid symbol
+                if (symbId == _PM_Head.inst) { continue; }; // Not the PM instance, e.g. zCView@
+                var zCPar_Symbol symb; symb = _^(symbPtr);
+                if ((symb.bitfield & zCPar_Symbol_bitfield_type) != zPAR_TYPE_INSTANCE) { continue; }; // Instance
+                var zCPar_Symbol cls2; cls2 = _PM_ToClass(symbId);
+                if (_@(clss) != _@(cls2)) { continue; };  // Same base class
 
+                // Do not assign already assigned instances to be safe
+                if (symb.offset) {
+                    MEM_Info(ConcatStrings("skipping ", symb.name)); // This output might get annoying
+                } else {
+                    symb.offset = _PM_Head.currOffs;
+                };
+            end;
+            MEM_Free(arr);
+        };
+    };
+    MEM_ArrayRemoveValue(_PM_Head.content, obj);
+};
