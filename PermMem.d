@@ -1437,6 +1437,11 @@ func void _PM_ClassToInst_Auto(var string className) {
         var int offs; offs = _PM_GetSymbOffs(className, _PM_ObjectName(obj));
 
         if(offs == -1) {
+            if(Hlp_StrCmp(_PM_ObjectName(obj), "__PM_REFERENCES")) {
+                // Should always be the last element anyway
+                i += 1;
+                MEM_StackPos.position = p;
+            };
             _PM_Error(ConcatStrings("Unknown Symbol. ", _PM_ObjectName(obj)));
             return;
         };
@@ -1552,8 +1557,8 @@ func void _PM_Unarchive() {
         _PM_ReadSaveStruct();
         _PM_SearchObjCache = "";
         if (_PM_HeadPtr) {
-            MEM_Call(_PM_ResolveRefs);
             _PM_SaveStructToInst();
+            MEM_Call(_PM_RestoreRefs); // After the unarchiver (see string@)
 
             _HT_Insert(HandlesPointer, _PM_Head.currOffs, i);
             _HT_Insert(HandlesInstance, _PM_Head.inst, i);
@@ -1819,37 +1824,44 @@ func void PM_LoadToPtr(var string name, var int destPtr) {
     destPtr = _PM_Load(name, -1, destPtr);
 };
 
-func void _PM_ResolveRefs() {
+func void _PM_RestoreRefs() {
     _PM_SearchWarn = 0;
     var int obj; obj = _PM_SearchObj("__PM_REFERENCES");
     if (!obj) { return; };
 
     if (_PM_ObjectType(obj) == _PM_StrArr) {
-        var int arr; arr = PM_Load("__PM_REFERENCES");
+        var zCPar_Symbol clss; clss = _PM_ToClass(_PM_Head.inst);
+        var _PM_SaveObject_Arr oa; oa = _^(obj);
+        var zCArray arr; arr = _^(oa.content);
 
-        if (arr) {
-            var zCPar_Symbol clss; clss = _PM_ToClass(_PM_Head.inst);
-            var _PM_SaveObject_Arr oa; oa = MEM_PtrToInst(obj);
-            repeat(j, oa.elements); var int j;
-                var int symbId;  symbId  = MEM_FindParserSymbol(MEM_ReadStringArray(arr, j));
-                var int symbPtr; symbPtr = MEM_GetSymbolByIndex(symbId);
+        // Iterate over all listed symbols
+        repeat(j, arr.numInArray); var int j;
+            var _PM_SaveObject_Str os; os = _^(MEM_ReadIntArray(arr.array, j));
+            var int symbId; symbId = MEM_FindParserSymbol(os.content);
 
-                if (!symbPtr) { continue; }; // Valid symbol
-                if (symbId == _PM_Head.inst) { continue; }; // Not the PM instance, e.g. zCView@
-                var zCPar_Symbol symb; symb = _^(symbPtr);
-                if ((symb.bitfield & zCPar_Symbol_bitfield_type) != zPAR_TYPE_INSTANCE) { continue; }; // Instance
-                var zCPar_Symbol cls2; cls2 = _PM_ToClass(symbId);
-                if (_@(clss) != _@(cls2)) { continue; };  // Same base class
+            // Valid symbol
+            if ((symbId == -1) || (symbId == _PM_Head.inst)) {
+                continue;
+            };
 
-                // Do not assign already assigned instances to be safe
-                if (symb.offset) {
-                    MEM_Info(ConcatStrings("skipping ", symb.name)); // This output might get annoying
-                } else {
-                    symb.offset = _PM_Head.currOffs;
-                };
-            end;
-            MEM_Free(arr);
-        };
+            // Same base class
+            var zCPar_Symbol clss2; clss2 = _PM_ToClass(symbId);
+            if (_@(clss) != _@(clss2)) { // Terrible
+                continue;
+            };
+
+            // Symbol is of type instance
+            var zCPar_Symbol symb; symb = _^(MEM_GetSymbolByIndex(symbId));
+            if ((symb.bitfield & zCPar_Symbol_bitfield_type) != zPAR_TYPE_INSTANCE) {
+                continue;
+            };
+
+            // Do not set already assigned instances to be safe
+            if (symb.offset) {
+                continue;
+            };
+
+            symb.offset = _PM_Head.currOffs;
+        end;
     };
-    MEM_ArrayRemoveValue(_PM_Head.content, obj);
 };
