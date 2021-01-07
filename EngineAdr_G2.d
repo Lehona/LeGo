@@ -124,6 +124,7 @@ const int zcon_address_lego							= 11221088; //0xAB3860 //zcon_address is defin
 const int malloc_adr                                = 8078534; //0x7B44C6
 const int free_adr                                  = 8078540; //0x7B44CC
 const int memcpy_adr                                = 8213280; //0x7D5320
+const int swap_adr                                  = 8196369; //0x7D1111
 const int zString__vtbl                             = 8578800; //0x82E6F0
 
 //========================================
@@ -137,6 +138,7 @@ const int zCParser_datastack_sptr_offset  = 8280; //0x2058
 //========================================
 // 2 Bytes
 const int ASMINT_OP_subESPplus      =   60547; //0xEC83
+const int ASMINT_OP_movImIntoECX    =     455; //0x01C7
 // 3 Bytes
 const int ASMINT_OP_movEAXtoESPplus = 2376841; //0x244489
 const int ASMINT_OP_movESPplusToEAX = 2376843; //0x24448B

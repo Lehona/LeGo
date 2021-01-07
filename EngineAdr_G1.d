@@ -117,6 +117,7 @@ const int zcon_address_lego                         = 9291168; //0x8DC5A0 // zco
 const int malloc_adr                                = 7712198; //0x75ADC6
 const int free_adr                                  = 7712111; //0x75AD6F
 const int memcpy_adr                                = 7846464; //0x77BA40
+const int swap_adr                                  = 7829281; //0x777721
 const int zCOptions_dir_string_offset               = 120;     //0x78     // The class zCOption is defined incorrectly in Ikarus for Gothic1!
 const int zCOption__ParmValue                       = 4586784; //0X45FD20
 const int zCWorld__AdvanceClock                     = 6257280; //0x5F7A80 Hook: Draw3D
@@ -155,6 +156,7 @@ const int zCParser_datastack_sptr_offset  = 4184; //0x1058
 //========================================
 // 2 Bytes
 const int ASMINT_OP_subESPplus      =   60547; //0xEC83
+const int ASMINT_OP_movImIntoECX    =     455; //0x01C7
 // 3 Bytes
 const int ASMINT_OP_movEAXtoESPplus = 2376841; //0x244489
 const int ASMINT_OP_movESPplusToEAX = 2376843; //0x24448B

@@ -421,43 +421,51 @@ func int _PM_GetClassReferencesByOffset(var string className, var int offset) {
     // Allocate memory for resulting string array
     var int arrPtr; arrPtr = MEM_ArrayCreate();
 
-    // Modify zCParser::ResetWithVarReferenceList to fill our string array
-    const int addr = 0;
-    if (!addr) {
-        addr = zCParser__ResetWithVarReferenceList+95;
-        MemoryProtectionOverride(addr, 17);
-        const int bytes[5] = {0, 0, 0, 0, 0};
-        MEM_CopyBytes(addr, _@(bytes), 17);
-        /* 90 90 90 90 90     nop
-           50                 push   eax
-           8B 0D XX XX XX XX  mov    ecx, [arrPtr]
-           E8 XX XX XX XX     call   zCArray<zString>::InsertEnd  */
-        const int newbytes[4] = { /*90909090*/-1869574000, /*0D8B5090*/227233936, 0, /*EB,*/ 0 };
-        newbytes[2] = _@(arrPtr);
-        newbytes[3] = zCArray_zString__InsertEnd - (addr+12)-5;
-    };
-    MEM_CopyBytes(_@(newbytes), addr, 12);
-    MEM_WriteInt(addr+13, newbytes[3]);
-
-    // Run cascade of engine functions
-    var int refList; refList = MEM_ArrayCreate();
     const int call = 0;
-    const int classNamePtr = 0;
     if (CALL_Begin(call)) {
-        classNamePtr = _@s(className);
+        // Create modified code
+        const int srcAddr = zCParser__ResetWithVarReferenceList+95;
+        const int byteCount = 17;
+        MemoryProtectionOverride(srcAddr, byteCount);
+        ASM_Open(byteCount+1);
+        ASM_1(ASMINT_OP_nop); ASM_1(ASMINT_OP_nop); ASM_1(ASMINT_OP_nop); ASM_1(ASMINT_OP_nop); ASM_1(ASMINT_OP_nop);
+        ASM_1(ASMINT_OP_pushEAX);
+        ASM_2(ASMINT_OP_movMemToECX); ASM_4(_@(arrPtr));
+        ASM_1(ASMINT_OP_call); ASM_4(zCArray_zString__InsertEnd - (srcAddr+12) - 5);
+        const int dstAddr = 0; dstAddr = ASM_Close();
+
+        // Create pointers first time
+        const int classNamePtr = 0; classNamePtr = _@s(className);
+        const int refList = 0; refList = MEM_ArrayCreate();
+
+        // Fill refList with all variable references
         CALL_PtrParam(_@(refList));
         CALL_PtrParam(_@(classNamePtr));
         CALL__thiscall(_@(parser), zCParser__CreateVarReferenceList);
 
+        // Modify zCParser::ResetWithVarReferenceList (see above)
+        CALL_IntParam(_@(byteCount));
+        CALL_PtrParam(_@(srcAddr));
+        CALL_PtrParam(_@(dstAddr));
+        CALL__cdecl(swap_adr);
+
+        // Call modified zCParser::ResetWithVarReferenceList
         CALL_PtrParam(_@(offset));
         CALL_PtrParam(_@(refList));
         CALL__thiscall(_@(parser), zCParser__ResetWithVarReferenceList);
+
+        // Revert changes
+        CALL_IntParam(_@(byteCount));
+        CALL_PtrParam(_@(srcAddr));
+        CALL_PtrParam(_@(dstAddr));
+        CALL__cdecl(swap_adr);
+
+        // Clear refList->numInArray
+        ASM_1(ASMINT_OP_movImToECX);   ASM_4(refList+8);
+        ASM_2(ASMINT_OP_movImIntoECX); ASM_4(0);
+
         call = CALL_End();
     };
-    MEM_ArrayFree(refList);
-
-    // Revert changes in zCParser::ResetWithVarReferenceList
-    MEM_CopyBytes(_@(bytes), addr, 17);
 
     // Return results if any
     if (!MEM_ArraySize(arrPtr)) {
