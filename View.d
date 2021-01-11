@@ -192,6 +192,16 @@ func void ViewPtr_Open(var int ptr) {
     // zCView::Open destroys all textlines (why??)
     CALL__thiscall(ptr, zCView__Open);
 
+    // Open instantly to avoid getting stuck when calling every frame
+    // I assume zCView::UpdateOpen is called next frame AFTER the FrameFunction hook
+    // This is essentially its contents
+    if (!v.fxOpen) {
+        v.timeOpen     = FLOATNULL;
+        v.continueOpen = FALSE;
+        v.isOpen       = TRUE;
+        v.isClosed     = FALSE;
+    };
+
     v.textLines_next = textlinesBak;
 };
 func void View_Open(var int hndl) {

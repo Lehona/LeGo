@@ -153,8 +153,11 @@ func void Bar_Hide(var int bar) {
 func void Bar_Show(var int bar) {
 	if(!Hlp_IsValidHandle(bar)) { return; };
 	var _bar b; b = get(bar);
-	View_Open(b.v0);
-	View_Open(b.v1);
+	// Only open if allowed or if not initialized
+	if (_Bar_Update_Status) || (!(_LeGo_Flags & LeGo_Bars)) {
+		View_Open(b.v0);
+		View_Open(b.v1);
+	};
 	b.hidden = FALSE;
 };
 
