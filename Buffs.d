@@ -242,13 +242,15 @@ func int _Buff_Check(var int buffh) {
 	return rContinue;
 };
 func int Buff_Has(var c_npc npc, var int buff) {
+	if (npc.aivar[AIV_TALENT]) {
 		Buff_NpcID = Npc_GetID(npc);
 		Buff_BuffHndl = 0;
 		ForeachHndl(buff, _Buff_Check);
 		if (Buff_BuffHndl != 0) {	
 			return Buff_BuffHndl;
 		};
-		return 0;
+	};
+	return 0;
 };	
 
 func void _Buff_Dispatcher(var int bh) { // This is called every tick and is responsible for deleting the object 
