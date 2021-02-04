@@ -111,6 +111,10 @@ const int BUFF_Y = 7000;
 const int BUFF_HEIGHT = 500;
 
 func void Bufflist_Init() {
+	if (!Buffs_DisplayForHero) {
+		return;
+	};
+
 	Print_GetScreenSize();
 	var int xsize; xsize = roundf(divf(mkf(BUFF_HEIGHT), Print_Ratio));
 	bufflist_hero = new(zCArray@);
