@@ -399,7 +399,6 @@ func int Token_GetSize(var int tok) {
 };
 
 func int Tokens_Copy(var int src, var int dest, var int len) {
-    MEM_Warn(ConcatStrings("Now movin tokens: ", inttostring(len)));
     var int p; p = MEM_Alloc(len);
     MEM_CopyBytes(src, p, len);
     MEM_CopyBytes(p, dest, len);
