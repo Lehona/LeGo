@@ -1840,7 +1840,7 @@ func void _PM_RestoreRefs() {
             var int symbId; symbId = MEM_FindParserSymbol(os.content);
 
             // Valid symbol
-            if ((symbId == -1) || (symbId == _PM_Head.inst)) {
+            if (symbId == -1) {
                 continue;
             };
 
