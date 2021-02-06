@@ -1127,6 +1127,9 @@ func void _PM_Archive() {
 	if (PM_HandleList) {
 		PM_HandleList; MEM_GetFuncID(_PM_Archive_ListSub);
 		MEM_Call(List_ForF);
+
+		PM_HandleList;
+		MEM_Call(List_Destroy);
 	};
 
 	PM_HandleList = 0;
