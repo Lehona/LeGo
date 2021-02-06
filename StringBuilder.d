@@ -318,3 +318,42 @@ func int STR_StartsWith(var string str, var string start) {
     if(z1.len > z0.len) { return 0; };
     MEM_CompareBytes(z0.ptr, z1.ptr, z1.len);
 };
+
+//========================================
+// Create array of all string symbols
+//========================================
+func int BuildStringSymbolsArray() {
+    // The parser's string table contains only strings but not their symbols
+    var int array; array = MEM_ArrayCreate();
+
+    repeat(i, MEM_Parser.symtab_table_numInArray); var int i;
+        var int symbPtr; symbPtr = MEM_ReadIntArray(MEM_Parser.symtab_table_array, i);
+        var zCPar_Symbol symb; symb = _^(symbPtr);
+        if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
+            MEM_ArrayInsert(array, symbPtr);
+        };
+    end;
+
+    return array;
+};
+
+//========================================
+// Get symbol of a string by its address
+//========================================
+func int GetStringSymbolByAddr(var int addr) {
+    // Performance: find all string symbols only once
+    const int stringSymbolsArray = 0;
+    if (!stringSymbolsArray) {
+        stringSymbolsArray = BuildStringSymbolsArray();
+    };
+
+    repeat(i, MEM_ArraySize(stringSymbolsArray)); var int i;
+        var int symbPtr; symbPtr = MEM_ArrayRead(stringSymbolsArray, i);
+        var zCPar_Symbol symb; symb = _^(symbPtr);
+        if (symb.content == addr) {
+            return symbPtr;
+        };
+    end;
+
+    return 0;
+};

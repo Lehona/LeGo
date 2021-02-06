@@ -22,20 +22,6 @@ instance float@(_int);
 class _string { var string s; };
 instance string@(_string);
 
-/* Get the symbol of a string */
-func int GetStringSymbolByAddr(var int addr) {
-    repeat(id, MEM_Parser.symtab_table_numInArray); var int id;
-        var int symbPtr; symbPtr = MEM_ReadIntArray(MEM_Parser.symtab_table_array, id);
-        var zCPar_Symbol symb; symb = _^(symbPtr);
-        if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
-            if (symb.content == addr) {
-                return symbPtr;
-            };
-        };
-    end;
-    return FALSE;
-};
-
 /* _string */
 func void _string_Archiver(var _string this) {
     PM_SaveString("s", this.s);
