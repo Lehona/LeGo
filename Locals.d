@@ -394,6 +394,8 @@ func void Locals() {
 func int Token_GetSize(var int tok) {
     if((tok >= zPAR_TOK_CALL && tok <= zPAR_TOK_PUSHINDEX)||(tok >= zPAR_TOK_JUMP && tok <= zPAR_TOK_SETINSTANCE)) {
         return 5;
+    } else if (tok == zPAR_TOK_PUSH_ARRAYVAR) {
+        return 6;
     };
     return 1;
 };
