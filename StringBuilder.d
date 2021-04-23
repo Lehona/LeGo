@@ -248,6 +248,25 @@ func string STR_Escape(var string s0) {
             SBc(92);
             SBc(92);
         }
+        else if(c > 126) {
+            SBc(92);
+            SBc(120); // 'x'
+            var int cb;
+            cb = (c >> 4); // high
+            if(cb < 10) {
+                SBc(cb + 48); // '0'
+            }
+            else {
+                SBc(cb + 87); // 'a'-10
+            };
+            cb = c & 15; // low
+            if(cb < 10) {
+                SBc(cb + 48); // '0'
+            }
+            else {
+                SBc(cb + 87); // 'a'-10
+            };
+        }
         else if(c < 33) {
             SBc(92);
             SBc(MEM_ReadStatArr(STR_Sequences, c));
@@ -283,6 +302,14 @@ func string STR_Unescape(var string s0) {
             c = MEM_ReadByte(z.ptr + i);
             if(c == 92) {
                 SBc(92);
+            }
+            else if(c == 120) { // 'x'
+                if(i+2 < l) {
+                    c = MEMINT_HexCharToInt(MEM_ReadByte(z.ptr + i + 1)) << 4;
+                    c += MEMINT_HexCharToInt(MEM_ReadByte(z.ptr + i + 2));
+                    SBc(c);
+                    i += 2;
+                };
             }
             else {
                 var int j; j = 0;
