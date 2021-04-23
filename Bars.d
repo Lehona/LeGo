@@ -373,10 +373,8 @@ func void Bar_ResizePxl(var int bar, var int x, var int y) {
 func void Bar_SetAlpha(var int bar, var int alpha) {
 	if(!Hlp_IsValidHandle(bar)) { return; };
 	var _bar b; b = get(bar);
-	var zCView v; v = View_Get(b.v0);
-	v.alpha = alpha;
-	v = View_Get(b.v1);
-	v.alpha = alpha;
+	View_SetAlpha(b.v0, alpha);
+	View_SetAlpha(b.v1, alpha);
 };
 
 //========================================
