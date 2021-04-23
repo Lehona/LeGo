@@ -201,6 +201,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     var int SymbID;         // Symbol index of 'function'
     var int ptr;            // Pointer to temporary memory of the old instruction
     var int relAdr;         // Relative address from 'address' to new assembly code
+    var int absAdr;         // Absolute address
 
     // ----- Safety checks -----
     if (oldInstr < 5) {
@@ -307,6 +308,14 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     // Clean up stack and pop altered registers
     ASM_1(ASMINT_OP_popa);
     ASM_2(ASMINT_OP_addImToESP);      ASM_1(8);
+
+    // Resolve relative jump address of a possible third party hook at the same address
+    if (MEM_ReadByte(ptr) == ASMINT_OP_jmp) {
+        relAdr = MEM_ReadInt(ptr+1); // Relative jump from old address
+        absAdr = relAdr+5+address;
+        relAdr = absAdr-ASM_Here()-5; // Relative jump from new address
+        MEM_WriteInt(ptr+1, relAdr);
+    };
 
     // Append original instruction
     MEM_CopyBytes(ptr, ASMINT_Cursor, oldInstr);
