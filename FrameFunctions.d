@@ -200,10 +200,17 @@ func int FrameFunctions(var int hndl) {
 
     MEM_Label(0);
     if(timer >= itm.next) {
+        // Backup data stack pointer
+        var int sptr; sptr = MEM_Parser.datastack_sptr;
+
+        // Call function
 		if (itm.hasData) {
 			itm.data;
 		};
         MEM_CallByPtr(itm.fncID);
+
+        // Restore data stack pointer
+        MEM_Parser.datastack_sptr = sptr;
 
         // If a FrameFunction removes itself while its delay is small enough s.t. MEM_Goto(0) is called below,
         // the game crashes, because MEM_CallByPtr moves the stack pointer to an invalid position.

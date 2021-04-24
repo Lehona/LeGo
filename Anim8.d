@@ -179,23 +179,6 @@ func int _Anim8_Loop(var int hndl) {
     if(!h.queue) {
         return rContinue;
     };
-    if(h.queue < 1048576) {
-        var int s; s = SB_New();
-        SB ("A8 sucks. Handle ");
-        SBi(hndl);
-        SB (" of instance ");
-        SB (_PM_InstName(getInst(hndl)));
-        SB (" messed up with a queue of ");
-        SBi(h.queue);
-        SB (". I will ignore it.");
-        SB (STR_Unescape("\n"));
-        SB ("The pointer was ");
-        SBi(getPtr(hndl));
-        SB ("...");
-        MEM_Warn(SB_ToString());
-        SB_Destroy();
-        return rContinue;
-    };
     if(!List_HasLength(h.queue, 2)) {
         return rContinue;
     };

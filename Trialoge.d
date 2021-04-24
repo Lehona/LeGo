@@ -165,6 +165,10 @@ class _TRIA_fltWrapper {
 };
 
 func void _TRIA_Copy(var int n0, var int n1) {
+    if (!Hlp_Is_oCNpc(n0)) || (!Hlp_Is_oCNpc(n1)) {
+        MEM_Error("_TRIA_Copy: Invalid NPC");
+        return;
+    };
     var c_npc np0; np0 = MEM_PtrToInst(n0);
     var c_npc np1; np1 = MEM_PtrToInst(n1);
     var oCNpc onp0; onp0 = MEM_PtrToInst(n0);
@@ -179,6 +183,7 @@ func void _TRIA_Copy(var int n0, var int n1) {
     MEM_SwapBytes(_@s(onp0.mds_name),          _@s(onp1.mds_name),         76);                          // visuals
 	MEM_SwapBytes(_@(onp0._zCVob_bitfield),    _@(onp1._zCVob_bitfield),   20);                          // vob bitfield
 	MEM_SwapBytes(_@(onp0._zCVob_visualAlpha), _@(onp1._zCVob_visualAlpha), 4);
+    MEM_SwapBytes(_@(onp0.protection),         _@(onp1.protection),        32);                          // protection
     Mdl_SetModelScale(np0, fn0.f0, fn0.f1, fn0.f2);
     Mdl_SetModelScale(np1, fn1.f0, fn1.f1, fn1.f2);
     Mdl_SetModelFatness(np0, fn0.f3);
@@ -390,14 +395,6 @@ func void TRIA_Finish() {
 func void _TRIA_Finish() {
     if(TRIA_Last != TRIA_Self) {
         _TRIA_Copy(TRIA_Self, TRIA_Last);
-    };
-    var int i; i = 0;
-    var int p; p = MEM_StackPos.position;
-    if(i < TRIA_CPtr-1) {
-        var c_npc slf; slf = MEM_PtrToInst(MEM_ReadStatArr(TRIA_NpcPtr, i));
-        //AI_ContinueRoutine(slf);
-        i += 1;
-        MEM_StackPos.position = p;
     };
     TRIA_Running = 0;
     TRIA_CPtr = 0;

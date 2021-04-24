@@ -111,6 +111,10 @@ const int BUFF_Y = 7000;
 const int BUFF_HEIGHT = 500;
 
 func void Bufflist_Init() {
+	if (!Buffs_DisplayForHero) {
+		return;
+	};
+
 	Print_GetScreenSize();
 	var int xsize; xsize = roundf(divf(mkf(BUFF_HEIGHT), Print_Ratio));
 	bufflist_hero = new(zCArray@);
@@ -242,13 +246,15 @@ func int _Buff_Check(var int buffh) {
 	return rContinue;
 };
 func int Buff_Has(var c_npc npc, var int buff) {
+	if (npc.aivar[AIV_TALENT]) {
 		Buff_NpcID = Npc_GetID(npc);
 		Buff_BuffHndl = 0;
 		ForeachHndl(buff, _Buff_Check);
 		if (Buff_BuffHndl != 0) {	
 			return Buff_BuffHndl;
 		};
-		return 0;
+	};
+	return 0;
 };	
 
 func void _Buff_Dispatcher(var int bh) { // This is called every tick and is responsible for deleting the object 

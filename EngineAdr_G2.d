@@ -23,7 +23,8 @@ const int oCGame__Render                            = 7112352; //0x6C86A0 Hook: 
 const int oCGame__RenderX                           = 7112704; //0x6C8800 Hook: Quickslots
 const int oCGame__UpdateStatus                      = 7093113; //0x6C3B79 Hook: Focusnames
 const int oCGame__UpdateStatus_start                = 7090496; //0x6C3140 Hook: Bars
-const int oCGame__UpdateScreenResolution            = 7089664; //0x6C2E00 Hook: Bars
+const int oCGame__UpdateScreenResolution            = 7089664; //0x6C2E00 unused, kept for compatibility
+const int oCGame__UpdateScreenResolution_end        = 7090416; //0x6C30F0 Hook: Bars
 const int oCItem__Render                            = 7420608; //0x713AC0
 const int oCNpc__CloseInventory                     = 7742483; //0x762413 Hook: Quickslots
 const int oCNpc__DropUnconscious                    = 7560880; //0x735EB0 Hook: Shields
@@ -117,6 +118,26 @@ const int zTBSphere3D__Draw                         = 5521904; //0x5441F0
 const int zTBBox3D__Draw                            = 5529312; //0x545EE0
 const int zCOBBox3D__Draw                           = 5533040; //0x546D70
 const int zcon_address_lego							= 11221088; //0xAB3860 //zcon_address is defined in Ikarus but only for Gothic2!
+const int malloc_adr                                = 8078534; //0x7B44C6
+const int free_adr                                  = 8078540; //0x7B44CC
+const int memcpy_adr                                = 8213280; //0x7D5320
+const int zString__vtbl                             = 8578800; //0x82E6F0
+
+//========================================
+// More class offsets
+//========================================
+const int zCParser_datastack_stack_offset =   88; //0x0058
+const int zCParser_datastack_sptr_offset  = 8280; //0x2058
+
+//========================================
+// More assembly op codes
+//========================================
+// 2 Bytes
+const int ASMINT_OP_subESPplus      =   60547; //0xEC83
+// 3 Bytes
+const int ASMINT_OP_movEAXtoESPplus = 2376841; //0x244489
+const int ASMINT_OP_movESPplusToEAX = 2376843; //0x24448B
+const int ASMINT_OP_pushESPplus     = 2389247; //0x2474FF
 
 //========================================
 // Globale Flagvariable

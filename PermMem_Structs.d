@@ -22,6 +22,120 @@ instance float@(_int);
 class _string { var string s; };
 instance string@(_string);
 
+/* _string */
+func void _string_Archiver(var _string this) {
+    PM_SaveString("s", this.s);
+    var int symbPtr; symbPtr = GetStringSymbolByAddr(_@s(this.s));
+    if (symbPtr) {
+        PM_SaveString("symb", MEM_ReadString(symbPtr));
+    };
+};
+func void _string_Unarchiver(var _string this) {
+    if (PM_Exists("symb")) {
+        var int symbPtr; symbPtr = MEM_GetSymbol(PM_LoadString("symb"));
+        if (symbPtr) {
+            var zCPar_Symbol symb; symb = _^(symbPtr);
+            if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
+                MEM_Free(_PM_Head.currOffs);                    // Free the just allocated memory
+                _PM_Head.currOffs = symb.content;               // Set the pointer
+                this = _^(_PM_Head.currOffs);                   // Update the instance
+                MEM_ArrayInsert(HandlesWrapped, PM_CurrHandle); // Mark as manually maintained
+            };
+        };
+    };
+    this.s = PM_LoadString("s");
+};
+
+/* _int */
+func void _int_Archiver(var _int this) {
+    PM_SaveInt("i", this.i);
+    var int symbPtr; symbPtr = _@(this.i) - zCParSymbol_content_offset;
+    if (symbPtr) {
+        if (MEM_ReadInt(symbPtr) == zString__vtbl) {
+            var string symbName; symbName = MEM_ReadString(symbPtr);
+            if (MEM_GetSymbol(symbName) == symbPtr) {
+                PM_SaveString("symb", symbName);
+            };
+        };
+    };
+};
+func void _int_Unarchiver(var _int this) {
+    if (PM_Exists("symb")) {
+        var int symbPtr; symbPtr = MEM_GetSymbol(PM_LoadString("symb"));
+        if (symbPtr) {
+            var zCPar_Symbol symb; symb = _^(symbPtr);
+            if ((_PM_Head.inst == int@)   && ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_INT))
+            || ((_PM_Head.inst == float@) && ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_FLOAT)) {
+                MEM_Free(_PM_Head.currOffs);                    // Free the just allocated memory
+                _PM_Head.currOffs = _@(symb.content);           // Set the pointer
+                this = _^(_PM_Head.currOffs);                   // Update the instance
+                MEM_ArrayInsert(HandlesWrapped, PM_CurrHandle); // Mark as manually maintained
+            };
+        };
+    };
+    this.i = PM_LoadInt("i");
+};
+
+/*
+ * Convenience function to wrap a string variable into a handle to make it persistent.
+ * Saved and restored automatically by PermMem without any manual work, the string will remain untouched in its
+ * usual behavior and handling.
+ *
+ * var string myString;
+ * PM_BindString(myString);   // Only necessary once
+ * myString = "Hello World";  // The string will now maintain its contents over saving and loading
+ *
+ */
+func void PM_BindString(var string var) {
+    // On first call: Replace myself and jump back to before I was called (+ parameter)
+    MEM_ReplaceFunc(PM_BindString, PM_BindStringSub);
+    MEM_SetCallerStackPos(MEM_GetCallerStackPos() - 10); // zPAR_TOK_CALL + 4 bytes + zPAR_TOK_PUSHVAR + 4 bytes
+};
+
+/* Same for int */
+func void PM_BindInt(var int var) {
+    MEM_ReplaceFunc(PM_BindInt, PM_BindIntSub);
+    MEM_SetCallerStackPos(MEM_GetCallerStackPos() - 10);
+};
+
+/* Same for float */
+func void PM_BindFloat(var float var) {
+    MEM_ReplaceFunc(PM_BindFloat, PM_BindFloatSub);
+    MEM_SetCallerStackPos(MEM_GetCallerStackPos() - 10);
+};
+
+const int PM_Bind_addr = 0;
+func void PM_Bind(/* var string VAR */ var int inst) {
+    var int tok; tok = MEMINT_StackPopInstAsInt();
+    PM_Bind_addr = MEMINT_StackPopInstAsInt();
+    if (tok != zPAR_TOK_PUSHVAR) {
+        _PM_Error("First parameter given is not an lValue");
+        return;
+    };
+
+    // Check if already stored
+    foreachHndl(inst, PM_BindSub);
+    if (PM_Bind_addr) {
+        wrap(inst, PM_Bind_addr);
+    };
+};
+func int PM_BindSub(var int hndl) {
+    if (PM_Bind_addr == getPtr(hndl)) {
+        PM_Bind_addr = 0;
+        return rBreak;
+    };
+    return rContinue;
+};
+func void PM_BindStringSub(/* var string VAR */) {
+    PM_Bind(/* VAR */ string@);
+};
+func void PM_BindIntSub(/* var int VAR */) {
+    PM_Bind(/* VAR */ int@);
+};
+func void PM_BindFloatSub(/* var float VAR */) {
+    PM_Bind(/* VAR */ float@);
+};
+
 const string zCList_Struct = "auto zCList*";
 instance zCList@(zCList);
 

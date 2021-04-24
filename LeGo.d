@@ -13,7 +13,7 @@
 |*                              auf Ikarus                               *|
 |*                                                                       *|
 \*************************************************************************/
-const string LeGo_Version = "LeGo 2.7.1";
+const string LeGo_Version = "LeGo 2.8.0";
 
 const int LeGo_PrintS          = 1<<0;  // Interface.d
 const int LeGo_HookEngine      = 1<<1;  // HookEngine.d
@@ -109,6 +109,7 @@ func void LeGo_InitAlways(var int f) {
 			_PM_Reset();
 			HandlesPointer = _HT_Create();
 			HandlesInstance = _HT_Create();
+			HandlesWrapped = MEM_ArrayCreate();
 			_PM_CreateForeachTable();
 		};
 	};
@@ -181,6 +182,11 @@ func void LeGo_InitAlways(var int f) {
         _Render_RestorePointer();
         GameState_AddListener(_Render_RestorePointer_Listener);
     };
+
+    if (f & LeGo_Bars) {
+        // Reset bar visibility updating status (in case of quick-load)
+        _Bar_Update_Status = -1;
+    };
 };
 
 //========================================
@@ -244,7 +250,7 @@ func void LeGo_InitGamestart(var int f) {
     };
 
     if(f & LeGo_Bars) {
-        HookEngineF(oCGame__UpdateScreenResolution, 5, _Bar_UpdateResolution);
+        HookEngineF(oCGame__UpdateScreenResolution_end, 6, _Bar_UpdateResolution);
         HookEngineF(oCGame__UpdateStatus_start, 6, _Bar_Update);
     };
 };

@@ -692,6 +692,21 @@ func int List_CmpDescending(var int data1, var int data2) {
 	return data1 < data2;
 };
 
+func int List_CmpAscendingUnsigned(var int data1, var int data2) {
+    var int gt; gt =  data1 & ~data2;
+    var int lt; lt = ~data1 &  data2;
+    lt = lt | (lt >>  1);
+    lt = lt | (lt >>  2);
+    lt = lt | (lt >>  4);
+    lt = lt | (lt >>  8);
+    lt = lt | (lt >> 16);
+    return !!(gt & ~lt); // data1 > data2
+};
+
+func int List_CmpDescendingUnsigned(var int data1, var int data2) {
+    return List_CmpAscendingUnsigned(data2, data1); // data2 > data1
+};
+
 func void List_InsertSorted(var int list, var int data, var func compare) {
     if(!list) {
         _List_ErrPtr("InsertSorted");

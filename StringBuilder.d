@@ -248,6 +248,25 @@ func string STR_Escape(var string s0) {
             SBc(92);
             SBc(92);
         }
+        else if(c > 126) {
+            SBc(92);
+            SBc(120); // 'x'
+            var int cb;
+            cb = (c >> 4); // high
+            if(cb < 10) {
+                SBc(cb + 48); // '0'
+            }
+            else {
+                SBc(cb + 87); // 'a'-10
+            };
+            cb = c & 15; // low
+            if(cb < 10) {
+                SBc(cb + 48); // '0'
+            }
+            else {
+                SBc(cb + 87); // 'a'-10
+            };
+        }
         else if(c < 33) {
             SBc(92);
             SBc(MEM_ReadStatArr(STR_Sequences, c));
@@ -284,6 +303,14 @@ func string STR_Unescape(var string s0) {
             if(c == 92) {
                 SBc(92);
             }
+            else if(c == 120) { // 'x'
+                if(i+2 < l) {
+                    c = MEMINT_HexCharToInt(MEM_ReadByte(z.ptr + i + 1)) << 4;
+                    c += MEMINT_HexCharToInt(MEM_ReadByte(z.ptr + i + 2));
+                    SBc(c);
+                    i += 2;
+                };
+            }
             else {
                 var int j; j = 0;
                 while(j < 33);
@@ -317,4 +344,43 @@ func int STR_StartsWith(var string str, var string start) {
     var zString z1; z1 = _^(_@s(start));
     if(z1.len > z0.len) { return 0; };
     MEM_CompareBytes(z0.ptr, z1.ptr, z1.len);
+};
+
+//========================================
+// Create array of all string symbols
+//========================================
+func int BuildStringSymbolsArray() {
+    // The parser's string table contains only strings but not their symbols
+    var int array; array = MEM_ArrayCreate();
+
+    repeat(i, MEM_Parser.symtab_table_numInArray); var int i;
+        var int symbPtr; symbPtr = MEM_ReadIntArray(MEM_Parser.symtab_table_array, i);
+        var zCPar_Symbol symb; symb = _^(symbPtr);
+        if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
+            MEM_ArrayInsert(array, symbPtr);
+        };
+    end;
+
+    return array;
+};
+
+//========================================
+// Get symbol of a string by its address
+//========================================
+func int GetStringSymbolByAddr(var int addr) {
+    // Performance: find all string symbols only once
+    const int stringSymbolsArray = 0;
+    if (!stringSymbolsArray) {
+        stringSymbolsArray = BuildStringSymbolsArray();
+    };
+
+    repeat(i, MEM_ArraySize(stringSymbolsArray)); var int i;
+        var int symbPtr; symbPtr = MEM_ArrayRead(stringSymbolsArray, i);
+        var zCPar_Symbol symb; symb = _^(symbPtr);
+        if (symb.content == addr) {
+            return symbPtr;
+        };
+    end;
+
+    return 0;
 };

@@ -23,15 +23,15 @@ var int HookOverwriteInstances; // self, other, item
 //========================================
 // [intern] Hook controller
 //========================================
-func void _Hook(var int evtHAddr, // ESP-36
-                var int _edi,     // ESP-32 // Function parameters in order of popad (reverse order of pushad)
-                var int _esi,     // ESP-28
-                var int _ebp,     // ESP-24
-                var int _esp,     // ESP-20
-                var int _ebx,     // ESP-16
-                var int _edx,     // ESP-12
-                var int _ecx,     // ESP-8
-                var int _eax) {   // ESP-4
+func void _Hook(var int evtHAddr, // ESP-44
+                var int _edi,     // ESP-40 // Function parameters in order of popad (reverse order of pushad)
+                var int _esi,     // ESP-36
+                var int _ebp,     // ESP-32
+                var int _esp,     // ESP-28
+                var int _ebx,     // ESP-24
+                var int _edx,     // ESP-20
+                var int _ecx,     // ESP-16
+                var int _eax) {   // ESP-12
 
     // Backup use-instance before anything else. Temporary variable for now, because it's done before locals()
     var int _instBak_temp; _instBak_temp = MEM_GetUseInstance();
@@ -78,17 +78,75 @@ func void _Hook(var int evtHAddr, // ESP-36
         MEM_InitGlobalInst();
     };
 
-    // Do not overwrite the global instances by default
-    HookOverwriteInstances = FALSE;
-
     // Iterate over all registered event handler functions
     var zCArray a; a = _^(evtHAddr);
     repeat(i, a.numInArray); var int i;
         // Clear data stack in-between function calls
         MEM_Parser.datastack_sptr = 0;
 
+        // Do not overwrite the global instances by default
+        HookOverwriteInstances = FALSE;
+
+        // Obtain hooking function
+        var int funcID; funcID = MEM_ReadIntArray(a.array, i);
+        var zCPar_Symbol fncSymb; fncSymb = _^(MEM_GetSymbolByIndex(funcID));
+
+        // Supply function arguments if expected
+        var int stackOffset; stackOffset = 4;
+        repeat(j, fncSymb.bitfield & zCPar_Symbol_bitfield_ele); var int j;
+            var zCPar_Symbol symb; symb = _^(MEM_GetSymbolByIndex(funcID+1+j));
+            var int stackValue; stackValue = MEM_ReadInt(ESP+stackOffset); stackOffset += 4;
+            if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
+                // Either zString or zString* on stack
+                var string str; str = "";
+                if (stackValue) {
+                    if (stackValue == zString__vtbl) {
+                        str = MEM_ReadString(ESP+stackOffset);
+                        stackOffset += sizeof_zString-4;
+                    } else if (MEM_ReadInt(stackValue) == zString__vtbl) {
+                        str = MEM_ReadString(stackValue);
+                    };
+                };
+                MEM_PushStringParam(str);
+            } else if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_INSTANCE) {
+                // Either symbol index or pointer on stack
+                if (stackValue > 0) && (stackValue < currSymbolTableLength) { // Exclude yINSTANCE_HELP
+                    var zCPar_Symbol symb2; symb2 = _^(MEM_GetSymbolByIndex(stackValue));
+                    if ((symb2.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_INSTANCE) {
+                        stackValue = symb2.offset;
+                    };
+                };
+                symb.offset = stackValue;
+                MEM_PushInstParam(funcID+1+j);
+            } else {
+                // Otherwise push value directly (integer/float/...)
+                MEM_PushIntParam(stackValue);
+            };
+        end;
+
         // Call the function
-        MEM_CallByID(MEM_ReadIntArray(a.array, i));
+        MEM_CallByID(funcID);
+
+        // Assign EAX from return value
+        if (fncSymb.offset) && (MEM_Parser.datastack_sptr > 0) {
+            if (fncSymb.offset == (zPAR_TYPE_INT >> 12)) || (fncSymb.offset == (zPAR_TYPE_FLOAT >> 12)) {
+                // Safety checks on stack integrity
+                if (MEM_Parser.datastack_sptr >= 2) {
+                    var int sPtr; sPtr = MEM_Parser.datastack_sptr; // Stack pointer is constantly changing so copy it
+                    var int tok; tok = contentParserAddress + zCParser_datastack_stack_offset + (sPtr-1)*4;
+                    if (MEM_ReadInt(tok) == zPAR_TOK_PUSHINT) || (MEM_ReadInt(tok) == zPAR_TOK_PUSHVAR) {
+                        // There is indeed a valid return value
+                        EAX = MEM_PopIntResult();
+                    };
+                };
+            } else {
+                // Strings are not supported, because we would need a unique string for each hook. Who frees the memory?
+                // Instances are not supported, because they are ambiguous: Return a pointer or a symbol ID?
+                // Since EAX is a 32-bit register, any non-simple data-type should be manually returned as a pointer
+                MEM_Error("HOOKENGINE: Only integer/float return values are supported. Return a pointer if necessary.");
+                // No need to clean up the stack here
+            };
+        };
 
         // Restore global instances in between function calls
         if (!HookOverwriteInstances) {
@@ -103,16 +161,16 @@ func void _Hook(var int evtHAddr, // ESP-36
 
         // Stack registers should be kept read-only in between function calls
         ESP = _esp; // Stack pointer is read-only
-        EBP = _ebp; // Base pointer is read-only
     end;
 
     // Update modifiable registers on stack (ESP points to the position before pushad)
-    MEM_WriteInt(ESP-32, EDI);
-    MEM_WriteInt(ESP-28, ESI);
-    MEM_WriteInt(ESP-16, EBX);
-    MEM_WriteInt(ESP-12, EDX);
-    MEM_WriteInt(ESP-8,  ECX);
-    MEM_WriteInt(ESP-4,  EAX);
+    MEM_WriteInt(ESP-40, EDI);
+    MEM_WriteInt(ESP-36, ESI);
+    MEM_WriteInt(ESP-32, EBP);
+    MEM_WriteInt(ESP-24, EBX);
+    MEM_WriteInt(ESP-20, EDX);
+    MEM_WriteInt(ESP-16, ECX);
+    MEM_WriteInt(ESP-12, EAX);
 
     // Restore register variables for recursive hooks
     EDI = ediBak;
@@ -143,6 +201,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     var int SymbID;         // Symbol index of 'function'
     var int ptr;            // Pointer to temporary memory of the old instruction
     var int relAdr;         // Relative address from 'address' to new assembly code
+    var int absAdr;         // Absolute address
 
     // ----- Safety checks -----
     if (oldInstr < 5) {
@@ -185,7 +244,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     MEM_CopyBytes(address, ptr, oldInstr);
 
     // ----- Allocate new stream for assembly code -----
-    ASM_Open(25 + oldInstr + 6 + 1); // Asm code + oldInstr + retn + 1
+    ASM_Open(129 + oldInstr + 6 + 1); // Asm code + oldInstr + retn + 1
 
     // ----- Treat possibly protected memory -----
     MemoryProtectionOverride(address, oldInstr+3);
@@ -197,35 +256,74 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
 
     // ----- Write new assembly code -----
 
-    // Call deadalus hook function
+    // Set up stack and backup general purpose registers
+    ASM_2(ASMINT_OP_subESPplus);      ASM_1(8);
     ASM_1(ASMINT_OP_pusha); // ESP -= 32 (8*4)
 
-    ASM_1(ASMINT_OP_pushIm);
-    ASM_4(ev);
+    // Increase pushed ESP to correct it for use within Daedalus hook
+    ASM_2(ASMINT_OP_movESPtoEAX);
+    ASM_2(ASMINT_OP_addImToEAX);      ASM_1(32+8); // 32 bytes popa, 8 bytes data stack backup
+    ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(12); // Current stack position of pushed ESP
 
-    ASM_1(ASMINT_OP_pushIm);
-    ASM_4(MEM_GetFuncID(_Hook));
+    // Allocate memory for backing up Daedalus data stack for hooking external engine functions
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4); // Data stack size
+    ASM_1(ASMINT_OP_call);            ASM_4(malloc_adr-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(4); // Clean up 1 parameter from stack
+    ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(32+4); // Save pointer on the stack
 
-    ASM_1(ASMINT_OP_pushIm);
-    ASM_4(parser);
+    // Backup Daedalus data stack
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4);
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(ContentParserAddress+zCParser_datastack_stack_offset);
+    ASM_1(ASMINT_OP_pushEAX);
+    ASM_1(ASMINT_OP_call);            ASM_4(memcpy_adr-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(12); // Clean up 3 parameters from stack
 
-    ASM_1(ASMINT_OP_call);
-    ASM_4(zParser__CallFunc-ASM_Here()-4);
+    // Backup Daedalus data stack "pointer"
+    ASM_1(ASMINT_OP_movMemToEAX);     ASM_4(ContentParserAddress+zCParser_datastack_sptr_offset);
+    ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(32); // Save pointer on the stack
 
-    ASM_2(ASMINT_OP_addImToESP);
-    ASM_1(12); // 3*4: parser, _Hook, address
+    // Call deadalus hook function
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(ev);
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEM_GetFuncID(_Hook));
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(parser);
+    ASM_1(ASMINT_OP_call);            ASM_4(zParser__CallFunc-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(12); // 3*4: parser, _Hook, address
 
-    ASM_1(ASMINT_OP_popa); // Pop altered registers
+    // Restore Daedalus stack "pointer"
+    ASM_3(ASMINT_OP_movESPplusToEAX); ASM_1(32);
+    ASM_2(ASMINT_OP_movEAXToMem);     ASM_4(ContentParserAddress+zCParser_datastack_sptr_offset);
+
+    // Restore Daedalus stack
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4);
+    ASM_3(ASMINT_OP_pushESPplus);     ASM_1(32+4+4); // Current stack position of memory pointer
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(ContentParserAddress+zCParser_datastack_stack_offset);
+    ASM_1(ASMINT_OP_call);            ASM_4(memcpy_adr-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(12);  // Clean up 3 parameters from stack
+
+    // Free memory
+    ASM_3(ASMINT_OP_pushESPplus);     ASM_1(32+4); // Current stack position of memory pointer
+    ASM_1(ASMINT_OP_call);            ASM_4(free_adr-ASM_Here()-4);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(4); // Clean up 1 parameter from stack
+
+    // Clean up stack and pop altered registers
+    ASM_1(ASMINT_OP_popa);
+    ASM_2(ASMINT_OP_addImToESP);      ASM_1(8);
+
+    // Resolve relative jump address of a possible third party hook at the same address
+    if (MEM_ReadByte(ptr) == ASMINT_OP_jmp) || (MEM_ReadByte(ptr) == ASMINT_OP_call) {
+        relAdr = MEM_ReadInt(ptr+1); // Relative jump from old address
+        absAdr = relAdr+5+address;
+        relAdr = absAdr-ASM_Here()-5; // Relative jump from new address
+        MEM_WriteInt(ptr+1, relAdr);
+    };
 
     // Append original instruction
     MEM_CopyBytes(ptr, ASMINT_Cursor, oldInstr);
     MEM_Free(ptr);
-
     ASMINT_Cursor += oldInstr;
 
     // Return to engine function
-    ASM_1(ASMINT_OP_pushIm);
-    ASM_4(address + oldInstr);
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(address + oldInstr);
     ASM_1(ASMINT_OP_retn);
 
     var int i; i = ASM_Close();
@@ -318,7 +416,16 @@ func void RemoveHookI(var int address, var int oldInstr, var int function) {
 
         // Remove engine hook
         var int newCodeAddr; newCodeAddr = MEM_ReadInt(address+1)+address+5;
-        var int rvtCodeAddr; rvtCodeAddr = newCodeAddr+25; // Original code
+        var int rvtCodeAddr; rvtCodeAddr = newCodeAddr+129; // Original code
+        var int relAdr; var int absAdr;
+
+        // Revert relative jump address (see above)
+        if (MEM_ReadByte(rvtCodeAddr) == ASMINT_OP_jmp) || (MEM_ReadByte(rvtCodeAddr) == ASMINT_OP_call) {
+            relAdr = MEM_ReadInt(rvtCodeAddr+1); // Relative jump from new address
+            absAdr = relAdr+5+rvtCodeAddr;
+            relAdr = absAdr-address-5; // Relative jump from old address (reconstruct original jump)
+            MEM_WriteInt(rvtCodeAddr+1, relAdr);
+        };
 
         // Replace jump with original instruction
         MEM_CopyBytes(rvtCodeAddr, address, oldInstr);

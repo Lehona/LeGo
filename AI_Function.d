@@ -35,6 +35,26 @@ func void AI_Function_II(var c_npc slf, var func function, var int param1, var i
     _AI_Function(slf, SB_ToString());
     SB_Destroy();
 };
+func void AI_Function_N(var c_npc slf, var func function, var int param) {
+    var int s; s = SB_New();
+    SB ("N ");
+    SBi(param);
+    SB (" ");
+    SBi(MEM_GetFuncID(function));
+    _AI_Function(slf, SB_ToString());
+    SB_Destroy();
+};
+func void AI_Function_NN(var c_npc slf, var func function, var int param1, var int param2) {
+    var int s; s = SB_New();
+    SB ("NN ");
+    SBi(param1);
+    SB (" ");
+    SBi(param2);
+    SB (" ");
+    SBi(MEM_GetFuncID(function));
+    _AI_Function(slf, SB_ToString());
+    SB_Destroy();
+};
 func void AI_Function_S(var c_npc slf, var func function, var string param) {
     var int s; s = SB_New();
     SB ("S ");
@@ -50,6 +70,28 @@ func void AI_Function_SS(var c_npc slf, var func function, var string param1, va
     SB (STR_Escape(param1));
     SB (" ");
     SB (STR_Escape(param2));
+    SB (" ");
+    SBi(MEM_GetFuncID(function));
+    _AI_Function(slf, SB_ToString());
+    SB_Destroy();
+};
+func void AI_Function_IN(var c_npc slf, var func function, var int param1, var int param2) {
+    var int s; s = SB_New();
+    SB ("IN ");
+    SBi(param1);
+    SB (" ");
+    SBi(param2);
+    SB (" ");
+    SBi(MEM_GetFuncID(function));
+    _AI_Function(slf, SB_ToString());
+    SB_Destroy();
+};
+func void AI_Function_NI(var c_npc slf, var func function, var int param1, var int param2) {
+    var int s; s = SB_New();
+    SB ("NI ");
+    SBi(param1);
+    SB (" ");
+    SBi(param2);
     SB (" ");
     SBi(MEM_GetFuncID(function));
     _AI_Function(slf, SB_ToString());
@@ -77,6 +119,28 @@ func void AI_Function_IS(var c_npc slf, var func function, var int param1, var s
     _AI_Function(slf, SB_ToString());
     SB_Destroy();
 };
+func void AI_Function_SN(var c_npc slf, var func function, var string param1, var int param2) {
+    var int s; s = SB_New();
+    SB ("SN ");
+    SB (STR_Escape(param1));
+    SB (" ");
+    SBi(param2);
+    SB (" ");
+    SBi(MEM_GetFuncID(function));
+    _AI_Function(slf, SB_ToString());
+    SB_Destroy();
+};
+func void AI_Function_NS(var c_npc slf, var func function, var int param1, var string param2) {
+    var int s; s = SB_New();
+    SB ("NS ");
+    SBi(param1);
+    SB (" ");
+    SB (STR_Escape(param2));
+    SB (" ");
+    SBi(MEM_GetFuncID(function));
+    _AI_Function(slf, SB_ToString());
+    SB_Destroy();
+};
 
 //========================================
 // [intern] Enginehook
@@ -92,11 +156,21 @@ func void _AI_FUNCTION_EVENT() {
         return;
     };
 
+    // Provide global instances (will be reverted by HookEngine afterwards)
+    self = _^(ECX);
+    other = MEM_NullToInst(); // Invalidate to avoid misuse
+    item = MEM_NullToInst();
+
     var string argc; argc = STR_Split(AniName, " ", 1);
     if (Hlp_StrCmp(argc, "I")) {
         i0 = STR_ToInt(STR_Split(AniName, " ", 2));
         fnc = STR_ToInt(STR_Split(AniName, " ", 3));
         MEM_PushIntParam(i0);
+    }
+    else if (Hlp_StrCmp(argc, "N")) {
+        i0 = STR_ToInt(STR_Split(AniName, " ", 2));
+        fnc = STR_ToInt(STR_Split(AniName, " ", 3));
+        MEM_PushInstParam(i0);
     }
     else if (Hlp_StrCmp(argc, "S")) {
         s0 = STR_Unescape(STR_Split(AniName, " ", 2));
@@ -110,12 +184,33 @@ func void _AI_FUNCTION_EVENT() {
         MEM_PushIntParam(i0);
         MEM_PushIntParam(i1);
     }
+    else if (Hlp_StrCmp(argc, "NN")) {
+        i0 = STR_ToInt(STR_Split(AniName, " ", 2));
+        i1 = STR_ToInt(STR_Split(AniName, " ", 3));
+        fnc = STR_ToInt(STR_Split(AniName, " ", 4));
+        MEM_PushInstParam(i0);
+        MEM_PushInstParam(i1);
+    }
     else if (Hlp_StrCmp(argc, "SS")) {
         s0 = STR_Unescape(STR_Split(AniName, " ", 2));
         s1 = STR_Unescape(STR_Split(AniName, " ", 3));
         fnc = STR_ToInt(STR_Split(AniName, " ", 4));
         MEM_PushStringParam(s0);
         MEM_PushStringParam(s1);
+    }
+    else if (Hlp_StrCmp(argc, "IN")) {
+        i0 = STR_ToInt(STR_Split(AniName, " ", 2));
+        i1 = STR_ToInt(STR_Split(AniName, " ", 3));
+        fnc = STR_ToInt(STR_Split(AniName, " ", 4));
+        MEM_PushIntParam(i0);
+        MEM_PushInstParam(i1);
+    }
+    else if (Hlp_StrCmp(argc, "NI")) {
+        i0 = STR_ToInt(STR_Split(AniName, " ", 2));
+        i1 = STR_ToInt(STR_Split(AniName, " ", 3));
+        fnc = STR_ToInt(STR_Split(AniName, " ", 4));
+        MEM_PushInstParam(i0);
+        MEM_PushIntParam(i1);
     }
     else if (Hlp_StrCmp(argc, "SI")) {
         s0 = STR_Unescape(STR_Split(AniName, " ", 2));
@@ -129,6 +224,20 @@ func void _AI_FUNCTION_EVENT() {
         s1 = STR_Unescape(STR_Split(AniName, " ", 3));
         fnc = STR_ToInt(STR_Split(AniName, " ", 4));
         MEM_PushIntParam(i0);
+        MEM_PushStringParam(s1);
+    }
+    else if (Hlp_StrCmp(argc, "SN")) {
+        s0 = STR_Unescape(STR_Split(AniName, " ", 2));
+        i1 = STR_ToInt(STR_Split(AniName, " ", 3));
+        fnc = STR_ToInt(STR_Split(AniName, " ", 4));
+        MEM_PushStringParam(s0);
+        MEM_PushInstParam(i1);
+    }
+    else if (Hlp_StrCmp(argc, "NS")) {
+        i0 = STR_ToInt(STR_Split(AniName, " ", 2));
+        s1 = STR_Unescape(STR_Split(AniName, " ", 3));
+        fnc = STR_ToInt(STR_Split(AniName, " ", 4));
+        MEM_PushInstParam(i0);
         MEM_PushStringParam(s1);
     }
     else {
