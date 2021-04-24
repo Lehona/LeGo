@@ -310,7 +310,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     ASM_2(ASMINT_OP_addImToESP);      ASM_1(8);
 
     // Resolve relative jump address of a possible third party hook at the same address
-    if (MEM_ReadByte(ptr) == ASMINT_OP_jmp) {
+    if (MEM_ReadByte(ptr) == ASMINT_OP_jmp) || (MEM_ReadByte(ptr) == ASMINT_OP_call) {
         relAdr = MEM_ReadInt(ptr+1); // Relative jump from old address
         absAdr = relAdr+5+address;
         relAdr = absAdr-ASM_Here()-5; // Relative jump from new address
@@ -417,6 +417,15 @@ func void RemoveHookI(var int address, var int oldInstr, var int function) {
         // Remove engine hook
         var int newCodeAddr; newCodeAddr = MEM_ReadInt(address+1)+address+5;
         var int rvtCodeAddr; rvtCodeAddr = newCodeAddr+129; // Original code
+        var int relAdr; var int absAdr;
+
+        // Revert relative jump address (see above)
+        if (MEM_ReadByte(rvtCodeAddr) == ASMINT_OP_jmp) || (MEM_ReadByte(rvtCodeAddr) == ASMINT_OP_call) {
+            relAdr = MEM_ReadInt(rvtCodeAddr+1); // Relative jump from new address
+            absAdr = relAdr+5+rvtCodeAddr;
+            relAdr = absAdr-address-5; // Relative jump from old address (reconstruct original jump)
+            MEM_WriteInt(rvtCodeAddr+1, relAdr);
+        };
 
         // Replace jump with original instruction
         MEM_CopyBytes(rvtCodeAddr, address, oldInstr);
