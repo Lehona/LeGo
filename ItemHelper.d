@@ -28,7 +28,7 @@ func void GetItemHelper() {
         var C_NPC selfBak;
         selfBak = Hlp_GetNpc (self);
         Wld_InsertNpc (ITEM_HELPER_INST, ITEMHELPER_WAYPOINT);
-        Item_Helper = Hlp_GetNpc (self);
+        Item_Helper = Hlp_GetNpc (ITEM_HELPER_INST);
         self = Hlp_GetNpc (selfBak);
     };
 };
