@@ -250,9 +250,7 @@ func int Buff_Has(var c_npc npc, var int buff) {
 		Buff_NpcID = Npc_GetID(npc);
 		Buff_BuffHndl = 0;
 		ForeachHndl(buff, _Buff_Check);
-		if (Buff_BuffHndl != 0) {	
-			return Buff_BuffHndl;
-		};
+		return +Buff_BuffHndl;
 	};
 	return 0;
 };	
