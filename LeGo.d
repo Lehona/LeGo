@@ -175,6 +175,11 @@ func void LeGo_InitAlways(var int f) {
         };
     };
 
+    if (f & LeGo_Sprite) {
+        // Reinstate priorities
+        foreachHndlSort(gCSprite@, _Sprite_PrioComparer);
+    };
+
     if (f & LeGo_Render) {
         if (!Hlp_IsValidHandle(_render_list)) {
             _render_list = new(zCList@);
