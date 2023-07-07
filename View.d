@@ -504,7 +504,7 @@ func void ViewPtr_AlignText(var int ptr, var int margin) {
             l = _^(lp);
             vt = _^(l.data);
             width = Print_ToVirtual(Print_GetStringWidthPtr(vt.text, vt.font), PS_X) * PS_VMAX / v.vsizex;
-            vt.posx = PS_VMAX - width - margin;
+            vt.posx = PS_VMAX - width + margin;
             lp = l.next;
         end;
     };
