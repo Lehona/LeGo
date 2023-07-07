@@ -86,6 +86,11 @@ func void MEM_ArraySortFunc(var int stream, var func fnc) {
 };
 
 func void MEM_ArrayForEach(var int stream, var func fnc) { // fnc(int val)
+    MEM_GetFuncID(fnc);
+    MEM_GetFuncID(_PM_TrueFunc_int); // Iterate over all elements
+    MEM_Call(MEM_ArrayForEachCond);
+};
+func void MEM_ArrayForEachCond(var int stream, var func fnc, var func cond) {
     locals();
     var zCArray z; z = _^(stream);
     var int l; l = z.numInArray;
@@ -93,12 +98,18 @@ func void MEM_ArrayForEach(var int stream, var func fnc) { // fnc(int val)
     MEM_Copy(z.array, a, l); // Duplicate to be safe against manipulation during the loop
     var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
     var int fptr; fptr = fsymb.content + currParserStackAddress;
+    var int cptr; cptr = MEM_GetFuncPtr(cond);
     repeat(i, l); var int i;
-        MEM_ReadInt(a+(i<<2)); // Element
-        MEM_CallByPtr(fptr);
-        if (fsymb.offset) {
-            if (MEM_PopIntResult() == rBreak) {
-                break;
+        var int e; e = MEM_ReadInt(a+(i<<2)); // Element
+        e;
+        MEM_CallByPtr(cptr); // Conditional skipping of elements
+        if (MEM_PopIntResult()) {
+            e;
+            MEM_CallByPtr(fptr);
+            if (fsymb.offset) {
+                if (MEM_PopIntResult() == rBreak) {
+                    break;
+                };
             };
         };
     end;
@@ -256,33 +267,15 @@ func void _PM_CreateForeachTable() {
 };
 
 func void foreachHndl(var int inst, var func fnc) {
-    locals();
     if(!_PM_foreachTable) { return; };
     var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
     if(!c) {
         return;
     };
-    var zCArray z; z = _^(c);
-    var int l; l = z.numInArray;
-    var int a; a = MEM_Alloc(l<<2); 
-    MEM_Copy(z.array, a, l);
-    var int i; i = 0;
-    var int o; o = MEM_GetFuncPtr(fnc);
-    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
-    while(i < l);
-        var int h; h = MEM_ReadInt(a+(i<<2)); //handle
-        if(_HT_Get(HandlesPointer, h)) {
-            h;
-            MEM_CallByPtr(o);
-            if(fsymb.offset) {
-                if(MEM_PopIntResult() == rBreak) {
-                    break;
-                };
-            };
-        };
-        i += 1;
-    end;
-    MEM_Free(a);
+    c;
+    MEM_GetFuncID(fnc);
+    MEM_GetFuncID(Hlp_IsValidHandle); // Conditional: skip invalid handles
+    MEM_Call(MEM_ArrayForEachCond);
 };
 
 func int hasHndl(var int inst) {
@@ -1713,6 +1706,7 @@ func string PM_LoadString(var string name) {
 func void _PM_EmptyFunc_void() {};
 func void _PM_EmptyFunc_int(var int i) {};
 func void _PM_EmptyFunc_int_int(var int i, var int j) {};
+func int  _PM_TrueFunc_int(var int i) { return TRUE; };
 
 func int PM_LoadFuncID(var string name) {
     var int funcID; funcID = MEM_FindParserSymbol(PM_LoadString(name));
