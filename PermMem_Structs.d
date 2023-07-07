@@ -116,7 +116,7 @@ func void PM_Bind(/* var string VAR */ var int inst) {
     // Check if already stored
     foreachHndl(inst, PM_BindSub);
     if (PM_Bind_addr) {
-        wrap(inst, PM_Bind_addr);
+        var int i; i = wrap(inst, PM_Bind_addr);
     };
 };
 func int PM_BindSub(var int hndl) {
