@@ -311,6 +311,7 @@ func void List_DestroyS(var int list) {
 // Funktion auf eine Liste anwenden
 //========================================
 func void List_ForF(var int list, var func fnc) {
+    locals();
     if(!list) {
         _List_ErrPtr("ForF");
         return;
@@ -325,6 +326,7 @@ func void List_ForF(var int list, var func fnc) {
 };
 
 func void List_ForI(var int list, var int funcID) {
+    locals();
     if(!list) {
         _List_ErrPtr("ForI");
         return;
@@ -339,6 +341,7 @@ func void List_ForI(var int list, var int funcID) {
 };
 
 func void List_For(var int list, var string fnc) {
+    locals();
     if(!list) {
         _List_ErrPtr("For");
         return;
@@ -354,6 +357,7 @@ func void List_For(var int list, var string fnc) {
 };
 
 func void List_ForFS(var int list, var func fnc) {
+    locals();
     if(!list) {
         _List_ErrPtr("ForFS");
         return;
@@ -368,6 +372,7 @@ func void List_ForFS(var int list, var func fnc) {
 };
 
 func void List_ForIS(var int list, var int funcID) {
+    locals();
     if(!list) {
         _List_ErrPtr("ForIS");
         return;
@@ -382,6 +387,7 @@ func void List_ForIS(var int list, var int funcID) {
 };
 
 func void List_ForS(var int list, var string fnc) {
+    locals();
     if(!list) {
         _List_ErrPtr("ForS");
         return;

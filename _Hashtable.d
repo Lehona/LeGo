@@ -146,6 +146,7 @@ func int _HT_GetNumber(var int ptr) {
 	return arr.numInArray;
 };
 func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
+	locals();
 	var zCArray arr; arr = _^(ptr); var zCArray buck;
 	var int i; var int j; var int bucket; i = 0; j = 0;
 	repeat(i, arr.numAlloc/4);
