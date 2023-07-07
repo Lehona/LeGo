@@ -316,11 +316,18 @@ func void List_ForI(var int list, var int funcID) {
         _List_ErrPtr("ForI");
         return;
     };
+    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(funcID));
+    var int fptr; fptr = fsymb.content + currParserStackAddress;
     var zCList l;
     while(list);
         l = _^(list);
         list;
-        MEM_CallByID(funcID);
+        MEM_CallByPtr(fptr);
+        if (fsymb.offset) {
+            if (MEM_PopIntResult() == rBreak) {
+                break;
+            };
+        };
         list = l.next;
     end;
 };
@@ -347,11 +354,18 @@ func void List_ForIS(var int list, var int funcID) {
         _List_ErrPtr("ForIS");
         return;
     };
+    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(funcID));
+    var int fptr; fptr = fsymb.content + currParserStackAddress;
     var zCListSort l;
     while(list);
         l = _^(list);
         list;
-        MEM_CallByID(funcID);
+        MEM_CallByPtr(fptr);
+        if (fsymb.offset) {
+            if (MEM_PopIntResult() == rBreak) {
+                break;
+            };
+        };
         list = l.next;
     end;
 };

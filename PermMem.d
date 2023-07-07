@@ -185,8 +185,6 @@ func void release(var int h) {
 //========================================
 // Funktion für alle Handles aufrufen
 //========================================
-const int rBreak = break;
-const int rContinue = continue;
 const int foreachHndl_ptr = 0;
 
 func void _PM_AddToForeachTable(var int h) {

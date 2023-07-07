@@ -145,10 +145,16 @@ func int _HT_GetNumber(var int ptr) {
 	var zCArray arr; arr = _^(ptr);
 	return arr.numInArray;
 };
+
+const int rBreak = break;
+const int rContinue = continue;
+
 func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
 	locals();
 	var zCArray arr; arr = _^(ptr); var zCArray buck;
 	var int i; var int j; var int bucket; i = 0; j = 0;
+	var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
+	var int fptr; fptr = fsymb.content + currParserStackAddress;
 	repeat(i, arr.numAlloc/4);
 		bucket = MEM_ReadIntArray(arr.array, i);
 		if (bucket) {
@@ -156,7 +162,12 @@ func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
 			repeat(j, buck.numInArray/2);
 				MEM_ReadIntArray(buck.array, j*2  );
 				MEM_ReadIntArray(buck.array, j*2+1);
-				MEM_Call(fnc);
+				MEM_CallByPtr(fptr);
+				if (fsymb.offset) {
+					if (MEM_PopIntResult() == rBreak) {
+						break;
+					};
+				};
 			end;
 		};
 	end;
