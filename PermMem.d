@@ -1122,11 +1122,6 @@ func void _PM_Archive() {
     _PM_FreedSize = 0;    _PM_FreedNum    = 0;
 
     _PM_Mode = 1;
-	
-    var int arrMax; arrMax = _HT_GetNumber(HandlesPointer);
-
-    var int newArr; newArr = MEM_ArrayCreate();
-
     _PM_Tabs = 0;
 
     BW_Text(ConcatStrings("PermMem::v", IntToString(_PM_Version)));
@@ -1156,7 +1151,7 @@ func void _PM_Archive() {
     MEM_Info(ConcatStrings("buffer cleaned:  ", IntToString(_PM_FreedSize)));
     MEM_Info(ConcatStrings("objects created: ", IntToString(_PM_DataPoolNum)));
     MEM_Info(ConcatStrings("objects cleaned: ", IntToString(_PM_FreedNum)));
-    MEM_Info(ConcatStrings("ellapsed time:   ", IntToString(MEM_GetSystemTime()-TIME)));
+    MEM_Info(ConcatStrings("elapsed time:    ", IntToString(MEM_GetSystemTime()-TIME)));
     MEM_Info("===        Done        ===");
 };
 
