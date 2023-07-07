@@ -148,7 +148,7 @@ func void AI_Function_NS(var c_npc slf, var func function, var int param1, var s
 func void _AI_FUNCTION_EVENT() {
     var string s0; var string s1;
     var int i0; var int i1; var int fnc;
-    var int ptr; ptr = EBP+88;
+    var int ptr; ptr = MEM_ReadInt(ESP+4)+88;
     MEMINT_StackPushVar(ptr);
     var string AniName; AniName = MEMINT_PopString();
 
