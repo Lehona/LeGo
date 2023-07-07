@@ -310,21 +310,6 @@ func void List_DestroyS(var int list) {
 //========================================
 // Funktion auf eine Liste anwenden
 //========================================
-func void List_ForF(var int list, var func fnc) {
-    locals();
-    if(!list) {
-        _List_ErrPtr("ForF");
-        return;
-    };
-    var zCList l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_Call(fnc);
-        list = l.next;
-    end;
-};
-
 func void List_ForI(var int list, var int funcID) {
     locals();
     if(!list) {
@@ -340,35 +325,20 @@ func void List_ForI(var int list, var int funcID) {
     end;
 };
 
+func void List_ForF(var int list, var func fnc) {
+    if(!list) {
+        _List_ErrPtr("ForF");
+        return;
+    };
+    List_ForI(list, MEM_GetFuncID(fnc));
+};
+
 func void List_For(var int list, var string fnc) {
-    locals();
     if(!list) {
         _List_ErrPtr("For");
         return;
     };
-    var int f; f = MEM_FindParserSymbol(STR_Upper(fnc));
-    var zCList l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_CallByID(f);
-        list = l.next;
-    end;
-};
-
-func void List_ForFS(var int list, var func fnc) {
-    locals();
-    if(!list) {
-        _List_ErrPtr("ForFS");
-        return;
-    };
-    var zCListSort l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_Call(fnc);
-        list = l.next;
-    end;
+    List_ForI(list, MEM_FindParserSymbol(STR_Upper(fnc)));
 };
 
 func void List_ForIS(var int list, var int funcID) {
@@ -386,20 +356,20 @@ func void List_ForIS(var int list, var int funcID) {
     end;
 };
 
+func void List_ForFS(var int list, var func fnc) {
+    if(!list) {
+        _List_ErrPtr("ForFS");
+        return;
+    };
+    List_ForIS(list, MEM_GetFuncID(fnc));
+};
+
 func void List_ForS(var int list, var string fnc) {
-    locals();
     if(!list) {
         _List_ErrPtr("ForS");
         return;
     };
-    var int f; f = MEM_FindParserSymbol(STR_Upper(fnc));
-    var zCListSort l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_CallByID(f);
-        list = l.next;
-    end;
+    List_ForIS(list, MEM_FindParserSymbol(STR_Upper(fnc)));
 };
 
 //========================================
