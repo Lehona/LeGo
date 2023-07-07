@@ -85,6 +85,26 @@ func void MEM_ArraySortFunc(var int stream, var func fnc) {
     _MEM_ArraySortFunc(MEM_ReadInt(stream), MEM_ReadInt(stream) + ((MEM_ArraySize(stream)-1)<<2));
 };
 
+func void MEM_ArrayForEach(var int stream, var func fnc) { // fnc(int val)
+    locals();
+    var zCArray z; z = _^(stream);
+    var int l; l = z.numInArray;
+    var int a; a = MEM_Alloc(l<<2);
+    MEM_Copy(z.array, a, l); // Duplicate to be safe against manipulation during the loop
+    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
+    var int fptr; fptr = fsymb.content + currParserStackAddress;
+    repeat(i, l); var int i;
+        MEM_ReadInt(a+(i<<2)); // Element
+        MEM_CallByPtr(fptr);
+        if (fsymb.offset) {
+            if (MEM_PopIntResult() == rBreak) {
+                break;
+            };
+        };
+    end;
+    MEM_Free(a);
+};
+
 //========================================
 // [intern] Variablen
 //========================================
