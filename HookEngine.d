@@ -80,7 +80,8 @@ func void _Hook(var int evtHAddr, // ESP-44
 
     // Iterate over all registered event handler functions
     var zCArray a; a = _^(evtHAddr);
-    repeat(i, a.numInArray); var int i;
+    var int i; i = 0;
+    while(i < a.numInArray); // Repeat does not work in combination with LeGo_Locals here!
         // Clear data stack in-between function calls
         MEM_Parser.datastack_sptr = 0;
 
@@ -161,6 +162,8 @@ func void _Hook(var int evtHAddr, // ESP-44
 
         // Stack registers should be kept read-only in between function calls
         ESP = _esp; // Stack pointer is read-only
+
+        i += 1;
     end;
 
     // Update modifiable registers on stack (ESP points to the position before pushad)

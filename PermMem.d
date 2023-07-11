@@ -85,11 +85,6 @@ func void MEM_ArraySortFunc(var int stream, var func fnc) {
     _MEM_ArraySortFunc(MEM_ReadInt(stream), MEM_ReadInt(stream) + ((MEM_ArraySize(stream)-1)<<2));
 };
 
-func void MEM_ArrayForEach(var int stream, var func fnc) { // fnc(int val)
-    MEM_GetFuncID(fnc);
-    MEM_GetFuncID(_PM_TrueFunc_int); // Iterate over all elements
-    MEM_Call(MEM_ArrayForEachCond);
-};
 func void MEM_ArrayForEachCond(var int stream, var func fnc, var func cond) {
     locals();
     var zCArray z; z = _^(stream);
@@ -99,7 +94,8 @@ func void MEM_ArrayForEachCond(var int stream, var func fnc, var func cond) {
     var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
     var int fptr; fptr = fsymb.content + currParserStackAddress;
     var int cptr; cptr = MEM_GetFuncPtr(cond);
-    repeat(i, l); var int i;
+    var int i; i = 0;
+    while(i < l); // Repeat does not work in combination with LeGo_Locals here!
         var int e; e = MEM_ReadInt(a+(i<<2)); // Element
         e;
         MEM_CallByPtr(cptr); // Conditional skipping of elements
@@ -112,8 +108,13 @@ func void MEM_ArrayForEachCond(var int stream, var func fnc, var func cond) {
                 };
             };
         };
+        i += 1;
     end;
     MEM_Free(a);
+};
+
+func void MEM_ArrayForEach(var int stream, var func fnc) { // fnc(int val)
+    MEM_ArrayForEachCond(stream, fnc, _PM_TrueFunc_int);
 };
 
 //========================================
@@ -272,10 +273,7 @@ func void foreachHndl(var int inst, var func fnc) {
     if(!c) {
         return;
     };
-    c;
-    MEM_GetFuncID(fnc);
-    MEM_GetFuncID(Hlp_IsValidHandle); // Conditional: skip invalid handles
-    MEM_Call(MEM_ArrayForEachCond);
+    MEM_ArrayForEachCond(c, fnc, Hlp_IsValidHandle); // Conditional: skip invalid handles
 };
 
 func int hasHndl(var int inst) {

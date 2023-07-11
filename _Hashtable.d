@@ -151,15 +151,16 @@ const int rContinue = continue;
 
 func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
 	locals();
-	var zCArray arr; arr = _^(ptr); var zCArray buck;
-	var int i; var int j; var int bucket; i = 0; j = 0;
+	var zCArray arr; arr = _^(ptr); var zCArray buck; var int bucket;
 	var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
 	var int fptr; fptr = fsymb.content + currParserStackAddress;
-	repeat(i, arr.numAlloc/4);
+	var int i; i = 0;
+	while(i < arr.numAlloc/4); // Repeat does not work in combination with LeGo_Locals here!
 		bucket = MEM_ReadIntArray(arr.array, i);
 		if (bucket) {
 			buck = _^(bucket);
-			repeat(j, buck.numInArray/2);
+			var int j; j = 0;
+			while(j < buck.numInArray/2);
 				MEM_ReadIntArray(buck.array, j*2  );
 				MEM_ReadIntArray(buck.array, j*2+1);
 				MEM_CallByPtr(fptr);
@@ -168,8 +169,10 @@ func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
 						break;
 					};
 				};
+				j += 1;
 			end;
 		};
+		i += 1;
 	end;
 };
 
