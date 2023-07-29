@@ -4,11 +4,12 @@ func int atan2f(var int x, var int y) {
 	const int call = 0;
 	var int ret;
 	if (Call_Begin(call)) {
+		const int code[3] = {69485785, 136594649, 12841945}; // fld [esp+4]; fld [esp+8]; fpatan; retn
 		CALL_FloatParam(_@(x));
 		CALL_FloatParam(_@(y));
 		CALL_RetValisFloat();
 		CALL_PutRetValTo(_@(ret));
-		CALL__cdecl(_atan2f);
+		CALL__cdecl(_@(code));
 		
 		call = CALL_End();
 	};
@@ -29,10 +30,11 @@ func int sin(var int angle) {
 	const int call = 0;
 	var int ret;
 	if (Call_Begin(call)) {
+		const int code[2] = {69485785, 12844761}; // fld [esp+4]; fsin; retn
 		CALL_FloatParam(_@(angle));
 		CALL_RetValisFloat();
 		CALL_PutRetValTo(_@(ret));
-		CALL__cdecl(_sinf);
+		CALL__cdecl(_@(code));
 		
 		call = CALL_End();
 	};

@@ -130,7 +130,7 @@ func void _CC_Hook() {
     };
 
     // Get query entered into console
-    var int stackOffset; stackOffset = MEMINT_SwitchG1G2(/*2ach*/ 684, /*424h*/ 1060);
+    var int stackOffset; stackOffset = MEMINT_SwitchExe(/*2ach*/ 684, /*2b0h*/ 688, /*42Ch*/ 1068, /*424h*/ 1060);
     var string query; query = MEM_ReadString(MEM_ReadInt(ESP+stackOffset+4));
 
     // Iterate over all registered CCs

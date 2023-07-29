@@ -443,4 +443,10 @@ func void Print_FixPS() {
         MemoryProtectionOverride(addr, 4);
         MEM_WriteInt(addr, 23761040); // nop; nop; push 1
     end;
+
+    if (GOTHIC_BASE_VERSION == 112) {
+        MemoryProtectionOverride(zCView__PrintTimedCX_color+8, 2);
+        MEM_WriteByte(zCView__PrintTimedCX_color+8, ASMINT_OP_nop);
+        MEM_WriteByte(zCView__PrintTimedCX_color+9, ASMINT_OP_nop);
+    };
 };

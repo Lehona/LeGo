@@ -269,13 +269,13 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(12); // Current stack position of pushed ESP
 
     // Allocate memory for backing up Daedalus data stack for hooking external engine functions
-    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4); // Data stack size
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchExe(1024, 1024, 1024, 2048) * 4); // Data stack size
     ASM_1(ASMINT_OP_call);            ASM_4(malloc_adr-ASM_Here()-4);
     ASM_2(ASMINT_OP_addImToESP);      ASM_1(4); // Clean up 1 parameter from stack
     ASM_3(ASMINT_OP_movEAXtoESPplus); ASM_1(32+4); // Save pointer on the stack
 
     // Backup Daedalus data stack
-    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4);
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchExe(1024, 1024, 1024, 2048) * 4);
     ASM_1(ASMINT_OP_pushIm);          ASM_4(ContentParserAddress+zCParser_datastack_stack_offset);
     ASM_1(ASMINT_OP_pushEAX);
     ASM_1(ASMINT_OP_call);            ASM_4(memcpy_adr-ASM_Here()-4);
@@ -297,7 +297,7 @@ func void HookEngineI(var int address, var int oldInstr, var int function) {
     ASM_2(ASMINT_OP_movEAXToMem);     ASM_4(ContentParserAddress+zCParser_datastack_sptr_offset);
 
     // Restore Daedalus stack
-    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchG1G2(1024, 2048) * 4);
+    ASM_1(ASMINT_OP_pushIm);          ASM_4(MEMINT_SwitchExe(1024, 1024, 1024, 2048) * 4);
     ASM_3(ASMINT_OP_pushESPplus);     ASM_1(32+4+4); // Current stack position of memory pointer
     ASM_1(ASMINT_OP_pushIm);          ASM_4(ContentParserAddress+zCParser_datastack_stack_offset);
     ASM_1(ASMINT_OP_call);            ASM_4(memcpy_adr-ASM_Here()-4);

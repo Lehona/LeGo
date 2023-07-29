@@ -288,7 +288,7 @@ func void LeGo_Init(var int flags) {
     _LeGo_Init = 1;
 
     // For Gothic 1 mark _LeGo_Loaded with -1 to prevent second call during new game
-    if (GOTHIC_BASE_VERSION == 1) && (!_LeGo_Loaded) && (!Hlp_IsValidNpc(hero)) {
+    if ((GOTHIC_BASE_VERSION == 1) || (GOTHIC_BASE_VERSION == 112)) && (!_LeGo_Loaded) && (!Hlp_IsValidNpc(hero)) {
         _LeGo_Loaded = -1;
     } else {
         _LeGo_Loaded = 1;

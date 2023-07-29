@@ -146,6 +146,7 @@ const int zCModel__GetAniIDFromAniName              = 4713552; // .text:0047EC50
 //========================================
 const int zCParser_datastack_stack_offset =   88; //0x0058
 const int zCParser_datastack_sptr_offset  = 4184; //0x1058
+const int oCMsgConversation_name_offset   =   88; //0x0058
 
 //========================================
 // More assembly op codes

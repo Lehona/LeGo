@@ -128,6 +128,7 @@ const int zString__vtbl                             = 8578800; //0x82E6F0
 //========================================
 const int zCParser_datastack_stack_offset =   88; //0x0058
 const int zCParser_datastack_sptr_offset  = 8280; //0x2058
+const int oCMsgConversation_name_offset   =   88; //0x0058
 
 //========================================
 // More assembly op codes

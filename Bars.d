@@ -29,7 +29,7 @@ class Bar {
 prototype GothicBar(Bar) {
     x = Print_Screen[PS_X] / 2;
     y = Print_Screen[PS_Y] - 20;
-    barTop = MEMINT_SwitchG1G2(2, 3);
+    barTop = MEMINT_SwitchExe(2, 3, 3, 3);
     barLeft = 7;
     width = 180;
     height = 20;

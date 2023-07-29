@@ -105,7 +105,7 @@ func void _B_HeroDamage() {
     var int currDam; currDam = Hero_LastHP - hero.attribute[ATR_Hitpoints];
     if(currDam) {
         Bloodsplat(currDam);
-        if (GOTHIC_BASE_VERSION == 2) {
+        if (GOTHIC_BASE_VERSION == 130) || (GOTHIC_BASE_VERSION == 2) {
             // Call by string for Gothic 1 parsing compatibility
             MEM_PushStringParam("HERO_HURT");
             MEM_CallByString("WLD_STOPEFFECT");

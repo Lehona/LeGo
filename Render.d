@@ -155,7 +155,7 @@ func void _Render_Init() {
 	/* G2 only, using offset due to G1G2 compatibility
    var oWorld w; w = MEM_PtrToInst(_render_wld);
 	w.m_bIsInventoryWorld = 1; */
-	if (MEMINT_SwitchG1G2(false, true)) {
+	if (GOTHIC_BASE_VERSION == 2) {
 		MEM_WriteInt (_render_wld+136, 1);
 	};
     

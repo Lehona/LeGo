@@ -177,13 +177,13 @@ func void _TRIA_Copy(var int n0, var int n1) {
     var int a1; a1 = Npc_GetArmor(np1);
     var _TRIA_fltWrapper fn0; fn0 = MEM_PtrToInst(_@(onp0.model_scale));
     var _TRIA_fltWrapper fn1; fn1 = MEM_PtrToInst(_@(onp1.model_scale));
-    MEM_SwapBytes(n0+60,                       n1+60,                      64);                          // trafo
-    MEM_SwapBytes(n0+MEM_NpcName_Offset,       n1+MEM_NpcName_Offset,      MEMINT_SwitchG1G2(272, 312)); // name, voice
-    MEM_SwapBytes(_@(onp0.bitfield),           _@(onp1.bitfield),          20);                          // bitfield
-    MEM_SwapBytes(_@s(onp0.mds_name),          _@s(onp1.mds_name),         76);                          // visuals
-	MEM_SwapBytes(_@(onp0._zCVob_bitfield),    _@(onp1._zCVob_bitfield),   20);                          // vob bitfield
+    MEM_SwapBytes(n0+60,                       n1+60,                      64);                                   // trafo
+    MEM_SwapBytes(n0+MEM_NpcName_Offset,       n1+MEM_NpcName_Offset,      MEMINT_SwitchExe(272, 272, 292, 312)); // name, voice
+    MEM_SwapBytes(_@(onp0.bitfield),           _@(onp1.bitfield),          20);                                   // bitfield
+    MEM_SwapBytes(_@s(onp0.mds_name),          _@s(onp1.mds_name),         76);                                   // visuals
+	MEM_SwapBytes(_@(onp0._zCVob_bitfield),    _@(onp1._zCVob_bitfield),   20);                                   // vob bitfield
 	MEM_SwapBytes(_@(onp0._zCVob_visualAlpha), _@(onp1._zCVob_visualAlpha), 4);
-    MEM_SwapBytes(_@(onp0.protection),         _@(onp1.protection),        32);                          // protection
+    MEM_SwapBytes(_@(onp0.protection),         _@(onp1.protection),        32);                                   // protection
     Mdl_SetModelScale(np0, fn0.f0, fn0.f1, fn0.f2);
     Mdl_SetModelScale(np1, fn1.f0, fn1.f1, fn1.f2);
     Mdl_SetModelFatness(np0, fn0.f3);
