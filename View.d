@@ -527,7 +527,7 @@ func void zCView_Archiver(var zCView this) {
     PM_SaveInt("_vtbl", this._vtbl);
     PM_SaveInt("_zCInputCallBack_vtbl", this._zCInputCallBack_vtbl);
 
-    if (MEMINT_SwitchExe(FALSE, FALSE, TRUE, TRUE)) {
+    if (GOTHIC_BASE_VERSION == 130) || (GOTHIC_BASE_VERSION == 2) {
         /* Gothic 1 kennt die Eigenschaft m_bFillZ nicht, daher die Pointerarithmetik hier */
         PM_SaveInt("m_bFillZ", MEM_ReadInt(_@(this)+8));
     };
@@ -611,7 +611,7 @@ func void zCView_Unarchiver(var zCView this) {
     this._vtbl = PM_LoadInt("_vtbl");
     this._zCInputCallBack_vtbl = PM_LoadInt("_zCInputCallBack_vtbl");
 
-    if (MEMINT_SwitchExe(FALSE, FALSE, TRUE, TRUE)) {
+    if (GOTHIC_BASE_VERSION == 130) || (GOTHIC_BASE_VERSION == 2) {
         /* Gothic 1 kennt die Eigenschaft m_bFillZ nicht, daher die Pointerarithmetik hier */
         MEM_WriteInt(_@(this)+8, PM_LoadInt("m_bFillZ"));
     };
