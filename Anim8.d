@@ -116,10 +116,7 @@ func int Anim8_NewExt(var int value, var func handler, var int data, var int IsF
 // Objekt komplett löschen
 //========================================
 func void Anim8_Delete(var int hndl) {
-    if(!Hlp_IsValidHandle(hndl)) {
-        MEM_Warn("A8_Delete: Invalid handle");
-        return;
-    };
+    // Warning removed here, because this happens often on _PM_Reset
     delete(hndl);
 };
 
