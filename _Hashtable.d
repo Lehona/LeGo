@@ -159,10 +159,13 @@ func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
 		bucket = MEM_ReadIntArray(arr.array, i);
 		if (bucket) {
 			buck = _^(bucket);
+			var int l; l = buck.numInArray;
+			var int a; a = MEM_Alloc(l<<2);
+			MEM_Copy(buck.array, a, l); // Duplicate to be safe against manipulation during the loop
 			var int j; j = 0;
-			while(j < buck.numInArray/2);
-				MEM_ReadIntArray(buck.array, j*2  );
-				MEM_ReadIntArray(buck.array, j*2+1);
+			while(j < l/2);
+				MEM_ReadIntArray(a, j*2  );
+				MEM_ReadIntArray(a, j*2+1);
 				MEM_CallByPtr(fptr);
 				if (fsymb.offset) {
 					if (MEM_PopIntResult() == rBreak) {
@@ -171,6 +174,7 @@ func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
 				};
 				j += 1;
 			end;
+			MEM_Free(a);
 		};
 		i += 1;
 	end;
