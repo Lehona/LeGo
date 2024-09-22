@@ -266,6 +266,7 @@ func void oCNpc_PutInSlot_Ext(var C_Npc slf, var string slotName, var int vobPtr
 };
 // Old, faulty function kept for compatibility (Do not use)
 func int oCNpc_PutInSlot(var c_npc slf, var string SlotName, var int oCVobPtr, var int /*keepInInv*/SlotID) {
+    MEM_Warn("oCNpc_PutInSlot is faulty, use oCNpc_PutInSlot_Ext instead!");
     oCNpc_PutInSlot_Ext(slf, SlotName, oCVobPtr, /*keepInInv*/SlotID);
     return 0;
 };
@@ -292,6 +293,7 @@ func int oCNpc_RemoveFromSlot_Ext(var C_Npc slf, var string slotName, var int dr
 };
 // Old, faulty function kept for compatibility (Do not use)
 func void oCNpc_RemoveFromSlot(var c_npc slf, var string SlotName, /*drop*/var int retVal, /*stopEff.*/var int SlotID) {
+    MEM_Warn("oCNpc_RemoveFromSlot is faulty, use oCNpc_RemoveFromSlot_Ext instead!");
     var int res; res = oCNpc_RemoveFromSlot_Ext(slf, SlotName, /*drop*/retVal, /*stopEffect*/SlotID);
 };
 

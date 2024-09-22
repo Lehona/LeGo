@@ -298,6 +298,7 @@ func int oCNpc_RemoveFromSlot_Ext(var C_Npc slf, var string slotName, var int dr
 
     const int call = 0;
     if (CALL_Begin(call)) {
+
         CALL_IntParam(_@(drop));
         CALL_PtrParam(_@(slotNamePtr));
         CALL_PutRetValTo(_@(ret));
