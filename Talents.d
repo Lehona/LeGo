@@ -58,27 +58,26 @@ func int Npc_GetID(var c_npc slf) {
     return slf.aivar[AIV_TALENT];
 };
 
-var int ID_NpcPtr;
-var int ID_Target;
+func int _TAL_List_FindByID(var int list, var int targetID) {
+    var zCListSort l;
+    var C_Npc npc;
 
-func void Npc_FindByID_sub(var int node) {
-    var zCListSort l; l = _^(node);
-    if (l.data) {
-        var C_Npc npc; npc = _^(l.data);
-        if (npc.aivar[AIV_TALENT] == ID_Target) {
-            ID_NpcPtr = l.data;
+    while(list);
+        l = _^(list);
+        if (l.data) {
+            npc = _^(l.data);
+            if (npc.aivar[AIV_TALENT] == targetID) {
+                return l.data;
+            };
         };
-    };
+        list = l.next;
+    end;
+    return 0;
 };
 
 func int Npc_FindByID(var int ID) { // GetByID would probably be too similar to GetID
-    ID_NpcPtr = 0;
-    ID_Target = ID;
-    
-	if (MEM_World.voblist_npcs) {
-		List_ForFS(MEM_World.voblist_npcs, Npc_FindByID_sub);
+    if (MEM_World.voblist_npcs) {
+        return _TAL_List_FindByID(MEM_World.voblist_npcs, ID);
     };
-    
-    
-    return ID_NpcPtr;
+    return 0;
 };

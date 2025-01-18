@@ -33,7 +33,7 @@ const int oCNpc__EquipItem                          = 7545792; //0x7323C0 Hook: 
 const int oCNpc__EquipWeapon                        = 7577648; //0x73A030
 const int oCNpc__EV_DrawWeapon                      = 7654416; //0x74CC10 Hook: Shields
 const int oCNpc__EV_DrawWeapon1                     = 7656160; //0x74D2E0 Hook: Shields
-const int oCNpc__EV_PlayAni                         = 7699121; //0x757AB1 Hook: AI_Function
+const int oCNpc__EV_PlayAni                         = 7699120; //0x757AB0 Hook: AI_Function
 const int oCNpc__EV_RemoveWeapon                    = 7658272; //0x74DB20 Hook: Shields
 const int oCNpc__EV_RemoveWeapon1                   = 7660720; //0x74E4B0 Hook: Shields
 const int oCNpc__OpenInventory                      = 7742032; //0x762250 Hook: Quickslots
@@ -251,22 +251,50 @@ func void MEM_InsertItem(var c_item itm, var int fX, var int fY, var int fZ) {
 //========================================
 // Vob an Npc hängen
 //========================================
-func int oCNpc_PutInSlot(var c_npc slf, var string SlotName, var int oCVobPtr, var int SlotID) {
-    CALL_IntParam(SlotID);
-    CALL_PtrParam(oCVobPtr);
-    CALL_zStringPtrParam(SlotName);
-    CALL__thiscall(MEM_InstToPtr(slf), oCNpc__PutInSlot);
-    return CALL_RetValAsInt();
+func void oCNpc_PutInSlot_Ext(var C_Npc slf, var string slotName, var int vobPtr, var int keepInInv) {
+    var int slfPtr; slfPtr = _@(slf);
+    var int slotNamePtr; slotNamePtr = _@s(slotName);
+
+    const int call = 0;
+    if (CALL_Begin(call)) {
+        CALL_IntParam(_@(keepInInv));
+        CALL_PtrParam(_@(vobPtr));
+        CALL_PtrParam(_@(slotNamePtr));
+        CALL__thiscall(_@(slfPtr), oCNpc__PutInSlot);
+        call = CALL_End();
+    };
+};
+// Old, faulty function kept for compatibility (Do not use)
+func int oCNpc_PutInSlot(var c_npc slf, var string SlotName, var int oCVobPtr, var int /*keepInInv*/SlotID) {
+    MEM_Warn("oCNpc_PutInSlot is faulty, use oCNpc_PutInSlot_Ext instead!");
+    oCNpc_PutInSlot_Ext(slf, SlotName, oCVobPtr, /*keepInInv*/SlotID);
+    return 0;
 };
 
 //========================================
 // Vob von Npc entfernen
 //========================================
-func void oCNpc_RemoveFromSlot(var c_npc slf, var string SlotName, var int retVal, var int SlotID) {
-    CALL_IntParam(SlotID);
-    CALL_IntParam(retVal);
-    CALL_zStringPtrParam(SlotName);
-    CALL__thiscall(MEM_InstToPtr(slf), oCNpc__RemoveFromSlot);
+func int oCNpc_RemoveFromSlot_Ext(var C_Npc slf, var string slotName, var int drop, var int stopEffect) {
+    var int slfPtr; slfPtr = _@(slf);
+    var int slotNamePtr; slotNamePtr = _@s(slotName);
+
+    const int call = 0;
+    if (CALL_Begin(call)) {
+        CALL_IntParam(_@(stopEffect)); // G2 only
+        CALL_IntParam(_@(drop));
+        CALL_PtrParam(_@(slotNamePtr));
+        CALL_PutRetValTo(_@(ret));
+        CALL__thiscall(_@(slfPtr), oCNpc__RemoveFromSlot);
+        call = CALL_End();
+    };
+
+    var int ret;
+    return +ret;
+};
+// Old, faulty function kept for compatibility (Do not use)
+func void oCNpc_RemoveFromSlot(var c_npc slf, var string SlotName, /*drop*/var int retVal, /*stopEff.*/var int SlotID) {
+    MEM_Warn("oCNpc_RemoveFromSlot is faulty, use oCNpc_RemoveFromSlot_Ext instead!");
+    var int res; res = oCNpc_RemoveFromSlot_Ext(slf, SlotName, /*drop*/retVal, /*stopEffect*/SlotID);
 };
 
 //========================================

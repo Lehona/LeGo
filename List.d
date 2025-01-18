@@ -310,32 +310,34 @@ func void List_DestroyS(var int list) {
 //========================================
 // Funktion auf eine Liste anwenden
 //========================================
+func void List_ForI(var int list, var int funcID) {
+    locals();
+    if(!list) {
+        _List_ErrPtr("ForI");
+        return;
+    };
+    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(funcID));
+    var int fptr; fptr = fsymb.content + currParserStackAddress;
+    var zCList l;
+    while(list);
+        l = _^(list);
+        list;
+        MEM_CallByPtr(fptr);
+        if (fsymb.offset) {
+            if (MEM_PopIntResult() == rBreak) {
+                break;
+            };
+        };
+        list = l.next;
+    end;
+};
+
 func void List_ForF(var int list, var func fnc) {
     if(!list) {
         _List_ErrPtr("ForF");
         return;
     };
-    var zCList l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_Call(fnc);
-        list = l.next;
-    end;
-};
-
-func void List_ForI(var int list, var int funcID) {
-    if(!list) {
-        _List_ErrPtr("ForI");
-        return;
-    };
-    var zCList l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_CallByID(funcID);
-        list = l.next;
-    end;
+    List_ForI(list, MEM_GetFuncID(fnc));
 };
 
 func void List_For(var int list, var string fnc) {
@@ -343,12 +345,27 @@ func void List_For(var int list, var string fnc) {
         _List_ErrPtr("For");
         return;
     };
-    var int f; f = MEM_FindParserSymbol(STR_Upper(fnc));
-    var zCList l;
+    List_ForI(list, MEM_FindParserSymbol(STR_Upper(fnc)));
+};
+
+func void List_ForIS(var int list, var int funcID) {
+    locals();
+    if(!list) {
+        _List_ErrPtr("ForIS");
+        return;
+    };
+    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(funcID));
+    var int fptr; fptr = fsymb.content + currParserStackAddress;
+    var zCListSort l;
     while(list);
         l = _^(list);
         list;
-        MEM_CallByID(f);
+        MEM_CallByPtr(fptr);
+        if (fsymb.offset) {
+            if (MEM_PopIntResult() == rBreak) {
+                break;
+            };
+        };
         list = l.next;
     end;
 };
@@ -358,27 +375,7 @@ func void List_ForFS(var int list, var func fnc) {
         _List_ErrPtr("ForFS");
         return;
     };
-    var zCListSort l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_Call(fnc);
-        list = l.next;
-    end;
-};
-
-func void List_ForIS(var int list, var int funcID) {
-    if(!list) {
-        _List_ErrPtr("ForIS");
-        return;
-    };
-    var zCListSort l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_CallByID(funcID);
-        list = l.next;
-    end;
+    List_ForIS(list, MEM_GetFuncID(fnc));
 };
 
 func void List_ForS(var int list, var string fnc) {
@@ -386,14 +383,7 @@ func void List_ForS(var int list, var string fnc) {
         _List_ErrPtr("ForS");
         return;
     };
-    var int f; f = MEM_FindParserSymbol(STR_Upper(fnc));
-    var zCListSort l;
-    while(list);
-        l = _^(list);
-        list;
-        MEM_CallByID(f);
-        list = l.next;
-    end;
+    List_ForIS(list, MEM_FindParserSymbol(STR_Upper(fnc)));
 };
 
 //========================================

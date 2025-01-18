@@ -85,6 +85,38 @@ func void MEM_ArraySortFunc(var int stream, var func fnc) {
     _MEM_ArraySortFunc(MEM_ReadInt(stream), MEM_ReadInt(stream) + ((MEM_ArraySize(stream)-1)<<2));
 };
 
+func void MEM_ArrayForEachCond(var int stream, var func fnc, var func cond) {
+    locals();
+    var zCArray z; z = _^(stream);
+    var int l; l = z.numInArray;
+    var int a; a = MEM_Alloc(l<<2);
+    MEM_Copy(z.array, a, l); // Duplicate to be safe against manipulation during the loop
+    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
+    var int fptr; fptr = fsymb.content + currParserStackAddress;
+    var int cptr; cptr = MEM_GetFuncPtr(cond);
+    var int i; i = 0;
+    while(i < l); // Repeat does not work in combination with LeGo_Locals here!
+        var int e; e = MEM_ReadInt(a+(i<<2)); // Element
+        e;
+        MEM_CallByPtr(cptr); // Conditional skipping of elements
+        if (MEM_PopIntResult()) {
+            e;
+            MEM_CallByPtr(fptr);
+            if (fsymb.offset) {
+                if (MEM_PopIntResult() == rBreak) {
+                    break;
+                };
+            };
+        };
+        i += 1;
+    end;
+    MEM_Free(a);
+};
+
+func void MEM_ArrayForEach(var int stream, var func fnc) { // fnc(int val)
+    MEM_ArrayForEachCond(stream, fnc, _PM_TrueFunc_int);
+};
+
 //========================================
 // [intern] Variablen
 //========================================
@@ -185,8 +217,6 @@ func void release(var int h) {
 //========================================
 // Funktion für alle Handles aufrufen
 //========================================
-const int rBreak = break;
-const int rContinue = continue;
 const int foreachHndl_ptr = 0;
 
 func void _PM_AddToForeachTable(var int h) {
@@ -238,33 +268,12 @@ func void _PM_CreateForeachTable() {
 };
 
 func void foreachHndl(var int inst, var func fnc) {
-    locals();
     if(!_PM_foreachTable) { return; };
     var int c; c = MEM_ReadIntArray(_PM_foreachTable, inst);
     if(!c) {
         return;
     };
-    var zCArray z; z = _^(c);
-    var int l; l = z.numInArray;
-    var int a; a = MEM_Alloc(l<<2); 
-    MEM_Copy(z.array, a, l);
-    var int i; i = 0;
-    var int o; o = MEM_GetFuncPtr(fnc);
-    var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
-    while(i < l);
-        var int h; h = MEM_ReadInt(a+(i<<2)); //handle
-        if(_HT_Get(HandlesPointer, h)) {
-            h;
-            MEM_CallByPtr(o);
-            if(fsymb.offset) {
-                if(MEM_PopIntResult() == rBreak) {
-                    break;
-                };
-            };
-        };
-        i += 1;
-    end;
-    MEM_Free(a);
+    MEM_ArrayForEachCond(c, fnc, Hlp_IsValidHandle); // Conditional: skip invalid handles
 };
 
 func int hasHndl(var int inst) {
@@ -1111,11 +1120,6 @@ func void _PM_Archive() {
     _PM_FreedSize = 0;    _PM_FreedNum    = 0;
 
     _PM_Mode = 1;
-	
-    var int arrMax; arrMax = _HT_GetNumber(HandlesPointer);
-
-    var int newArr; newArr = MEM_ArrayCreate();
-
     _PM_Tabs = 0;
 
     BW_Text(ConcatStrings("PermMem::v", IntToString(_PM_Version)));
@@ -1145,7 +1149,7 @@ func void _PM_Archive() {
     MEM_Info(ConcatStrings("buffer cleaned:  ", IntToString(_PM_FreedSize)));
     MEM_Info(ConcatStrings("objects created: ", IntToString(_PM_DataPoolNum)));
     MEM_Info(ConcatStrings("objects cleaned: ", IntToString(_PM_FreedNum)));
-    MEM_Info(ConcatStrings("ellapsed time:   ", IntToString(MEM_GetSystemTime()-TIME)));
+    MEM_Info(ConcatStrings("elapsed time:    ", IntToString(MEM_GetSystemTime()-TIME)));
     MEM_Info("===        Done        ===");
 };
 
@@ -1695,6 +1699,7 @@ func string PM_LoadString(var string name) {
 func void _PM_EmptyFunc_void() {};
 func void _PM_EmptyFunc_int(var int i) {};
 func void _PM_EmptyFunc_int_int(var int i, var int j) {};
+func int  _PM_TrueFunc_int(var int i) { return TRUE; };
 
 func int PM_LoadFuncID(var string name) {
     var int funcID; funcID = MEM_FindParserSymbol(PM_LoadString(name));

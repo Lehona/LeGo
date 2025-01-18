@@ -13,7 +13,7 @@
 |*                              auf Ikarus                               *|
 |*                                                                       *|
 \*************************************************************************/
-const string LeGo_Version = "LeGo 2.8.0";
+const string LeGo_Version = "LeGo 2.9.0";
 
 const int LeGo_PrintS          = 1<<0;  // Interface.d
 const int LeGo_HookEngine      = 1<<1;  // HookEngine.d
@@ -173,6 +173,11 @@ func void LeGo_InitAlways(var int f) {
         if (!_LeGo_Loaded) || (!_nrTalents) {
             Talent_Names = TAL_CreateTalent();
         };
+    };
+
+    if (f & LeGo_Sprite) {
+        // Reinstate priorities
+        foreachHndlSort(gCSprite@, _Sprite_PrioComparer);
     };
 
     if (f & LeGo_Render) {

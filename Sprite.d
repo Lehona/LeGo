@@ -118,6 +118,11 @@ const string gCSprite_Struct = "auto|7 zCArray* void|4";
 
 instance gCSprite@(gCSprite);
 
+func void gCSprite_Delete(var gCSprite this) {
+    // On deletion, update priorities because for-each table may rearrange
+    foreachHndlSort(gCSprite@, _Sprite_PrioComparer);
+};
+
 func void _Sprite_CalcZ(var gCSprite s) {
     var int off; off = s.stream;
     var int i; i = 0;
@@ -345,8 +350,6 @@ func void Sprite_SetVisible(var int h, var int visible) {
 func int Sprite_CreatePxl(var int x, var int y, var int width, var int height, var int color, var string tex) {
     var int h; h = new(gCSprite@);
     var gCSprite s; s = get(h);
-
-    s.buf = MEM_ArrayCreate();
 
     s.x = mkf(x);
     s.y = mkf(y);

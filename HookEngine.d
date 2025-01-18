@@ -79,8 +79,12 @@ func void _Hook(var int evtHAddr, // ESP-44
     };
 
     // Iterate over all registered event handler functions
-    var zCArray a; a = _^(evtHAddr);
-    repeat(i, a.numInArray); var int i;
+    var zCArray z; z = _^(evtHAddr);
+    var int l; l = z.numInArray;
+    var int a; a = MEM_Alloc(l<<2);
+    MEM_Copy(z.array, a, l); // Duplicate to be safe against manipulation during the loop
+    var int i; i = 0;
+    while(i < l); // Repeat does not work in combination with LeGo_Locals here!
         // Clear data stack in-between function calls
         MEM_Parser.datastack_sptr = 0;
 
@@ -88,12 +92,13 @@ func void _Hook(var int evtHAddr, // ESP-44
         HookOverwriteInstances = FALSE;
 
         // Obtain hooking function
-        var int funcID; funcID = MEM_ReadIntArray(a.array, i);
+        var int funcID; funcID = MEM_ReadIntArray(a, i);
         var zCPar_Symbol fncSymb; fncSymb = _^(MEM_GetSymbolByIndex(funcID));
 
         // Supply function arguments if expected
         var int stackOffset; stackOffset = 4;
-        repeat(j, fncSymb.bitfield & zCPar_Symbol_bitfield_ele); var int j;
+        var int j; j = 0;
+        while(j < (fncSymb.bitfield & zCPar_Symbol_bitfield_ele));
             var zCPar_Symbol symb; symb = _^(MEM_GetSymbolByIndex(funcID+1+j));
             var int stackValue; stackValue = MEM_ReadInt(ESP+stackOffset); stackOffset += 4;
             if ((symb.bitfield & zCPar_Symbol_bitfield_type) == zPAR_TYPE_STRING) {
@@ -122,6 +127,7 @@ func void _Hook(var int evtHAddr, // ESP-44
                 // Otherwise push value directly (integer/float/...)
                 MEM_PushIntParam(stackValue);
             };
+            j += 1;
         end;
 
         // Call the function
@@ -161,6 +167,8 @@ func void _Hook(var int evtHAddr, // ESP-44
 
         // Stack registers should be kept read-only in between function calls
         ESP = _esp; // Stack pointer is read-only
+
+        i += 1;
     end;
 
     // Update modifiable registers on stack (ESP points to the position before pushad)

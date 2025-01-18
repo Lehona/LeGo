@@ -145,19 +145,38 @@ func int _HT_GetNumber(var int ptr) {
 	var zCArray arr; arr = _^(ptr);
 	return arr.numInArray;
 };
+
+const int rBreak = break;
+const int rContinue = continue;
+
 func void _HT_ForEach(var int ptr, var func fnc) { // fnc(int key, int val)
-	var zCArray arr; arr = _^(ptr); var zCArray buck;
-	var int i; var int j; var int bucket; i = 0; j = 0;
-	repeat(i, arr.numAlloc/4);
+	locals();
+	var zCArray arr; arr = _^(ptr); var zCArray buck; var int bucket;
+	var zCPar_Symbol fsymb; fsymb = _^(MEM_GetSymbolByIndex(MEM_GetFuncID(fnc)));
+	var int fptr; fptr = fsymb.content + currParserStackAddress;
+	var int i; i = 0;
+	while(i < arr.numAlloc/4); // Repeat does not work in combination with LeGo_Locals here!
 		bucket = MEM_ReadIntArray(arr.array, i);
 		if (bucket) {
 			buck = _^(bucket);
-			repeat(j, buck.numInArray/2);
-				MEM_ReadIntArray(buck.array, j*2  );
-				MEM_ReadIntArray(buck.array, j*2+1);
-				MEM_Call(fnc);
+			var int l; l = buck.numInArray;
+			var int a; a = MEM_Alloc(l<<2);
+			MEM_Copy(buck.array, a, l); // Duplicate to be safe against manipulation during the loop
+			var int j; j = 0;
+			while(j < l/2);
+				MEM_ReadIntArray(a, j*2  );
+				MEM_ReadIntArray(a, j*2+1);
+				MEM_CallByPtr(fptr);
+				if (fsymb.offset) {
+					if (MEM_PopIntResult() == rBreak) {
+						break;
+					};
+				};
+				j += 1;
 			end;
+			MEM_Free(a);
 		};
+		i += 1;
 	end;
 };
 

@@ -93,6 +93,7 @@ func void _bar_Delete(var _bar b) {
 func void Bar_SetMax(var int bar, var int max) {
     if(!Hlp_IsValidHandle(bar)) { return; };
     var _bar b; b = get(bar);
+    if (max < 0) { max = 0; };
     b.valMax = max;
 };
 
@@ -102,7 +103,8 @@ func void Bar_SetMax(var int bar, var int max) {
 func void Bar_SetPromille(var int bar, var int pro) {
     if(!Hlp_IsValidHandle(bar)) { return; };
     var _bar b; b = get(bar);
-    if(pro > 1000) { pro = 1000; };
+    if(pro > 1000) { pro = 1000; }
+    else if(pro < 0) { pro = 0; };
     View_Resize(b.v1, (pro * b.barW) / 1000, -1);
 };
 
@@ -119,7 +121,7 @@ func void Bar_SetPercent(var int bar, var int perc) {
 func void Bar_SetValue(var int bar, var int val) {
     if(!Hlp_IsValidHandle(bar)) { return; };
     var _bar b; b = get(bar);
-    if(val) {
+    if(val > 0) && (b.valMax > 0) {
         Bar_SetPromille(bar, (val * 1000) / b.valMax);
     }
     else {
@@ -441,6 +443,7 @@ func int Bar_Create(var int inst) {
     var int bh; bh = new(_bar@);
     var _bar b; b = get(bh);
     b.valMax = bu.valueMax;
+    if (b.valMax < 0) { b.valMax = 0; };
     var int buhh; var int buwh;
     var int ah; var int aw;
     buhh = bu.height / 2;
