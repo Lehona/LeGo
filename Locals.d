@@ -412,10 +412,9 @@ func int Tokens_Copy(var int src, var int dest, var int len) {
     while(dstC < dstF);
         var int tok; tok = MEM_ReadByte(dstC);
         if(tok == zPAR_TOK_JUMPF || tok == zPAR_TOK_JUMP) {
-            MEM_Info("Move if for Bytes.");
-            MEM_Info(inttostring(diff));
             var int trg; trg = MEM_ReadInt(dstC+1);
-            if(trg <= srcF && trg >= src) {
+            var int trgPtr; trgPtr = trg + currParserStackAddress;
+            if(trgPtr <= srcF && trgPtr >= src) {
                 MEM_WriteInt(dstC+1, trg+diff);
             };
         };
